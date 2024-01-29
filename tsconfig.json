@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "outDir": "out",
+    "lib": [
+      "ES2022"
+    ],
+    "removeComments": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Node",
+    "strict": true /* enable all strict type-checking options */
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "name": "vscode-annil",
+  "publisher": "missannil",
+  "displayName": "annil",
+  "description": "小程序原生开发插件`annil`的vscode拓展插件",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/missannil/vscode-annil"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "annil.auto-attribute",
+        "title": "auto-attribute"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "annil.auto-attribute",
+        "key": "ctrl+s",
+        "mac": "cmd+s",
+        "when": "editorTextFocus"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "fmt": "dprint fmt",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --fix && npm run fmt"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.20.5",
+    "@types/node": "^20.11.10",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.23.6",
+    "@babel/traverse": "^7.23.7",
+    "@xmldom/xmldom": "^0.8.10"
+  }
+}
