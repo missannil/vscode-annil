@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "小程序原生开发插件`annil`的vscode拓展插件",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -28,18 +28,18 @@
     "keybindings": [
       {
         "command": "annil.auto-attribute",
-        "key": "ctrl+s",
-        "mac": "cmd+s",
+        "key": "alt + s",
+        "mac": "alt + s",
         "when": "editorTextFocus"
       }
     ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
+    "publish": "vsce publish",
     "compile": "tsc -p ./",
     "fmt": "dprint fmt",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --fix && npm run fmt"
   },
   "devDependencies": {

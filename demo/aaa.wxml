@@ -1,3 +1,12 @@
 <view>
-	<subA class=" w-full " n的ums="{{wxdyfml}}" xxd="{{这还没写}}" fdffff="{{subA_fdffff}}" xdcddf9="{{subA_xdcddf9}}" num="{{subA_num}}" kkk="{{subA_kkk}}"/>
+	<subA
+		n的ums="{{wxdyfml}}"
+		xxd="{{这还没写}}"
+		fdffff="{{subA_fdffff}}"
+		xdcddf9="{{subA_xdcddf9}}"
+		num="{{subA_num}}"
+		kkk="{{subA_kkk}}"
+		bind:xxx="subA_xxx"
+		catch:yyy="subA_yyy_catch"
+	/>
 </view>

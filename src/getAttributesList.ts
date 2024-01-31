@@ -65,7 +65,7 @@ export async function getAttributesList(tsContentStr: string): Promise<Attribute
                     {
                       if (secondLevelFieldName.endsWith("_catch")) {
                         attributes[
-                          `catch:${realAttr}`
+                          `catch:${realAttr.slice(0, -6)}` // 去除realAttr 后六位 (_catch)
                         ] = `${secondLevelFieldName}`;
                       } else {
                         attributes[
