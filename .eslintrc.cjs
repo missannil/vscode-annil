@@ -41,15 +41,19 @@ module.exports = {
     "no-mixed-spaces-and-tabs": "off",
     "@typescript-eslint/ban-ts-comment": 0,
     "padding-line-between-statements": 0,
+    // "@typescript-eslint/explicit-function-return-type": 2, // 函数必须有返回类型
     "@typescript-eslint/padding-line-between-statements": [
       "warn",
-      { blankLine: "always", prev: "const", next: "expression" },
-      { blankLine: "always", prev: "*", next: "class" },
-      { blankLine: "always", prev: "class", next: "*" },
+      { blankLine: "always", prev: "*", next: "function" },
+      { blankLine: "always", prev: "*", next: "export" },
+      // { blankLine: "always", prev: "const", next: "expression" },
+      // { blankLine: "always", prev: "*", next: "class" },
+      // { blankLine: "always", prev: "class", next: "*" },
       { blankLine: "always", prev: "*", next: "return" },
-      { blankLine: "always", prev: "expression", next: "*" },
-      { blankLine: "always", prev: "*", next: ["interface", "type"] },
-      { blankLine: "always", prev: ["interface", "type"], next: "*" },
+      // { blankLine: "always", prev: "expression", next: "*" },
+      // { blankLine: "always", prev: "*", next: ["interface", "type"] },
+      // { blankLine: "always", prev: ["interface", "type"], next: "*" },
     ],
+    "complexity": ["error", 10], // 代码复杂度
   },
 };

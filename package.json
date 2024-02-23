@@ -21,13 +21,13 @@
   "contributes": {
     "commands": [
       {
-        "command": "annil.auto-attribute",
-        "title": "auto-attribute"
+        "command": "annil.fix-diagnostics",
+        "title": "fix-diagnostics"
       }
     ],
     "keybindings": [
       {
-        "command": "annil.auto-attribute",
+        "command": "annil.fix-diagnostics",
         "key": "alt + s",
         "mac": "alt + s",
         "when": "editorTextFocus"
@@ -37,9 +37,9 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "publish": "vsce publish",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p tsconfig-build.json",
     "fmt": "dprint fmt",
-    "watch": "tsc -watch -p ./",
+    "watch": "tsc -watch -p tsconfig-build.json",
     "lint": "eslint src --fix && npm run fmt"
   },
   "devDependencies": {
@@ -54,6 +54,8 @@
   "dependencies": {
     "@babel/parser": "^7.23.6",
     "@babel/traverse": "^7.23.7",
-    "@xmldom/xmldom": "^0.8.10"
+    "@xmldom/xmldom": "^0.8.10",
+    "htmlparser2": "^9.1.0",
+    "parse5": "^7.1.2"
   }
 }

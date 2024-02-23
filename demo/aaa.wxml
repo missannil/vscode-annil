@@ -1,12 +1,54 @@
 <view>
-	<subA
-		n的ums="{{wxdyfml}}"
-		xxd="{{这还没写}}"
-		fdffff="{{subA_fdffff}}"
-		xdcddf9="{{subA_xdcddf9}}"
-		num="{{subA_num}}"
+	<sub_xxx
+		id="sub_xxx"
+		ndufm="{{subA_ndufm}}"
 		kkk="{{subA_kkk}}"
 		bind:xxx="subA_xxx"
 		catch:yyy="subA_yyy_catch"
 	/>
+	<subA
+		class="w-200"
+		nums="{{wxdfyfml}}"
+		xfDxd="{{需手动书写}}"
+		xxxfff="{{subA_xxxfff}}"
+		bind:xxdfdx="subA_xxdfdx"
+		catch:yyy="subA_yyy_catch"
+		fff="{{subA_fff}}"
+	/>
 </view>
+<view class="flex p-20">
+	<view class="flex-1 text-center" />
+	<view
+		hover-class
+		class="flex-none"
+		bind:tap="onTapClose"
+	>关闭</view>
+</view>
+
+<view class="flex items-center my-20">
+	<h_image
+		yyy="{{ image_yyy}} "
+		xxx="   {{image_xxx}} "
+		aria-disabled="{{iamge_ariaDisabled}}"
+		src="{{ 自定s义变量 }}"
+		height="{{imaddgeSize}}"
+		width="{{imageSize}}"
+		bind:zzz="image_zzz"
+		catch:eee="image_eee_catch"
+	/>
+	<h_image
+		yyy="{{image_yyy}}"
+		xxx="{{image_xxx}}"
+		aria-disabled="{{iamge_ariaDisabled}}"
+		src="{{ 自定义变d量 }}"
+		height="{{ imaddgeSize }}"
+		width="{{ imageSize }}"
+		bind:zzz="image_zzz"
+		catch:eee="image_eee_catch"
+		style
+		id
+	/>
+	<order_item goodsInfo="{{goodsInfo}}" />
+</view>
+<!-- </scroll-view> -->
+<view error />

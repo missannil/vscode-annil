@@ -11,7 +11,7 @@
     "strict": true /* enable all strict type-checking options */
   },
   "include": [
-    "**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
