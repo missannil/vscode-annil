@@ -2,8 +2,8 @@
   "name": "vscode-annil",
   "publisher": "missannil",
   "displayName": "annil",
-  "description": "小程序原生开发插件`annil`的vscode拓展插件",
-  "version": "0.1.1",
+  "description": "微信小程序原生插件——`annil`的vscode拓展",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -37,25 +37,36 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "publish": "vsce publish",
-    "compile": "tsc -p tsconfig-build.json",
+    "compile": "rollup -c",
     "fmt": "dprint fmt",
-    "watch": "tsc -watch -p tsconfig-build.json",
+    "watch": "tsc -watch -p tsconfig.json",
     "lint": "eslint src --fix && npm run fmt"
   },
+  "files": [
+    "LICENSE",
+    "CHANGELOG.md",
+    "README.md",
+    "dist",
+    "tsconfig.json"
+  ],
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@types/babel__traverse": "^7.20.5",
     "@types/node": "^20.11.10",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-typescript2": "^0.36.0",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "@babel/parser": "^7.23.6",
-    "@babel/traverse": "^7.23.7",
-    "@xmldom/xmldom": "^0.8.10",
-    "htmlparser2": "^9.1.0",
-    "parse5": "^7.1.2"
+    "@babel/traverse": "^7.24.1",
+    "htmlparser2": "^9.1.0"
   }
 }

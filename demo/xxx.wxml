@@ -3,7 +3,7 @@
 	xxx="{{image_xxx}}"
 	aria-disabled="{{iamge_ariaDisabled}}"
 	yyy="{{ image_yyy}} "
-	src="{{自定义变量1}}"
+	src="{{自定义变量}}"
 	width="{{imageSize}}"
 	bind:zzz="image_zzz"
 	catch:eee="image_eee_catch"

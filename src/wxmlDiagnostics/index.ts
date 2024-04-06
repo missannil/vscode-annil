@@ -17,6 +17,7 @@ import { getSiblingUri } from "./getSiblingUri";
 async function visibleTextEditorsHandler(): Promise<void> {
   const visibleTextEditors = vscode.window.visibleTextEditors;
   for (const textEditor of visibleTextEditors) {
+    console.log(111)
     await onOpenTextEditor(textEditor);
   }
 }
@@ -74,5 +75,5 @@ export async function initializeWxmlDiagnostics(context: vscode.ExtensionContext
   visibleTextEditorsHandler();
   onDidChangeActiveTextEditor();
   onComponentFileDidChangeTextDocument();
-  onCloseWxmlFileHandle();
+  // onCloseWxmlFileHandle();
 }

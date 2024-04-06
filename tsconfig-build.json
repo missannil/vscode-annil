@@ -1,20 +1,9 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "out",
-    "target": "ESNext",
-    "lib": ["ESNext"],
-    "module": "CommonJS",
-    "removeComments": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "moduleResolution": "Node10",
-    "strict": true /* enable all strict type-checking options */
+    "module": "ES2022"
   },
   "include": [
     "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "out"
   ]
 }

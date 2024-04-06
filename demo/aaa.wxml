@@ -7,9 +7,8 @@
 		catch:yyy="subA_yyy_catch"
 	/>
 	<subA
-		class="w-200"
 		nums="{{wxdfyfml}}"
-		xfDxd="{{需手动书写}}"
+		xfDxd="{{需手动1书1写}}"
 		xxxfff="{{subA_xxxfff}}"
 		bind:xxdfdx="subA_xxdfdx"
 		catch:yyy="subA_yyy_catch"

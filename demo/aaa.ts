@@ -1,26 +1,27 @@
-// const subA = SubComponent<xxx, yyy>()({
-//   inherit: {
-//     subA_nums: "wxdfyfml",
-//     subA_xfDxd: "wxml",
-//   },
-//   data: {
-//     subA_fff: "sssds",
-//     subA_xxxfff: "yyy",
-//   },
-//   // store: {
-//   //   subA_num: () => 123,
-//   // },
-//   // computed: {
-//   //   subA_kkk() {
-//   //     return this.xxx + 123;
-//   //   },
-//   // },
-//   events: {
-//     subA_xxdfdx(e) {
-//     },
-//     subA_yyy_catch(e) {},
-//   },
-// });
+// @ts-ignore
+const subA = SubComponent<xxx, yyy>()({
+  inherit: {
+    subA_nums: "wxdfyfml",
+    subA_xfDxd: "wxml",
+  },
+  data: {
+    subA_fff: "sssds",
+    subA_xxxfff: "yyy",
+  },
+  // store: {
+  //   subA_num: () => 123,
+  // },
+  // computed: {
+  //   subA_kkk() {
+  //     return this.xxx + 123;
+  //   },
+  // },
+  events: {
+    subA_xxdfdx(e) {
+    },
+    subA_yyy_catch(e) {},
+  },
+});
 // @ts-ignore
 const sub_xxx = SubComponent<xxx, yyy>()({
   // inherit: {
@@ -62,5 +63,3 @@ const h_image = SubComponent<Main, $Image>()({
     image_eee_catch() {},
   },
 });
-
-console.log(111); 

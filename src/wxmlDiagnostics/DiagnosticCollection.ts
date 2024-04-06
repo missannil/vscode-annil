@@ -7,7 +7,7 @@ import { getElementTagListFromWxmlFile } from "./diagnosticListCache/subCompConf
 import { getUsingComponentConfig } from "./diagnosticListCache/usingComponentsConfigCache";
 import { ErrorType } from "./ErrorType";
 import { isComponentFile } from "./fileTypeChecks";
-import { getElementList } from "./getElement";
+import { getElementList } from "./getElement"; 
 import { generateElementDianosticList, getTagPosition } from "./getElementErrorInfo";
 import { getSiblingUri } from "./getSiblingUri";
 
@@ -121,7 +121,6 @@ export function displayWxmlDiagnostics(wxmlUri: vscode.Uri, diagnosticList: vsco
 }
 
 export function hiddenWxmldiagnostics(wxmlUri: vscode.Uri): void {
-  console.log(wxmlUri);
   diagnosticCollection.delete(wxmlUri);
 }
 
@@ -203,6 +202,7 @@ export async function updateDiagnostics(
       }
     }
   }
+  console.log("diagnosticList", diagnosticList) 
   setDiagnosticListToCache(wxmlUri.fsPath, diagnosticList);
 
   displayWxmlDiagnostics(wxmlUri, diagnosticList);
