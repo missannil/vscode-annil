@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -32,10 +32,24 @@
         "mac": "alt + s",
         "when": "editorTextFocus"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "annil",
+      "properties": {
+        "excludeTags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "排除检查的标签"
+        }
+      }
+    }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "clean": "rm -rf ./out",
+    "vscode:prepublish": " npm run clean && npm run compile",
     "publish": "vsce publish",
     "compile": "rollup -c",
     "fmt": "dprint fmt",

@@ -37,11 +37,15 @@ function findRepeatedString(keys: string[]): string[][] {
 /**
  * 获取标签的位置所在的起始行数
  * @param wxmlTextLines
- * @param tagName
+ * @param tagNameOrId
  * @param index
  * @returns
  */
-export function getElementStartIndex(wxmlTextLines: string[], tagName: string, index: number): number {
+export function getElementStartIndexByTag(
+  wxmlTextLines: string[],
+  tagNameOrId: string,
+  index: number,
+): number {
   // 已匹配到的标签的数量
   let elementMatchCount = 0;
   // 匹配的起始标签行数
@@ -66,7 +70,7 @@ export function getElementStartIndex(wxmlTextLines: string[], tagName: string, i
       continue;
     }
 
-    const tagMatch = curlineStr.match(`<${tagName}`);
+    const tagMatch = curlineStr.match(`<${tagNameOrId}`);
     // 行中匹配到了标签时
     if (tagMatch !== null) {
       if (elementMatchCount === index) {
@@ -79,6 +83,42 @@ export function getElementStartIndex(wxmlTextLines: string[], tagName: string, i
   }
 
   return startRowIndex;
+}
+
+export function getElementStartIndexById(
+  wxmlTextLines: string[],
+  tagName: string,
+  id: string,
+): number {
+  let tagRowIndex = -1;
+  let isComment = false;
+  for (let rowIndex = 0; rowIndex < wxmlTextLines.length; rowIndex++) {
+    const curlineStr = wxmlTextLines[rowIndex];
+    // 判断当前行是否是注释
+    if (isComment === false && curlineStr.includes("<!--")) {
+      isComment = true;
+    }
+    // 判断注释区是否结束
+    if (isComment === true && curlineStr.includes("-->")) {
+      isComment = false;
+      // 跳过当前行的剩余部分
+      continue;
+    }
+    // 如果是注释区,则跳过此行
+    if (isComment === true) {
+      continue;
+    }
+    const tagMatch = curlineStr.match(`<${tagName}`);
+    if (tagMatch !== null) {
+      tagRowIndex = rowIndex;
+    }
+    const idMatch = curlineStr.match(`id\\s*=\\s*["']${id}["']`);
+    if (idMatch !== null) {
+      return tagRowIndex;
+    }
+  }
+
+  throw Error(`找不到id为${id}的元素`);
 }
 
 type Position = {
@@ -189,7 +229,10 @@ function createMissingAttrDiagnostic(
       `${ErrorType.missingAttributes}: ${attrName}`,
       vscode.DiagnosticSeverity.Error,
     );
-    diagnostic.code = `${attrName}="{{${attributeConfig[attrName]}}}"`;
+
+    diagnostic.code = attrName.includes(":")
+      ? `${attrName}="${attributeConfig[attrName]}"`
+      : `${attrName}="{{${attributeConfig[attrName]}}}"`;
     diagnosticList.push(diagnostic);
   });
 
@@ -369,39 +412,42 @@ function collectErrorValueDiagnostic(
 }
 
 // 不检查的属性
-const notCheckAttr = ["style", "id"];
+const notCheckAttr = ["style", "id", "class"];
 
 // 删除不检查的属性
 function deleteUncheckAttr(elementAttributes: Record<string, string>): Record<string, string> {
-  notCheckAttr.forEach(attr => {
-    if (attr in elementAttributes) {
-      delete elementAttributes[attr];
+  for (const eleName in elementAttributes) {
+    if (notCheckAttr.includes(eleName) || eleName.includes("data-")) {
+      delete elementAttributes[eleName];
     }
-  });
+  }
 
   return elementAttributes;
 }
 
 /**
- * @param element DOM元素
- * @param attributeConfig 期望的属性(键值对)
- * @returns  vscode.Diagnostic[]
+ * @param element 子组件的元素
+ * @param attributeConfig 子组件的属性配置
+ * @param wxmlTextlines wxml文本的每一行
+ * @param index  第几个元素,id一定是0
+ * @param by 元素查找方式,默认为tag,可选值为id
+ * @returns
  */
 export function generateElementDianosticList(
   element: Element,
   attributeConfig: AttributeConfig,
   wxmlTextlines: string[],
-  index: number,
+  elementStartLine: number,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
-  const elementAttributes = deleteUncheckAttr(element.attribs);
+  const elementName = element.name;
+  const originalElementAttrs = element.attribs;
+  // 获取元素(标签)的起始行数,提高后续查找的效率(循环时索引起始位置)
+
+  const subCompAttributeNameList = Object.keys(attributeConfig);
+  const elementAttributes = deleteUncheckAttr(originalElementAttrs);
   // 获取所有要验证的属性名
   let elementAttributeNameList = Object.keys(elementAttributes);
-  const subCompAttributeNameList = Object.keys(attributeConfig);
-  const elementName = element.name;
-  // 获取元素(标签)的起始行数,提高后续查找的效率(循环时索引起始位置)
-  const elementStartLine = getElementStartIndex(wxmlTextlines, elementName, index);
-
   // 缺少的属性名的诊断
   const missingAttributeNames = subCompAttributeNameList.filter(
     subCompAttributeName => !hyphenToCamelCase(elementAttributeNameList).includes(subCompAttributeName),

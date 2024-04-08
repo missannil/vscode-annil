@@ -7,8 +7,13 @@ import { getElementTagListFromWxmlFile } from "./diagnosticListCache/subCompConf
 import { getUsingComponentConfig } from "./diagnosticListCache/usingComponentsConfigCache";
 import { ErrorType } from "./ErrorType";
 import { isComponentFile } from "./fileTypeChecks";
-import { getElementList } from "./getElement"; 
-import { generateElementDianosticList, getTagPosition } from "./getElementErrorInfo";
+import { getElementList } from "./getElement";
+import {
+  generateElementDianosticList,
+  getElementStartIndexById,
+  getElementStartIndexByTag,
+  getTagPosition,
+} from "./getElementErrorInfo";
 import { getSiblingUri } from "./getSiblingUri";
 
 const diagnosticCollection = vscode.languages.createDiagnosticCollection(`annil`);
@@ -178,8 +183,8 @@ export async function updateDiagnostics(
 
   // 获取ts文件诊断(对ts文件中的每个组件配置对应的wxml元素进行诊断)
   for (const subCompName in subCompConfig) {
-    const elementList = getElementList(wxmlDom, subCompName);
-    if (elementList.length === 0) {
+    const elements = getElementList(wxmlDom, subCompName);
+    if (elements === null) {
       // wxml中缺少对应组件配置的元素(元素名或id值都不等于subCompName),诊断标记在wxml的第一行,无法自动修复
       diagnosticList.push(
         new vscode.Diagnostic(
@@ -188,21 +193,41 @@ export async function updateDiagnostics(
           vscode.DiagnosticSeverity.Error,
         ),
       );
+      // 匹配的是id元素
+    } else if (!Array.isArray(elements)) {
+      // 获取元素(标签)的起始行数,提高后续查找的效率(循环时索引起始位置)
+      const elementStartLine = getElementStartIndexById(
+        wxmlTextlines,
+        elements.name,
+        elements.attribs.id,
+      );
+      diagnosticList.push(
+        ...generateElementDianosticList(
+          elements,
+          subCompConfig[subCompName],
+          wxmlTextlines,
+          elementStartLine,
+        ),
+      );
     } else {
-      // 对每个元素进行诊断
-      for (let index = 0; index < elementList.length; index++) {
+      for (let index = 0; index < elements.length; index++) {
+        const element = elements[0];
+        const elementStartLine = getElementStartIndexByTag(
+          wxmlTextlines,
+          element.name,
+          index,
+        );
         diagnosticList.push(
           ...generateElementDianosticList(
-            elementList[index],
+            elements[index],
             subCompConfig[subCompName],
             wxmlTextlines,
-            index,
+            elementStartLine,
           ),
         );
       }
     }
   }
-  console.log("diagnosticList", diagnosticList) 
   setDiagnosticListToCache(wxmlUri.fsPath, diagnosticList);
 
   displayWxmlDiagnostics(wxmlUri, diagnosticList);

@@ -1,23 +1,18 @@
 import * as vscode from "vscode";
-import {
-  hiddenWxmldiagnostics,
-  isWxmlDiagnosticsVisible,
-  registerSubscriptions,
-  updateDiagnostics,
-} from "./diagnosticCollection";
+import { debounce } from "./debounce";
+import { isWxmlDiagnosticsVisible, registerSubscriptions, updateDiagnostics } from "./diagnosticCollection";
 import { setSubCompConfigToCache } from "./diagnosticListCache/subCompConfigCache";
 import { getSubCompConfigFromText } from "./diagnosticListCache/subCompConfigCache/getSubCompConfigFromText";
 import {
   getUsingComponentConfigFromText,
   setUsingComponentsConfigToCache,
 } from "./diagnosticListCache/usingComponentsConfigCache";
-import { isComponentFile, isJsonFile, isTsFile, isWxmlFile } from "./fileTypeChecks";
+import { isComponentFile, isJsonFile, isTsFile } from "./fileTypeChecks";
 import { getSiblingUri } from "./getSiblingUri";
 
 async function visibleTextEditorsHandler(): Promise<void> {
   const visibleTextEditors = vscode.window.visibleTextEditors;
   for (const textEditor of visibleTextEditors) {
-    console.log(111)
     await onOpenTextEditor(textEditor);
   }
 }
@@ -40,16 +35,8 @@ function onDidChangeActiveTextEditor() {
   });
 }
 
-function onCloseWxmlFileHandle() {
-  vscode.workspace.onDidCloseTextDocument((document) => {
-    const { uri } = document;
-    if (isWxmlFile(uri)) {
-      hiddenWxmldiagnostics(uri);
-    }
-  });
-}
-
 function onComponentFileDidChangeTextDocument() {
+  const debouncedUpdateDiagnostics = debounce(updateDiagnostics, 100);
   vscode.workspace.onDidChangeTextDocument((event) => {
     if (event.contentChanges.length === 0) return;
     const uri = event.document.uri;
@@ -65,7 +52,7 @@ function onComponentFileDidChangeTextDocument() {
         const usingComponentKeys = getUsingComponentConfigFromText(documentText);
         setUsingComponentsConfigToCache(fsPath, usingComponentKeys);
       }
-      updateDiagnostics(getSiblingUri(uri, ".wxml"));
+      debouncedUpdateDiagnostics(getSiblingUri(uri, ".wxml"));
     }
   });
 }
@@ -77,3 +64,12 @@ export async function initializeWxmlDiagnostics(context: vscode.ExtensionContext
   onComponentFileDidChangeTextDocument();
   // onCloseWxmlFileHandle();
 }
+
+// function onCloseWxmlFileHandle() {
+//   vscode.workspace.onDidCloseTextDocument((document) => {
+//     const { uri } = document;
+//     if (isWxmlFile(uri)) {
+//       hiddenWxmldiagnostics(uri);
+//     }
+//   });
+// }

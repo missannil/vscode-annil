@@ -1,5 +1,5 @@
 import type * as Domhandler from "domhandler";
-import { nativeComponentList } from "./nativeComponentList";
+import { excludeTags } from "./excludeTags";
 
 function isElement(document: Domhandler.Node): document is Domhandler.Element {
   return document.type === "tag";
@@ -19,7 +19,7 @@ function collectCustomTags(childNodeList: Domhandler.ChildNode[], customTagsList
 }
 
 function removeNativeComponent(customTagsList: string[]): string[] {
-  return customTagsList.filter(tagName => !nativeComponentList.includes(tagName));
+  return customTagsList.filter(tagName => !excludeTags.includes(tagName));
 }
 
 function uniqueArray<T>(array: T[]): T[] {
