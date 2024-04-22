@@ -38,7 +38,8 @@ export function getSubCompConfigFromText(tsText: string): SubCompConfig {
                 switch (firstLevelField.key.name) {
                   // inherit传递规则与其他字段不同,所以单独处理
                   case "inherit":
-                    subCompAttrs[realAttr] = secondLevelField.value.value;
+                    // inherit字段的属性值有可能是数组或字符串
+                    subCompAttrs[realAttr] = secondLevelField.value.type === "ArrayExpression" ? secondLevelField.value.elements.map((el: any) => el.value) : secondLevelField.value.value;
                     break;
                   case "events":
                     // 事件字段名根据后缀来处理,不是catch后缀用bind:否则用catch:

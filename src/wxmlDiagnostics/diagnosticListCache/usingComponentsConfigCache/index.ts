@@ -1,45 +1,60 @@
 import * as vscode from "vscode";
-type ElementTag = string;
-type UsingComponentsConfig = ElementTag[];
+type SubComponentTag = string;
+type ImportedCustomComponentNames = SubComponentTag[];
 type JsonFilePath = string;
 type JsonConfig = {
   component?: true | undefined;
   usingComponents?: Record<string, string>;
 };
 
-export const usingComponentsConfigCache: Record<JsonFilePath, UsingComponentsConfig> = {};
+export const importedCustomComponentNamesCache: Record<
+  JsonFilePath,
+  ImportedCustomComponentNames
+> = {};
 
-export function hasUsingComponentsConfigCacheKey(jsonFilePath: JsonFilePath): boolean {
-  return Boolean(usingComponentsConfigCache[jsonFilePath]);
+export function hasImportedCustomComponentNamesCache(
+  jsonFilePath: JsonFilePath
+): boolean {
+  return Boolean(importedCustomComponentNamesCache[jsonFilePath]);
 }
 
-export function setUsingComponentsConfigToCache(
+export function setImportedCustomComponentNamesToCache(
   jsonFilePath: JsonFilePath,
-  usingComponentsConfig: UsingComponentsConfig,
+  importedCustomComponentNames: ImportedCustomComponentNames
 ): void {
-  usingComponentsConfigCache[jsonFilePath] = usingComponentsConfig;
+  importedCustomComponentNamesCache[jsonFilePath] =
+    importedCustomComponentNames;
 }
 
-export function getUsingComponentsConfigFromCache(
-  jsonFilePath: JsonFilePath,
-): UsingComponentsConfig | undefined {
-  return usingComponentsConfigCache[jsonFilePath];
+export function getImportedCustomComponentNamesFromCache(
+  jsonFilePath: JsonFilePath
+): ImportedCustomComponentNames | undefined {
+  return importedCustomComponentNamesCache[jsonFilePath];
 }
 
-export function getUsingComponentConfigFromText(jsonText: string): string[] {
+export function getImportedCustomComponentNamesFromText(
+  jsonText: string
+): string[] {
   const jsonConfig: JsonConfig = JSON.parse(jsonText);
-  const usingComponents = jsonConfig.usingComponents;
+  const importedCustomComponentNames = jsonConfig.usingComponents;
 
-  return usingComponents === undefined ? [] : Object.keys(usingComponents);
+  return importedCustomComponentNames === undefined ? [] : Object.keys(importedCustomComponentNames);
 }
 
-export async function getUsingComponentConfig(jsonUri: vscode.Uri): Promise<UsingComponentsConfig> {
-  let usingComponentsConfig = getUsingComponentsConfigFromCache(jsonUri.fsPath);
-  if (usingComponentsConfig === undefined) {
+export async function getImportedCustomComponentNames(
+  jsonUri: vscode.Uri
+): Promise<ImportedCustomComponentNames> {
+  let importedCustomComponentNames = getImportedCustomComponentNamesFromCache(jsonUri.fsPath);
+  if (importedCustomComponentNames === undefined) {
     const jsonDocument = await vscode.workspace.openTextDocument(jsonUri);
-    usingComponentsConfig = getUsingComponentConfigFromText(jsonDocument.getText());
-    setUsingComponentsConfigToCache(jsonUri.fsPath, usingComponentsConfig);
+    importedCustomComponentNames = getImportedCustomComponentNamesFromText(
+      jsonDocument.getText()
+    );
+    setImportedCustomComponentNamesToCache(
+      jsonUri.fsPath,
+      importedCustomComponentNames
+    );
   }
 
-  return usingComponentsConfig;
+  return importedCustomComponentNames;
 }

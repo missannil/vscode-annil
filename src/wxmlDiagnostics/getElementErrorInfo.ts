@@ -1,21 +1,22 @@
+/* eslint-disable complexity */
 import type { Element } from "domhandler/lib/node.d.ts";
 
 import * as vscode from "vscode";
-import { DEFAULTWXML } from "./constant";
-import type { AttributeConfig } from "./diagnosticListCache/subCompConfigCache";
+import { DEFAULTWXML, TERNARY } from "./constant";
+import type { AttributeConfig, AttributeValue } from "./diagnosticListCache/subCompConfigCache";
 import { ErrorType } from "./ErrorType";
 
 // 将连字符(短横线)命名转换为驼峰命名
 function hyphenToCamelCase<T extends string | string[]>(str: T): T {
   if (Array.isArray(str)) {
-    return str.map(item => hyphenToCamelCase(item)) as T;
+    return str.map((item) => hyphenToCamelCase(item)) as T;
   } else {
-    return str.replace(/-([a-z])/g, g => g[1].toUpperCase()) as T;
+    return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase()) as T;
   }
 }
 
 /**
- * 实现对数组中连字符(短横线)命名的字符串进行分组，返回重复的字符串数组
+ *  找到数组中连字符字符串与驼峰命名等效的字符串组并返回
  *  findRepeatedString( ["a-a", "aA",'x']); => [["a-a", "aA"]]
  *  findRepeatedString( ["b-b-b", "bB-b","b-bB",'x']); => [["b-b-b", "bB-b","b-bB"]]
  *  findRepeatedString( ["a-a", "aA","b-b-b", "bB-b","b-bB",'x']); => [["a-a", "aA"],["b-b-b", "bB-b","b-bB"]]
@@ -31,7 +32,7 @@ function findRepeatedString(keys: string[]): string[][] {
     }
   }
 
-  return Array.from(map.values()).filter(group => group.length > 1);
+  return Array.from(map.values()).filter((group) => group.length > 1);
 }
 
 /**
@@ -132,7 +133,11 @@ type Position = {
  * @param wxmlTextlines
  * @param attrName
  */
-function getAttrPosition(wxmlTextlines: string[], attrName: string, elementStartLine: number): Position {
+function getAttrPosition(
+  wxmlTextlines: string[],
+  attrName: string,
+  elementStartLine: number,
+): Position {
   // 属性名开头,中间有=号,等号后面有引号包裹内容
   const regex1 = new RegExp(`${attrName}\\s*=\\s*["'].*?["']`);
   const regex2 = new RegExp(`${attrName}\\s*=`);
@@ -141,30 +146,158 @@ function getAttrPosition(wxmlTextlines: string[], attrName: string, elementStart
     const line = wxmlTextlines[index];
     const match = line.match(regex1) || line.match(regex2) || line.match(regex3);
     if (match !== null) {
-      return { startLine: index, startIndex: match.index!, endIndex: match.index! + match[0].length };
+      return {
+        startLine: index,
+        startIndex: match.index!,
+        endIndex: match.index! + match[0].length,
+      };
     }
   }
 
   throw new Error(`找不到属性${attrName}`);
 }
 
-function getValuePosition(
+// 获取属性整体字符串的位置 与其他的边界是空格
+function getPositionOfAllAttrCharacter(
+  wxmlTextlines: string[],
+  attrName: string,
+  elementStartLine: number,
+): Position {
+  for (let index = elementStartLine; index < wxmlTextlines.length; index++) {
+    const line = wxmlTextlines[index];
+
+    const match = line.match(
+      new RegExp(`${attrName}(\\s*?=\\s*?[\\"'][^"]*[\\"'])?`),
+    );
+    if (match === null) {
+      continue;
+    }
+
+    return {
+      startLine: index,
+      startIndex: match.index!,
+      endIndex: match.index! + match[0].length,
+    };
+  }
+  throw new Error(`找不到属性${attrName}`);
+}
+
+// 把特殊字符转义为普通字符
+function escapeSpecialCharacter(str: string): string {
+  return str.replace(/([.*+?^${}()|[\]\\])/g, "\\$1");
+}
+// function getAllValuePosition(
+//   wxmlTextlines: string[],
+//   attrName: string,
+//   errorValue: string,
+//   elementStartLine: number
+// ): Position {
+//   errorValue = errorValue.replace(/([?:])/g, "\\$1");
+
+//   // const regex = new RegExp(`${errorValue}`);
+//   for (let index = elementStartLine; index < wxmlTextlines.length; index++) {
+//     const line = wxmlTextlines[index];
+//     const match = line.match(
+//       new RegExp(`\\s*${attrName}\\s*=\\s*["']${errorValue}["']`)
+//     );
+//     if (match === null) {
+//       continue;
+//     } else {
+//       const match = line.match(errorValue)!;
+
+//       return {
+//         startLine: index,
+//         startIndex: match.index!,
+//         endIndex: match.index! + errorValue.length,
+//       };
+//     }
+//   }
+//   throw new Error(`找不到属性${attrName}`);
+// }
+function getErrorValuePositionOfEventAttrName(
   wxmlTextlines: string[],
   attrName: string,
   errorValue: string,
   elementStartLine: number,
 ): Position {
-  // 属性名开头,中间有=号,等号后面有引号包裹内容
-  // const regex1 = new RegExp(`\\{\\{\\s*${errorValue}\\s*\\}\\}`);
-  const regex = new RegExp(`${errorValue}`);
   for (let index = elementStartLine; index < wxmlTextlines.length; index++) {
     const line = wxmlTextlines[index];
-    const match = line.match(regex);
-    if (match !== null) {
-      return { startLine: index, startIndex: match.index!, endIndex: match.index! + match[0].length };
+    //  匹配全属性字符串的正则表达式
+    const allAttrMatch = line.match(
+      new RegExp(`${attrName}\\s*=\\s*["']${escapeSpecialCharacter(errorValue)}["']`),
+    );
+    if (allAttrMatch === null) {
+      continue;
+    } // 在全字符串基础上匹配错误属性值(避免其他行有相同错误属性值的字符被匹配)
+    else {
+      const regex = new RegExp(`(?<=["'])(${escapeSpecialCharacter(errorValue)})(?=["'])`);
+      const match = allAttrMatch[0].match(regex)!;
+
+      return {
+        startLine: index,
+        startIndex: allAttrMatch.index! + match.index!,
+        endIndex: allAttrMatch.index! + match.index! + errorValue.length,
+      };
     }
   }
+  throw new Error(`找不到错误属性值${errorValue}`);
+}
 
+function getErrorValuePositionOfTernaryExpression(
+  wxmlTextlines: string[],
+  attrName: string,
+  errorValue: string,
+  elementStartLine: number,
+): Position {
+  for (let index = elementStartLine; index < wxmlTextlines.length; index++) {
+    const line = wxmlTextlines[index];
+    const allAttrMatch = line.match(
+      new RegExp(
+        `${attrName}\\s*=\\s*["']\\s*\\{\\{.*((?<=\\?|:)\\s*${errorValue}).*\\}\\}\\s*["']`,
+      ),
+    );
+    if (allAttrMatch === null) {
+      continue;
+    } else {
+      const regex = new RegExp(`(?<=\\?\\s*|:\\s*)${errorValue}`);
+      const match = allAttrMatch[0].match(regex)!;
+
+      return {
+        startLine: index,
+        startIndex: allAttrMatch.index! + match.index!,
+        endIndex: allAttrMatch.index! + match.index! + errorValue.length,
+      };
+    }
+  }
+  throw new Error(`找不到属性${attrName}`);
+}
+
+function getErrorValuePositionOfNonEventAttrName(
+  wxmlTextlines: string[],
+  attrName: string,
+  errorValue: string,
+  elementStartLine: number,
+): Position {
+  for (let index = elementStartLine; index < wxmlTextlines.length; index++) {
+    const line = wxmlTextlines[index];
+    const allAttrMatch = line.match(
+      new RegExp(
+        `${attrName}\\s*=\\s*["']\\s*\\{\\{\\s*${escapeSpecialCharacter(errorValue)}\\s*\\}\\}\\s*["']`,
+      ),
+    );
+    if (allAttrMatch === null) {
+      continue;
+    } else {
+      const regex = new RegExp(`(?<=\\{\\{\\s*)${escapeSpecialCharacter(errorValue)}(?=\\s*\\}\\})`);
+      const match = allAttrMatch[0].match(regex)!;
+
+      return {
+        startLine: index,
+        startIndex: allAttrMatch.index! + match.index!,
+        endIndex: allAttrMatch.index! + match.index! + errorValue.length,
+      };
+    }
+  }
   throw new Error(`找不到属性${attrName}`);
 }
 
@@ -178,21 +311,30 @@ export function getTagPosition(
     const line = wxmlTextlines[index];
     const match = line.match(regex);
     if (match !== null) {
-      return { startLine: index, startIndex: match.index!, endIndex: match.index! + match[0].length };
+      return {
+        startLine: index,
+        startIndex: match.index!,
+        endIndex: match.index! + match[0].length,
+      };
     }
   }
 
   throw new Error(`找不到元素${elementName}`);
 }
 
-function createRepeatedAttrDiagnostic(
+function createDiagnosticOfRepeatedAttrName(
   repeatedAttrNames: string[],
   wxmlTextlines: string[],
   elementStartLine: number,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
+
   repeatedAttrNames.forEach((repeatedAttrName) => {
-    const attrPosition = getAttrPosition(wxmlTextlines, repeatedAttrName, elementStartLine);
+    const attrPosition = getAttrPosition(
+      wxmlTextlines,
+      repeatedAttrName,
+      elementStartLine,
+    );
     const diagnostic = new vscode.Diagnostic(
       new vscode.Range(
         attrPosition.startLine,
@@ -209,44 +351,18 @@ function createRepeatedAttrDiagnostic(
   return diagnosticList;
 }
 
-function createMissingAttrDiagnostic(
-  elementName: string,
-  missingAttrNames: string[],
-  wxmlTextlines: string[],
-  attributeConfig: Record<string, string>,
-  elementStartLine: number,
-): vscode.Diagnostic[] {
-  const diagnosticList: vscode.Diagnostic[] = [];
-  missingAttrNames.forEach((attrName) => {
-    const tagPosition = getTagPosition(elementName, wxmlTextlines, elementStartLine);
-    const diagnostic = new vscode.Diagnostic(
-      new vscode.Range(
-        tagPosition.startLine,
-        tagPosition.startIndex,
-        tagPosition.startLine,
-        tagPosition.endIndex,
-      ),
-      `${ErrorType.missingAttributes}: ${attrName}`,
-      vscode.DiagnosticSeverity.Error,
-    );
-
-    diagnostic.code = attrName.includes(":")
-      ? `${attrName}="${attributeConfig[attrName]}"`
-      : `${attrName}="{{${attributeConfig[attrName]}}}"`;
-    diagnosticList.push(diagnostic);
-  });
-
-  return diagnosticList;
-}
-
-function createUnknownAttrDiagnostic(
+function createDiagnosticOfUnknownAttrName(
   unknownAttrNames: string[],
   wxmlTextlines: string[],
   elementStartLine: number,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
   unknownAttrNames.forEach((unknownAttrName) => {
-    const attrPosition = getAttrPosition(wxmlTextlines, unknownAttrName, elementStartLine);
+    const attrPosition = getAttrPosition(
+      wxmlTextlines,
+      unknownAttrName,
+      elementStartLine,
+    );
     const diagnostic = new vscode.Diagnostic(
       new vscode.Range(
         attrPosition.startLine,
@@ -262,15 +378,42 @@ function createUnknownAttrDiagnostic(
 
   return diagnosticList;
 }
-createUnknownAttrDiagnostic;
 
-function createErrorValueDiagnostic(
+function createDiagnosticOfAllAttrCharacter(
+  eleAttrName: string,
+  wxmlTextlines: string[],
+  elementStartLine: number,
+): vscode.Diagnostic {
+  const valuePosition = getPositionOfAllAttrCharacter(
+    wxmlTextlines,
+    eleAttrName,
+    elementStartLine,
+  );
+
+  return new vscode.Diagnostic(
+    new vscode.Range(
+      valuePosition.startLine,
+      valuePosition.startIndex,
+      valuePosition.startLine,
+      valuePosition.endIndex,
+    ),
+    `${ErrorType.empty}`,
+    vscode.DiagnosticSeverity.Error,
+  );
+}
+
+function createErrorValueDiagnosticOfTernaryExpression(
   eleAttrName: string,
   errorValue: string,
   wxmlTextlines: string[],
   elementStartLine: number,
 ): vscode.Diagnostic {
-  const valuePosition = getValuePosition(wxmlTextlines, eleAttrName, errorValue, elementStartLine);
+  const valuePosition = getErrorValuePositionOfTernaryExpression(
+    wxmlTextlines,
+    eleAttrName,
+    errorValue,
+    elementStartLine,
+  );
 
   return new vscode.Diagnostic(
     new vscode.Range(
@@ -284,127 +427,273 @@ function createErrorValueDiagnostic(
   );
 }
 
-function whenSubCompAttrValueIsWxml(
+function createErrorValueDiagnosticOfNonEventAttrName(
   eleAttrName: string,
-  elementAttrValue: string,
+  errorValue: string,
   wxmlTextlines: string[],
   elementStartLine: number,
-  eleAttrValue: string,
+): vscode.Diagnostic {
+  const valuePosition = getErrorValuePositionOfNonEventAttrName(
+    wxmlTextlines,
+    eleAttrName,
+    errorValue,
+    elementStartLine,
+  );
+
+  return new vscode.Diagnostic(
+    new vscode.Range(
+      valuePosition.startLine,
+      valuePosition.startIndex,
+      valuePosition.startLine,
+      valuePosition.endIndex,
+    ),
+    `${ErrorType.invalid}`,
+    vscode.DiagnosticSeverity.Error,
+  );
+}
+
+function isTernaryExpression(expression: string): boolean {
+  const ternaryPattern = /[^?]+\?[^:]+:[^:]+/;
+
+  return ternaryPattern.test(expression);
+}
+
+function extractOuterTernary(expression: string): [string, string] {
+  let questionMarkCount = 0;
+  let colonCount = 0;
+  let questionMarkIndex = -1;
+  let colonIndex = -1;
+
+  for (let i = 0; i < expression.length; i++) {
+    if (expression[i] === "?") {
+      questionMarkCount++;
+      if (questionMarkCount === 1) {
+        questionMarkIndex = i;
+      }
+    } else if (expression[i] === ":") {
+      colonCount++;
+      if (questionMarkCount === colonCount) {
+        colonIndex = i;
+        break;
+      }
+    }
+  }
+
+  const trueValue = expression
+    .substring(questionMarkIndex + 1, colonIndex)
+    .trim();
+  const falseValue = expression.substring(colonIndex + 1).trim();
+
+  return [trueValue, falseValue];
+}
+
+// 解析字符串表达式可能的值(三元表达式字符串可能有多个值,如: "a?b:c" => ["b", "c"])
+function parseExpressionValues(
+  expression: string,
+  values: string[] = [],
+): string[] {
+  // 判断表达式是否是三元表达式
+  if (!isTernaryExpression(expression)) {
+    values.push(expression);
+  } else {
+    // 获取三元表达式第一个问号后面到最后一个冒号之前的表达式为正确的表达式,最后一个冒号后面的表达式为错误的表达式
+    const [trueValue, falseValue] = extractOuterTernary(expression);
+    parseExpressionValues(trueValue, values);
+    parseExpressionValues(falseValue, values);
+  }
+
+  return values;
+}
+
+function isEventAttr(attrName: string): boolean {
+  return attrName.includes(":");
+}
+
+function generateDiagnosticsOfEventAttrValue(
+  elementAttrValueStr: string,
+  subCompAttrValue: string,
+  eleAttrName: string,
+  wxmlTextlines: string[],
+  elementStartLine: number,
 ): vscode.Diagnostic | undefined {
-  // 在annil插件中, SubComponent API 的inherit字段值为wxml时,表示该属性值源自wxml中的变量(如wxml循环语句的子变量)。在修复缺少此类属性时,修复的值为DEFAULTWXML,但还是要报错提醒用户修改。
-  const regex = new RegExp(`\\{\\{\\s*${DEFAULTWXML}\\s*\\}\\}`);
-  if (regex.test(elementAttrValue)) {
-    const diagnostic = createErrorValueDiagnostic(
-      eleAttrName,
-      DEFAULTWXML,
+  // 无值处理。例如 <button bind:yyy /> or <button bind:xxx=""></button> 诊断在全属性上
+  if (elementAttrValueStr === "") {
+    const valuePosition = getPositionOfAllAttrCharacter(
       wxmlTextlines,
+      eleAttrName,
       elementStartLine,
     );
 
-    return diagnostic;
-  } else {
-    // 自定义的属性值中有空格或tab时报错
-    if (eleAttrValue.includes(" ") || eleAttrValue.includes("\t")) {
-      const diagnostic = createErrorValueDiagnostic(
-        eleAttrName,
-        eleAttrValue,
-        wxmlTextlines,
-        elementStartLine,
-      );
+    const diagnostic = new vscode.Diagnostic(
+      new vscode.Range(
+        valuePosition.startLine,
+        valuePosition.startIndex,
+        valuePosition.startLine,
+        valuePosition.endIndex,
+      ),
+      `${ErrorType.empty}`,
+      vscode.DiagnosticSeverity.Error,
+    );
+    // 修复是标记位置替换的内容
+    diagnostic.code = `${eleAttrName}="${subCompAttrValue}"`;
 
-      return diagnostic;
-    }
+    return diagnostic;
+  } // 有值处理,诊断在值上
+  else if (elementAttrValueStr !== subCompAttrValue) {
+    const valuePosition = getErrorValuePositionOfEventAttrName(
+      wxmlTextlines,
+      eleAttrName,
+      elementAttrValueStr,
+      elementStartLine,
+    );
+
+    const diagnostic = new vscode.Diagnostic(
+      new vscode.Range(
+        valuePosition.startLine,
+        valuePosition.startIndex,
+        valuePosition.startLine,
+        valuePosition.endIndex,
+      ),
+      `${ErrorType.invalid}`,
+      vscode.DiagnosticSeverity.Error,
+    );
+    // 修复是标记位置替换的内容
+    diagnostic.code = subCompAttrValue as string;
+
+    return diagnostic;
   }
 }
 
-function getVariableAttrValueDiagnosticList(
-  elementAttrValue: string,
-  subCompAttrValue: string,
+function hasMeaninglessSpace(str: string): boolean {
+  // 字符串是否只包含空格 或 字符串中是否存在无意义的空格(即空格前后都不是点的情况)。
+  return str.trim() === "" || /[^\\.]\s[^\\.]/.test(str);
+}
+
+function generateDiagnosticsOfNonEventAttrValue(
+  elementAttrValueStr: string,
+  subCompAttrValue: AttributeValue,
   eleAttrName: string,
   wxmlTextlines: string[],
   elementStartLine: number,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
-  const regex = new RegExp(`\\{\\{\\s*(.*?)\\s*\\}\\}`);
-  const match = elementAttrValue.match(regex);
-  if (match === null) {
-    // 不满足{{xxx}}的格式时,报错位置是elementAttrValue的位置
-    const diagnostic = createErrorValueDiagnostic(
+  const mustacheMatch = elementAttrValueStr.match(/\{\{(.*?)\}\}/);
+  // 无效值(不满足大胡子语法或值为空串) 例如: `<button xxx />` 或 `<button xxx="">` 或 `<button xxx="{{}" />`或 `<button xxx="{{}}" />`
+  if (mustacheMatch === null || mustacheMatch[1] === "") {
+    const diagnostic = createDiagnosticOfAllAttrCharacter(
       eleAttrName,
-      elementAttrValue,
       wxmlTextlines,
       elementStartLine,
     );
-    // 借用code值作为传递正确的属性值，即修复时用的值
-    diagnostic.code = `{{ ${subCompAttrValue === "wxml" ? DEFAULTWXML : subCompAttrValue} }}`;
+    diagnostic.code = `${eleAttrName}="{{ ${
+      subCompAttrValue === "wxml" ? DEFAULTWXML : Array.isArray(subCompAttrValue) ? TERNARY : subCompAttrValue
+    } }}"`;
     diagnosticList.push(diagnostic);
 
     return diagnosticList;
   }
-  const eleAttrValue = match[1];
+  // 有效值的情况 例如: `<button xxx="{{ yyy }}" />` 或 `<button xxx="{{  }}" />`
+  const elementAttrValue = mustacheMatch[1].trim() === "" ? mustacheMatch[1] : mustacheMatch[1].trim();
+  // 诊断特例: 预期为wxml时
   if (subCompAttrValue === "wxml") {
-    // 当预期值为wxml时
-    const diagnostic = whenSubCompAttrValueIsWxml(
+    // 值为DEFAULTWXML或空串时或错误的语法,报错
+    if (elementAttrValue === DEFAULTWXML || hasMeaninglessSpace(elementAttrValue)) {
+      const diagnostic = createErrorValueDiagnosticOfNonEventAttrName(
+        eleAttrName,
+        elementAttrValue,
+        wxmlTextlines,
+        elementStartLine,
+      );
+      diagnostic.code = DEFAULTWXML;
+      diagnosticList.push(diagnostic);
+    }
+
+    return diagnosticList;
+  }
+  if (Array.isArray(subCompAttrValue)) {
+    if (!isTernaryExpression(elementAttrValue)) {
+      // 当前值不是三元表达式时报整体值错误
+      const diagnostic = createErrorValueDiagnosticOfNonEventAttrName(
+        eleAttrName,
+        elementAttrValue,
+        wxmlTextlines,
+        elementStartLine,
+      );
+      diagnostic.code = TERNARY;
+      diagnosticList.push(diagnostic);
+    } else {
+      // 是三元表达式时,分别检查(报错)
+      const eleAttrValueList = parseExpressionValues(elementAttrValue);
+      if (eleAttrValueList.length !== subCompAttrValue.length) {
+        const diagnostic = createErrorValueDiagnosticOfNonEventAttrName(
+          eleAttrName,
+          elementAttrValue,
+          wxmlTextlines,
+          elementStartLine,
+        );
+        diagnostic.code = TERNARY;
+        diagnosticList.push(diagnostic);
+      } else {
+        for (let index = 0; index < eleAttrValueList.length; index++) {
+          if (eleAttrValueList[index] !== subCompAttrValue[index]) {
+            const diagnostic = createErrorValueDiagnosticOfTernaryExpression(
+              eleAttrName,
+              eleAttrValueList[index],
+              wxmlTextlines,
+              elementStartLine,
+            );
+            diagnostic.code = subCompAttrValue[index];
+            diagnosticList.push(diagnostic);
+          }
+        }
+      }
+    }
+
+    return diagnosticList;
+  }
+  if (elementAttrValue !== subCompAttrValue) {
+    const diagnostic = createErrorValueDiagnosticOfNonEventAttrName(
       eleAttrName,
       elementAttrValue,
       wxmlTextlines,
       elementStartLine,
-      eleAttrValue,
     );
-    if (diagnostic) {
-      diagnostic.code = `${DEFAULTWXML}`;
-      diagnosticList.push(diagnostic);
-    }
-  } else {
-    // 属性值与期望值不相等时,报错位置是realAttrValue的位置
-    if (eleAttrValue !== subCompAttrValue) {
-      const diagnostic = createErrorValueDiagnostic(
-        eleAttrName,
-        eleAttrValue,
-        wxmlTextlines,
-        elementStartLine,
-      );
-      diagnostic.code = `${subCompAttrValue}`;
-      diagnosticList.push(diagnostic);
-    }
+    diagnostic.code = subCompAttrValue;
+    diagnosticList.push(diagnostic);
   }
 
   return diagnosticList;
 }
 
 // 收集错误属性值的诊断
-function collectErrorValueDiagnostic(
-  elementAttributeNameList: string[],
-  elementAttributes: Record<string, string>,
+function getDiagnosisOfAttrValueError(
+  elementAttributes: Element["attribs"],
   attributeConfig: AttributeConfig,
   wxmlTextlines: string[],
   elementStartLine: number,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
-  for (const eleAttrName of elementAttributeNameList) {
-    const elementAttrValue = elementAttributes[eleAttrName];
+  for (const eleAttrName in elementAttributes) {
+    const elementAttrValueStr = elementAttributes[eleAttrName];
     const subCompAttrValue = attributeConfig[hyphenToCamelCase(eleAttrName)];
-    // 事件属性验证 (事件属性中包含冒号)
-    if (eleAttrName.includes(":")) {
-      if (elementAttrValue !== subCompAttrValue) {
-        const diagnostic = createErrorValueDiagnostic(
-          eleAttrName,
-          elementAttrValue,
-          wxmlTextlines,
-          elementStartLine,
-        );
-        diagnostic.code = `${subCompAttrValue}`;
-        diagnosticList.push(diagnostic);
-      }
-    } // 变量属性验证
-    else {
-      diagnosticList.push(...getVariableAttrValueDiagnosticList(
-        elementAttrValue,
+    if (isEventAttr(eleAttrName)) {
+      const diagnostic = generateDiagnosticsOfEventAttrValue(
+        elementAttrValueStr,
+        subCompAttrValue as string,
+        eleAttrName,
+        wxmlTextlines,
+        elementStartLine,
+      );
+      diagnostic && diagnosticList.push(diagnostic);
+    } else {
+      const diagnostic = generateDiagnosticsOfNonEventAttrValue(
+        elementAttrValueStr,
         subCompAttrValue,
         eleAttrName,
         wxmlTextlines,
         elementStartLine,
-      ));
+      );
+      diagnosticList.push(...diagnostic);
     }
   }
 
@@ -415,7 +704,9 @@ function collectErrorValueDiagnostic(
 const notCheckAttr = ["style", "id", "class"];
 
 // 删除不检查的属性
-function deleteUncheckAttr(elementAttributes: Record<string, string>): Record<string, string> {
+function deleteUncheckAttr(
+  elementAttributes: Record<string, string>,
+): Record<string, string> {
   for (const eleName in elementAttributes) {
     if (notCheckAttr.includes(eleName) || eleName.includes("data-")) {
       delete elementAttributes[eleName];
@@ -423,6 +714,66 @@ function deleteUncheckAttr(elementAttributes: Record<string, string>): Record<st
   }
 
   return elementAttributes;
+}
+
+function createDiagnosticOfMissingAttrName(
+  elementName: string,
+  wxmlTextlines: string[],
+  elementStartLine: number,
+  attributeConfig: AttributeConfig,
+  subCompAttrNames: string[],
+  elementAttrNames: string[],
+): vscode.Diagnostic[] {
+  const diagnosticList: vscode.Diagnostic[] = [];
+  const missingAttrNames = subCompAttrNames.filter(
+    (subCompAttrName) => !hyphenToCamelCase(elementAttrNames).includes(subCompAttrName),
+  );
+  if (missingAttrNames.length > 0) {
+    missingAttrNames.forEach((attrName) => {
+      const tagPosition = getTagPosition(
+        elementName,
+        wxmlTextlines,
+        elementStartLine,
+      );
+      const diagnostic = new vscode.Diagnostic(
+        new vscode.Range(
+          tagPosition.startLine,
+          tagPosition.startIndex,
+          tagPosition.startLine,
+          tagPosition.endIndex,
+        ),
+        `${ErrorType.missingAttributes}: ${attrName}`,
+        vscode.DiagnosticSeverity.Error,
+      );
+
+      const expectedValue = attributeConfig[attrName];
+      diagnostic.code = attrName.includes(":")
+        ? `${attrName}="${expectedValue}"`
+        : `${attrName}="{{${
+          expectedValue === "wxml"
+            ? DEFAULTWXML
+            : Array.isArray(expectedValue)
+            ? TERNARY
+            : expectedValue
+        }}}"`;
+      diagnosticList.push(diagnostic);
+    });
+  }
+
+  return diagnosticList;
+}
+
+function getUnknownNames(
+  elementAttrNames: string[],
+  subCompAttrNames: string[],
+): string[] {
+  return elementAttrNames.flatMap((elementAttrName) => {
+    if (!subCompAttrNames.includes(hyphenToCamelCase(elementAttrName))) {
+      return [elementAttrName];
+    }
+
+    return [];
+  });
 }
 
 /**
@@ -440,73 +791,51 @@ export function generateElementDianosticList(
   elementStartLine: number,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
-  const elementName = element.name;
-  const originalElementAttrs = element.attribs;
-  // 获取元素(标签)的起始行数,提高后续查找的效率(循环时索引起始位置)
-
-  const subCompAttributeNameList = Object.keys(attributeConfig);
-  const elementAttributes = deleteUncheckAttr(originalElementAttrs);
-  // 获取所有要验证的属性名
-  let elementAttributeNameList = Object.keys(elementAttributes);
-  // 缺少的属性名的诊断
-  const missingAttributeNames = subCompAttributeNameList.filter(
-    subCompAttributeName => !hyphenToCamelCase(elementAttributeNameList).includes(subCompAttributeName),
-  );
-  if (missingAttributeNames.length > 0) {
-    diagnosticList.push(
-      ...createMissingAttrDiagnostic(
-        elementName,
-        missingAttributeNames,
-        wxmlTextlines,
-        attributeConfig,
-        elementStartLine,
-      ),
-    );
-  }
-  // 获取重复的属性(连字符命名属性转为驼峰命名属性后,所有重复的属性名去除最后一位,剩余的算重复属性名,如: ["a-a", "aA"] => ["a-a"], ["b-b-b", "bB-b","b-bB"] => ["b-b-b", "bB-b"])
-  const repeatedAttributeNames = findRepeatedString(elementAttributeNameList).flatMap(duplicateNames =>
-    duplicateNames.slice(0, -1)
-  );
-
-  if (repeatedAttributeNames.length > 0) {
-    diagnosticList.push(
-      ...createRepeatedAttrDiagnostic(
-        repeatedAttributeNames,
-        wxmlTextlines,
-        elementStartLine,
-      ),
-    );
-  }
-  // 获取elementAttributeNameList中有而subCompAttributeNameList中没有的属性名
-  const unknownNameList: string[] = [];
-  elementAttributeNameList = elementAttributeNameList.filter(item => {
-    // 去除重复的属性名
-    if (repeatedAttributeNames.includes(item)) {
-      return false;
-    }
-    // 去除未知的属性名
-    if (!subCompAttributeNameList.includes(hyphenToCamelCase(item))) {
-      unknownNameList.push(item);
-
-      return false;
-    }
-
-    return true;
-  });
-  // 建立未知属性的诊断
+  const checkElementAttr = deleteUncheckAttr(element.attribs);
+  const elementAttrNames = Object.keys(checkElementAttr);
+  const subCompAttrNames = Object.keys(attributeConfig);
+  // 1. 生成缺少的属性的诊断
   diagnosticList.push(
-    ...createUnknownAttrDiagnostic(
-      unknownNameList,
+    ...createDiagnosticOfMissingAttrName(
+      element.name,
+      wxmlTextlines,
+      elementStartLine,
+      attributeConfig,
+      subCompAttrNames,
+      elementAttrNames,
+    ),
+  );
+  // 2. 生成重复的属性(连字符命名属性转为驼峰命名属性后,所有重复的属性名去除最后一位,剩余的为重复属性名,如: ["a-a", "aA"] => ["a-a"], ["b-b-b", "bB-b","b-bB"] => ["b-b-b", "bB-b"])
+  const repeatedAttrNames = findRepeatedString(elementAttrNames).flatMap(
+    (duplicateNames) => duplicateNames.slice(0, -1),
+  );
+  diagnosticList.push(
+    ...createDiagnosticOfRepeatedAttrName(
+      repeatedAttrNames,
+      wxmlTextlines,
+      elementStartLine,
+    ),
+  );
+  // 3. 生成未知属性的诊断
+  const unknownNames = getUnknownNames(elementAttrNames, subCompAttrNames);
+  diagnosticList.push(
+    ...createDiagnosticOfUnknownAttrName(
+      unknownNames,
       wxmlTextlines,
       elementStartLine,
     ),
   );
 
-  // 收集错误属性值的诊断
+  // 4.剩余(去除重复和未知项)属性值错误的诊断
+  unknownNames.forEach((unknownName) => {
+    delete checkElementAttr[unknownName];
+  });
+  repeatedAttrNames.forEach((repeatedAttrName) => {
+    delete checkElementAttr[repeatedAttrName];
+  });
   diagnosticList.push(
-    ...collectErrorValueDiagnostic(
-      elementAttributeNameList,
-      elementAttributes,
+    ...getDiagnosisOfAttrValueError(
+      checkElementAttr,
       attributeConfig,
       wxmlTextlines,
       elementStartLine,

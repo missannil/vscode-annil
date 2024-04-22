@@ -16,3 +16,7 @@ readme
 
 修复一些问题
 增加排除标签配置(如 { "annil.excludeTags" : ["view","block","icon"] } ) 
+
+### 0.3.0
+
+支持annil 1.7.0新特性(子组件inherit配置新增数组类型值,表示wxml属性值应为三元表达式)

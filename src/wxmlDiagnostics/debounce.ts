@@ -1,17 +1,19 @@
 /**
- * 
- * @param func 
- * @param delay 
- * @returns 
+ * @param func
+ * @param delay
+ * @returns
  */
-export  function debounce<F extends (...args: any[]) => any>(func: F, delay: number): (...args: Parameters<F>) => void {
-	let timeoutId: NodeJS.Timeout | null = null;
-  
-	return (...args: Parameters<F>): void => {
-	  if (timeoutId) {
-		clearTimeout(timeoutId);
-	  }
-  
-	  timeoutId = setTimeout(() => func(...args), delay);
-	};
-  }
+export function debounce<A extends unknown[]>(
+  func: (...args: A) => unknown,
+  delay: number,
+): (...args: A) => void {
+  let timeoutId: NodeJS.Timeout | null = null;
+
+  return (...args: A): void => {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+    }
+
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+}

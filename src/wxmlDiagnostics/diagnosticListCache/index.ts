@@ -1,17 +1,17 @@
-import type * as vscode from "vscode";
+// import type * as vscode from "vscode";
 
-type WxmlFilePath = string;
+// type WxmlFilePath = string;
 
-// 诊断信息的缓存
-export const diagnosticListCache: Record<WxmlFilePath, vscode.Diagnostic[] | undefined> = {};
+// // 诊断信息的缓存
+//  const diagnosticListCache: Record<WxmlFilePath, vscode.Diagnostic[] | undefined> = {};
 
-export function getDiagnosticListFromCache(wxmlFilePath: WxmlFilePath): vscode.Diagnostic[] | undefined {
-  return diagnosticListCache[wxmlFilePath];
-}
+//  function getDiagnosticListFromCache(wxmlFilePath: WxmlFilePath): vscode.Diagnostic[] | undefined {
+//   return diagnosticListCache[wxmlFilePath];
+// }
 
-export function setDiagnosticListToCache(
-  wxmlFilePath: WxmlFilePath,
-  diagnosticList: vscode.Diagnostic[],
-): vscode.Diagnostic[] {
-  return diagnosticListCache[wxmlFilePath] = diagnosticList;
-}
+//  function setDiagnosticListToCache(
+//   wxmlFilePath: WxmlFilePath,
+//   diagnosticList: vscode.Diagnostic[],
+// ): vscode.Diagnostic[] {
+//   return diagnosticListCache[wxmlFilePath] = diagnosticList;
+// }

@@ -15,8 +15,6 @@ export default {
     ),
     resolve(),
     commonjs(),
-    // builtins(),
-    // globals(),
     json(),
   ],
 };
