@@ -15,8 +15,14 @@ readme
 ### 0.2.2
 
 修复一些问题
-增加排除标签配置(如 { "annil.excludeTags" : ["view","block","icon"] } ) 
+增加忽略标签配置(如 { "annil.ignoreTags" : ["view","block","icon"] } ) 
 
 ### 0.3.0
 
 支持annil 1.7.0新特性(子组件inherit配置新增数组类型值,表示wxml属性值应为三元表达式)
+
+### 0.4.0
+
+增加忽略属性配置(如 { "annil.ignoreAttrs" : ["wx:if","wx:for","wx:key"] } ),默认忽略的属性有 `class`、`style`、`id`和以`data-`开头的属性
+
+增加点击自定义组件标签跳转功能

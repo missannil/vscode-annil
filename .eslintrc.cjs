@@ -7,7 +7,14 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: "module",
+    project: ["./tsconfig.json"],
   },
+  ignorePatterns: [
+    ".eslintrc.cjs",
+    "rollup.config.mjs",
+    "**/*.js",
+    "**/*.d.ts",
+  ], // 忽略检查的文件 优先级低于外部定义
   globals: {
     wx: true,
     App: true,
@@ -32,6 +39,7 @@ module.exports = {
     "@typescript-eslint/no-var-requires": 0, // 不运行使用require的方式引入模块
     "no-prototype-builtins": 0, // 不接受 Object.prototype的方法调用，需要用 call的方法调用
     "@typescript-eslint/no-explicit-any": 0, // 不可以显示的写any
+    "@typescript-eslint/no-floating-promises": "error", // 禁止没有返回值的promise
     "@typescript-eslint/explicit-module-boundary-types": 0, // 函数返回和参数都应该明确写类型
     "@typescript-eslint/no-unused-vars": 1, // 没有使用的变量,
     "@typescript-eslint/ban-types": 0, // 不可以使用特殊的类型 比如 {}
@@ -41,7 +49,10 @@ module.exports = {
     "no-mixed-spaces-and-tabs": "off",
     "@typescript-eslint/ban-ts-comment": 0,
     "padding-line-between-statements": 0,
-    // "@typescript-eslint/explicit-function-return-type": 2, // 函数必须有返回类型
+    "no-implicit-coercion": 2,
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/strict-boolean-expressions": "error",
+    "@typescript-eslint/explicit-function-return-type": "error", // 函数必须有返回类型
     "@typescript-eslint/padding-line-between-statements": [
       "warn",
       { blankLine: "always", prev: "*", next: "function" },

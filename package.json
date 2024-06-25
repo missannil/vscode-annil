@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -36,13 +36,21 @@
     "configuration": {
       "title": "annil",
       "properties": {
-        "excludeTags": {
+        "annil.ignoreTags": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
-          "description": "排除检查的标签"
+          "description": "忽略引用检查的标签"
+        },
+        "annil.ignoreAttrs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "忽略检查的属性"
         }
       }
     }
@@ -53,7 +61,9 @@
     "publish": "vsce publish",
     "compile": "rollup -c",
     "fmt": "dprint fmt",
-    "watch": "tsc -watch -p tsconfig.json",
+    "watch": "npm run clean && start /b tsc -w -p ./tsconfig-src.json && start /b tsc -w -p ./tsconfig-test.json ", 
+    
+    "type": "tsc -watch --noEmit",
     "lint": "eslint src --fix && npm run fmt"
   },
   "files": [
@@ -72,9 +82,13 @@
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "annil": "^1.7.3",
     "eslint": "^8.56.0",
+    "hry-types": "^0.18.1",
     "rollup-plugin-typescript2": "^0.36.0",
-    "typescript": "^5.3.3"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "vscode-test": "^1.6.1"
   },
   "dependencies": {
     "@babel/parser": "^7.23.6",

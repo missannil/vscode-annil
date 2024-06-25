@@ -1,0 +1,9 @@
+<!-- subA(自闭合)标签 会被检测 -->
+<subA bind:aaa=" aaa " />
+<view>
+	<!--原生标签内部自定义组件标签(非自闭合) 会被检测  -->
+	<subB bind:bbb="bbb ">
+		<!--自定义组件标签内部(自闭合) 会被检测  -->
+		<subC bind:ccc=" ccc" />
+	</subB>
+</view>

@@ -1,0 +1,6 @@
+<subA
+	_id
+	numA
+	userList
+	bind:onTap
+/>

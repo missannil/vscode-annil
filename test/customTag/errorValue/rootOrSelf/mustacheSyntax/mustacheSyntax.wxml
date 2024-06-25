@@ -1,0 +1,7 @@
+<!-- subA(自闭合)标签 会被检测 -->
+
+<subA
+	_id="{{id1}"
+	numA="{{ subA_numA1 }"
+	userList="{{ subA_userList1 }"
+/>

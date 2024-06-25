@@ -1,0 +1,12 @@
+<block wx:if="{{bool}}">
+	<!-- 因为上面有了wx:if,这里的wx:elif正常 -->
+	<block wx:elif="{{bool}}">
+		<!-- 因为上面有了wx:elif,这里的wx:else正常 -->
+		<block wx:else>
+			<!-- 因为上面是wx:else,这里的wx:elif不正常 -->
+			<block wx:elif="bool"></block>
+			<!-- 因为上面是wx:else,这里的wx:else不正常 -->
+			<block wx:else></block>
+		</block>
+	</block>
+</block>

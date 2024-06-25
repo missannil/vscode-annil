@@ -1,20 +1,22 @@
 {
   "compilerOptions": {
-    "outDir": "out",
-    "target": "ESNext",
-    "lib": ["ESNext"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "removeComments": true,
     "module": "CommonJS",
     // "sourceMap": true,
+    "skipDefaultLibCheck": true,
+    // "declaration":true,
     "skipLibCheck": true,
-    "moduleResolution": "Node10",
-    "strict": true /* enable all strict type-checking options */
+    "strict": true, /* enable all strict type-checking options */
+    "types": [
+      "annil",
+      "hry-types",
+      "node",
+    ]
   },
   "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "out"
+    "src/**/*.ts",
+    "test/**/*.ts",
   ]
 }

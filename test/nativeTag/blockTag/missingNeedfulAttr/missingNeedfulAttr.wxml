@@ -1,0 +1,5 @@
+<block wx:for-item="" wx:for-index="aaa"></block>
+
+
+<block wx:for="{{arr}}" wx:for-item="xxx" wx:for-index="i"></block>
+<block wx:for="{{list}}" wx:for-item="yyy" wx:for-index="j"></block> 

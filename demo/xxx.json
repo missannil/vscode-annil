@@ -1,9 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "h_image": "/components/h_image/h_image",
-    "order_item": "/components/order_item/order_item",
-    "subA": "/components/subA/subA",
-    "xxx": "/components/xxx/xxx"
-  }
-}

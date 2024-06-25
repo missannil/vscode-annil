@@ -1,0 +1,8 @@
+{
+  "component": true,
+  "usingComponents":{
+    "subA":"../subA/subA",
+    "subB":"../subB/subB",
+    "subC":"../subC/subC"
+  }
+}

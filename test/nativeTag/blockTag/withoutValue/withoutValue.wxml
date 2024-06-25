@@ -1,0 +1,14 @@
+<block
+	wx:for
+	wx:for-index
+	wx:for-item
+	wx:key
+></block>
+
+<block wx:if>
+	<block wx:if="{{xxx}}">
+		<block wx:elif></block>
+		<block wx:else></block>
+		<block />
+	</block>
+</block>

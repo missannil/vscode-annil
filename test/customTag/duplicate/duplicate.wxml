@@ -1,0 +1,21 @@
+<!-- subA(自闭合)标签 会被检测 -->
+<subA
+	numAA="{{subA_numAA}}"
+	num-aA
+	numA-a="any"
+/>
+<view>
+	<!--原生标签内部自定义组件标签(非自闭合) 会被检测  -->
+	<subA
+		num-aA="{{subA_numAA}}"
+		numA-a="any"
+		numAA
+	>
+		<!--自定义组件标签内部(自闭合) 会被检测  -->
+		<subA
+			numA-a="{{subA_numAA}}"
+			numAA
+			num-aA="any"
+		/>
+	</subA>
+</view>
