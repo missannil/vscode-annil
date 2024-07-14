@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import type { Element } from "domhandler";
 import * as vscode from "vscode";
-import { type RootComponentInfo } from "../../../componentManager/tsFileManager";
+import { type RootComponentInfo, type WxForDefault } from "../../../componentManager/tsFileManager";
 import {
   type ConditionalAttrExisted,
   DiagnosticErrorType,
@@ -21,22 +21,33 @@ import { isVariableStr } from "../../../utils/isVariableStr";
 import { isWithoutValue } from "../../../utils/isWithoutValue";
 import { generateDiagnostic } from "../../generateDiagnostic";
 import { rangeRegexp } from "../../rangeRegexp";
-import type { BlockTagInfo, BlockTagInfoList, ConditionState } from "..";
 
 const conditionalAttrs: ConditionState[] = ["wx:if", "wx:elif", "wx:else"];
 type LoopAttrs = "wx:for" | "wx:for-item" | "wx:for-index" | "wx:key";
 const loopAttrs: LoopAttrs[] = ["wx:for", "wx:for-item", "wx:for-index", "wx:key"];
 const blockTagLegalAttrList = [...conditionalAttrs, ...loopAttrs];
-type BlockTagReturnType = { blockTagInfoList: BlockTagInfoList; diagnosticList: vscode.Diagnostic[] };
+
+export type ConditionState = "wx:if" | "wx:elif" | "wx:else";
+
+export type WxForInfo = Record<WxForDefault, string>;
+
+export type ConditionBlock = { conditionState: ConditionState; diagnosticList: vscode.Diagnostic[] };
+
+export type WxForBlock = { wxForInfo: WxForInfo; diagnosticList: vscode.Diagnostic[] };
+
+export type BlockTagInfo = ConditionBlock | WxForBlock;
 
 export class BlockTagChecker {
   private diagnosticList: vscode.Diagnostic[] = [];
+  private wxForInfo: WxForInfo = { item: "item", index: "index" };
+  private currentConditionState?: ConditionState;
   public constructor(
     private readonly element: Element,
     private readonly startLine: number,
     private readonly wxmlTextlines: string[],
-    private readonly blockTagInfoList: BlockTagInfoList,
+    private readonly wxForInfoList: WxForInfo[],
     private readonly rootComponentInfo: RootComponentInfo,
+    private readonly preConditionState: ConditionState | null,
   ) {}
   private islegal(value: string): boolean {
     return this.rootComponentInfo.dataList.includes(value);
@@ -66,7 +77,7 @@ export class BlockTagChecker {
   private isConditionalAttr(rawAttrName: string): rawAttrName is ConditionState {
     return conditionalAttrs.includes(rawAttrName as ConditionState);
   }
-  private checkLoopValue(rawAttrName: LoopAttrs, rawAttrValue: string, blockTagInfo: BlockTagInfo): void {
+  private checkLoopValue(rawAttrName: LoopAttrs, rawAttrValue: string): void {
     // 0. 无值检测 报错在属性上 例如: wx:for (注意,无值指未写值的属性` wx:for="" `值为空串而非无值)
     if (isWithoutValue(rawAttrName, rawAttrValue, this.wxmlTextlines, this.startLine)) {
       // 传fixCode字段
@@ -121,7 +132,7 @@ export class BlockTagChecker {
     }
     if (rawAttrName === "wx:for-item") {
       if (isVariableStr(rawAttrValue)) {
-        (blockTagInfo.wxFor ||= { item: rawAttrValue, index: "index" }).item = rawAttrValue;
+        this.wxForInfo.item = rawAttrValue;
       } else {
         this.diagnosticList.push(
           generateDiagnostic(
@@ -138,7 +149,7 @@ export class BlockTagChecker {
     }
     if (rawAttrName === "wx:for-index") {
       if (isVariableStr(rawAttrValue)) {
-        (blockTagInfo.wxFor ||= { item: "item", index: rawAttrValue }).index = rawAttrValue;
+        this.wxForInfo.index = rawAttrValue;
       } else {
         this.diagnosticList.push(
           generateDiagnostic(
@@ -228,22 +239,22 @@ export class BlockTagChecker {
   }
   // 因为checkValue是检测(循环的)最后阶段,所以返回值为void
   // 同样因为complexity过高,把属性值的检测分为两类分开检测
-  private checkValue(rawAttrName: string, rawAttrValue: string, blockTagInfo: BlockTagInfo): void {
+  private checkValue(rawAttrName: string, rawAttrValue: string): void {
     if (this.isLoopAttrs(rawAttrName)) {
-      this.checkLoopValue(rawAttrName, rawAttrValue, blockTagInfo);
+      this.checkLoopValue(rawAttrName, rawAttrValue);
 
       return;
     }
     if (this.isConditionalAttr(rawAttrName)) {
       this.checkConditionValue(rawAttrName, rawAttrValue);
-      blockTagInfo.conditionState = rawAttrName;
+      // this.currentConditionState = rawAttrName;
 
       return;
     }
     throw Error("不应该有其他属性了");
   }
-  // 缺少先决条件: 属性为`wx:elif` || `wx:else`时如果最后的lastConditionState中值undefined或为wx:else,这两个属性是缺少先决条件的)
-  private missPrerequisite(rawAttrName: ConditionState, lastConditionState: ConditionState | undefined): boolean {
+  // 缺少先决条件: 属性为`wx:elif` || `wx:else`时如果最后的lastConditionState中值null或为wx:else,这两个属性是缺少先决条件的)
+  private missPrerequisite(rawAttrName: ConditionState, lastConditionState: ConditionState | null): boolean {
     return ["wx:elif", "wx:else"].includes(rawAttrName) && (!lastConditionState || lastConditionState === "wx:else");
   }
   private isLoopAttrs(rawAttrName: string): rawAttrName is LoopAttrs {
@@ -275,11 +286,9 @@ export class BlockTagChecker {
 
   private checkConditionAttrs(
     rawAttrName: ConditionState,
-    blockTagInfo: BlockTagInfo,
-    lastConditionState: ConditionState | undefined,
   ): boolean {
     // 0. 缺少先决条件
-    if (this.missPrerequisite(rawAttrName, lastConditionState)) {
+    if (this.missPrerequisite(rawAttrName, this.preConditionState)) {
       this.diagnosticList.push(
         generateDiagnostic(
           rangeRegexp.getFullAttrRegexp(rawAttrName),
@@ -288,7 +297,6 @@ export class BlockTagChecker {
           this.startLine,
         ),
       );
-      blockTagInfo.conditionState = rawAttrName as ConditionState;
 
       return true;
     }
@@ -306,8 +314,6 @@ export class BlockTagChecker {
   private checkAttr(
     rawAttrName: string,
     isHasWxFor: boolean,
-    blockTagInfo: BlockTagInfo,
-    lastConditionState: ConditionState | undefined,
   ): boolean {
     // 0. 忽略的属性跳过
     if (ignoreAttrs.includes(rawAttrName)) {
@@ -333,7 +339,9 @@ export class BlockTagChecker {
     }
     // 3. wx:if相关属性检测
     if (this.isConditionalAttr(rawAttrName)) {
-      return this.checkConditionAttrs(rawAttrName, blockTagInfo, lastConditionState);
+      this.currentConditionState = rawAttrName;
+
+      return this.checkConditionAttrs(rawAttrName);
     }
 
     throw Error("不应该有其他属性了");
@@ -341,28 +349,25 @@ export class BlockTagChecker {
   /**
    * 检测可分为两个步骤(为了避免所有的检测逻辑写在一起,造成函数复杂度`complexity`过高),遍历标签元素的每个属性,先对属性进行检测,有错误加入错误列表并跳到下一个检测循环,无错误则对属性值进行检测,最终返回diagnosticList和blockTagInfoList。
    * 但block标签存在属性互斥的问题(某些属性不可以同时存在),所以在执行上述检测(遍历每个属性检测)流程前,先检测(排除)互斥属性,再把剩余的属性按上述流程检测。
-   * @returns { blockTagInfoList: BlockTagInfoList, diagnosticList: vscode.Diagnostic[] }
    */
-  public check(): BlockTagReturnType {
+  public start(): BlockTagInfo {
     const rawAttribs = this.element.attribs;
     const allRawAttrNames = Object.keys(rawAttribs);
     // 0. 互斥的属性检测 (wx:if 、 wx:elif 、 wx:else 三个条件属性是互斥的,不能同时存在,除了第一个属性外,其他属性报错,返回报错的属性,没有互斥属性则返回空数组)
     const mutuallyExclusiveAttrs = this.checkMutuallyExclusiveAttrs(allRawAttrNames);
     const remainingRawAttrNames = allRawAttrNames.filter((attrName) => !mutuallyExclusiveAttrs.includes(attrName));
-    const lastConditionState = this.blockTagInfoList[this.blockTagInfoList.length - 1]?.conditionState;
     const isHasWxFor = allRawAttrNames.includes("wx:for");
-    const blockTagInfo: BlockTagInfo = isHasWxFor
-      ? { wxFor: { item: "item", index: "index" } }
-      : {};
-    this.blockTagInfoList.push(blockTagInfo);
+
     // 1. 剩余属性的检测(去除互斥属性后的属性)。
     for (const rawAttrName of remainingRawAttrNames) {
       const rawAttrValue = rawAttribs[rawAttrName];
-      const res = this.checkAttr(rawAttrName, isHasWxFor, blockTagInfo, lastConditionState);
+      const res = this.checkAttr(rawAttrName, isHasWxFor);
       if (res) continue;
-      this.checkValue(rawAttrName, rawAttrValue, blockTagInfo);
+      this.checkValue(rawAttrName, rawAttrValue);
     }
 
-    return { blockTagInfoList: this.blockTagInfoList, diagnosticList: this.diagnosticList };
+    return this.currentConditionState
+      ? { conditionState: this.currentConditionState, diagnosticList: this.diagnosticList }
+      : { wxForInfo: this.wxForInfo, diagnosticList: this.diagnosticList };
   }
 }

@@ -5,10 +5,7 @@
 	wx:key
 ></block>
 
-<block wx:if>
-	<block wx:if="{{xxx}}">
-		<block wx:elif></block>
-		<block wx:else></block>
-		<block />
-	</block>
-</block>
+<block wx:if></block>
+<block wx:elif></block>
+<block wx:else></block>
+<block />

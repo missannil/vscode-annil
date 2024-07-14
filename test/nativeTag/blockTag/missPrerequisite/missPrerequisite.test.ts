@@ -10,4 +10,5 @@ const componentUri = getRandomComponentUri(wxmlUri);
 void test(componentUri, [
   `${DiagnosticErrorType.missPrerequisite}:wx:if | wx:elif` satisfies MissPrerequisite,
   `${DiagnosticErrorType.missPrerequisite}:wx:if | wx:elif` satisfies MissPrerequisite,
+  `${DiagnosticErrorType.missPrerequisite}:wx:if | wx:elif` satisfies MissPrerequisite,
 ]);

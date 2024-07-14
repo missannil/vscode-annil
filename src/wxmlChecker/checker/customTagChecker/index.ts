@@ -27,7 +27,9 @@ import { isMustacheStr, isValidSyntax } from "../../../utils/isMustacheStr";
 import { isWithoutValue } from "../../../utils/isWithoutValue";
 import { generateDiagnostic } from "../../generateDiagnostic";
 import { rangeRegexp } from "../../rangeRegexp";
-import type { BlockTagInfoList } from "..";
+import type { WxForInfo } from "../checknativeTag/checkBlockTag";
+
+
 
 export class CustomTagChecker {
   private diagnosticList: vscode.Diagnostic[] = [];
@@ -35,7 +37,7 @@ export class CustomTagChecker {
     private readonly element: Element,
     private readonly startLine: number,
     private readonly wxmlTextlines: string[],
-    private readonly blockTagInfoList: BlockTagInfoList,
+    private readonly wxForInfo: WxForInfo[],
     private readonly attributeConfig: AttrConfig,
   ) {
   }
