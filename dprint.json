@@ -5,7 +5,7 @@
   "json": {},
   "markdown": {},
   "includes": [
-    "**/*.{ts,js,cjs,mjs,json,md}"
+    "**/*.{ts,cjs,mjs,json,md}"
   ],
   "excludes": [
     "**/node_modules",

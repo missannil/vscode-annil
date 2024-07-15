@@ -5,7 +5,7 @@ import type { SubA, User } from "../../subA";
 
 const subA = SubComponent<Root, SubA>()({
   inherit: {
-    subA__id: WXML,
+    subA__id: "wxml",
   },
 });
 

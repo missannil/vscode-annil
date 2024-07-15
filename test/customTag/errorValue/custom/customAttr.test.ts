@@ -12,9 +12,6 @@ void test(componentUri, [
   `${DiagnosticErrorType.errorValue}:_id` satisfies ErrorValue,
   `${DiagnosticErrorType.mustacheSyntax}:_id` satisfies MustacheSyntax,
   `${DiagnosticErrorType.mustacheSyntax}:_id` satisfies MustacheSyntax,
-  //   `${DiagnosticErrorType.errorValue}:numA` satisfies ErrorValue,
-  //   `${DiagnosticErrorType.errorValue}:userList` satisfies ErrorValue,
-  //   `${DiagnosticErrorType.errorValue}:bind:eventA` satisfies ErrorValue,
 ], [
   `${DiagnosticErrorType.errorValue}:_id` satisfies ErrorValue,
   `${DiagnosticErrorType.errorValue}:_id` satisfies ErrorValue,

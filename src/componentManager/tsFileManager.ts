@@ -226,8 +226,11 @@ function isStringLiteral(node: Node): node is StringLiteral {
 }
 
 function getInheritValue(valueElement: StringLiteral | Identifier): Custom | Root {
-  if (isIdentifier(valueElement) && valueElement.name === "WXML") {
-    // 如果是WXML,则表示自定义值
+  if (
+    isStringLiteral(valueElement) && valueElement.value === WXML
+    || isIdentifier(valueElement) && valueElement.name === "WXML"
+  ) {
+    // 如果是wxml字符串或者是WXML变量,则表示自定义值
     return { type: "Custom", value: CUSTOM } satisfies Custom;
   }
   if (isStringLiteral(valueElement)) {

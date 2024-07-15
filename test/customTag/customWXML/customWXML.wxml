@@ -1,8 +1,0 @@
-<!-- subA(自闭合)标签 会被检测 -->
-
-<subA
-	_id="{{自定义}}"
-	numA="{{subA_numA1}}"
-	userList="{{subA_userList1}}"
-	bind:eventA="{{subA_eventA}}"
-/>

@@ -8,9 +8,15 @@ class RangeRegexp {
   }
   public getFullAttrRegexp(attrName: string): RegExp[] {
     return [
-      new RegExp(`\\b${attrName}\\s*=\\s*[^=\\s/>]+?(?=\\s|>|/>|$)`),
-      new RegExp(`\\b${attrName}\\s*=(?=\\s|>|/>|$)`),
-      new RegExp(`\\b${attrName}(?=\\s|>|/>|$)`),
+      // // class="flex-auto  w-1F5"
+      // new RegExp(`\\b${attrName}\\s*=\\s*['"].*['"](?=\\s|>|/>|$)`),
+      // // class=123
+      // new RegExp(`\\b${attrName}\\s*=\\s*[^=\\s/>]+?(?=\\s|>|/>|$)`),
+      // // class=
+      // new RegExp(`\\b${attrName}\\s*=(?=\\s|>|/>|$)`),
+      // // class
+      // new RegExp(`\\b${attrName}(?=\\s|>|/>|$)`),
+      new RegExp(`\\b${attrName}(\\s*=\\s*(['"].*?['"]|[^=\\s/>]*))?(?=\\s|>|/>|$)`),
     ];
   }
   public getPreValueRegexp(attrName: string, attrValue: string): RegExp[] {
