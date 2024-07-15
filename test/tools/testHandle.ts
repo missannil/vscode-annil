@@ -7,8 +7,18 @@ import { assertNonNullable } from "../../out/utils/assertNonNullable";
 import { wxmlChecker } from "../../out/wxmlChecker";
 import type { ComponentUri, WxmlUri } from "../../src/componentManager/isComponentUri";
 import { findDiffItems } from "./findDiffItems";
+let checkCountOfExample = 0;
+let completedCountOfExample = 0;
 
-async function replaceFileContent(uri: vscode.Uri, newContent: string): Promise<boolean> {
+function completeHandle(): void {
+  completedCountOfExample--;
+  // console.log("完成用例数量:", completedCountOfExample);
+  if (completedCountOfExample === 0) {
+    console.log("测试用例数量:", checkCountOfExample);
+  }
+}
+
+export async function replaceFileContent(uri: vscode.Uri, newContent: string): Promise<boolean> {
   const document = await vscode.workspace.openTextDocument(uri);
   const fullRange = new vscode.Range(
     document.positionAt(0),
@@ -38,11 +48,11 @@ async function fixAllActionTest(
     // console.log("修复后诊断",  diagnosticList);
     // console.log("删除修复功能回调",  testFilePath);
     wxmlChecker.deregisterCheckCompletedCallback(wxmlUri.fsPath);
-    const errorMessage = findDiffItems(
+    const diffErrorMessage = findDiffItems(
       diagnosticList.map((diagnostic) => diagnostic.message),
       expectAfterFixedErrorMessageList,
     );
-    if (errorMessage.length === 0) {
+    if (diffErrorMessage.length === 0) {
       console.log("\x1b[32m%s\x1b[0m", `${testFilePath}`);
     } else {
       console.error(wxmlUri.fsPath, "修复后还有错误", diagnosticList.map((diagnostic) => diagnostic.message).join());
@@ -50,6 +60,7 @@ async function fixAllActionTest(
     await replaceFileContent(wxmlUri, testContent);
     // console.log("恢复原始测试状态", testFilePath);
     // console.log("测试修复功能完成");
+    completeHandle();
   });
 
   // 执行修复命令后,还会触发诊断检查。
@@ -60,10 +71,13 @@ async function fixAllActionTest(
 
 export async function test(
   compUri: ComponentUri,
+  // 预期的错误信息列表
   expectErrorMessageList: string[],
-  // undefined表示不需要验证修复功能,[]表示预期修复后没有错误,有值表示预期修复后的错误信息
+  // undefined表示忽略验证修复功能,[]表示预期修复后没有错误,有值表示预期修复后的错误信息
   expectAfterFixedErrorMessageList?: string[],
 ): Promise<void> {
+  checkCountOfExample++;
+  completedCountOfExample++;
   const wxmlUri = getSiblingUri(compUri, ".wxml");
   const testFilePath = getTestFileFsPath(wxmlUri);
   // console.log("错误信息测试", testFilePath);
@@ -73,14 +87,22 @@ export async function test(
   wxmlChecker.registerCheckCompletedCallback(wxmlUri.fsPath, async (diagnosticList) => {
     wxmlChecker.deregisterCheckCompletedCallback(wxmlUri.fsPath);
     // console.log("检测完成回调", diagnosticList);
-    const errorMessage = findDiffItems(diagnosticList.map((diagnostic) => diagnostic.message), expectErrorMessageList);
+    const diffErrorMessage = findDiffItems(
+      diagnosticList.map((diagnostic) => diagnostic.message),
+      expectErrorMessageList,
+    );
     // console.log("错误信息:", errorMessage);
-    if (errorMessage.length > 0) {
-      console.error(`测试错误不符合预期: ${testFilePath}`, errorMessage.join());
+    if (diffErrorMessage.length > 0) {
+      console.error(`测试错误不符合预期: ${testFilePath}`, diffErrorMessage.join());
+      completeHandle();
+
+      return;
     } else {
-      // 如果预期错误信息为空,通过测试,不需要验证修复功能
-      if (expectErrorMessageList.length === 0) {
+      // 如果预期修复后错误信息为undefined,通过测试,不需要验证修复功能
+      if (!expectAfterFixedErrorMessageList) {
+        // console.log("没有修复内容");
         console.log("\x1b[32m%s\x1b[0m", `${testFilePath}`);
+        completeHandle();
 
         return;
       }
@@ -88,19 +110,10 @@ export async function test(
     }
     const fixAllAction = diagnosticFixProvider.generateFixAllAction(wxmlUri, diagnosticList);
     if (assertNonNullable(fixAllAction.edit).size === 0) {
-      if (!expectAfterFixedErrorMessageList) {
-        // console.log("没有修复内容");
-        console.log("\x1b[32m%s\x1b[0m", `${testFilePath}`);
-      } else {
-        console.error("无法修复,但是预期有修复后错误信息", testFilePath);
-      }
+      console.error("无法修复,但是预期有修复后错误信息", testFilePath);
+      completeHandle();
     } else {
-      if (!expectAfterFixedErrorMessageList) {
-        // console.log("没有修复内容");
-        console.error(`配置错误: ${testFilePath}应该传入修复后的错误信息`);
-      } else {
-        await fixAllActionTest(wxmlUri, testContent, fixAllAction, expectAfterFixedErrorMessageList);
-      }
+      await fixAllActionTest(wxmlUri, testContent, fixAllAction, expectAfterFixedErrorMessageList);
     }
   });
   // 打开文件

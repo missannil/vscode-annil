@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-
 import type { WxmlUri } from "../../../../src/componentManager/isComponentUri";
+import { DiagnosticErrorType, type ShouldwithoutValue } from "../../../../src/diagnosticFixProvider/errorType";
 import { getRandomComponentUri } from "../../../tools/getComponentUri";
 import { test } from "../../../tools/testHandle";
 
@@ -8,8 +8,5 @@ import { test } from "../../../tools/testHandle";
 const wxmlUri = vscode.Uri.file(__filename.replace(".test.js", ".wxml")) as WxmlUri;
 const componentUri = getRandomComponentUri(wxmlUri);
 void test(componentUri, [
-  "未知的属性:wx:forA",
-  "未知的属性:wx:forB",
-  "未知的属性:wx:forC",
-  "未知的属性:wx:forD",
+  `${DiagnosticErrorType.shouldwithoutValue}:wx:else` satisfies ShouldwithoutValue,
 ], []);

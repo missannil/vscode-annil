@@ -57,21 +57,29 @@ class ComponentManager {
       await wxmlFileManager.update(uri.fsPath);
     }
   }
+  private async onOpenTextEditor(uri: vscode.Uri): Promise<void> {
+    const wxmlUri = getSiblingUri(uri, ".wxml");
+    if (isComponentUri(uri) && this.shouldCheckFile(wxmlUri)) {
+      this.addCheckingQueue(wxmlUri.fsPath);
+      await wxmlChecker.start(wxmlUri);
+      this.removeCheckingQueue(wxmlUri.fsPath);
+    } else {
+      // console.log("不是组件文件,或者已经有诊断信息了,或者正在检测中",uri.fsPath)
+    }
+  }
+  private async visibleTextEditorsHandler(): Promise<void> {
+    const visibleTextEditors = vscode.window.visibleTextEditors;
+    for (const textEditor of visibleTextEditors) {
+      await this.onOpenTextEditor(textEditor.document.uri);
+    }
+  }
   // 是否应该检测这个文件,如果已经有诊断信息了,或者正在检测中,则不检测
   private shouldCheckFile(wxmlUri: WxmlUri): boolean {
     return !diagnosticManager.has(wxmlUri) && !this.isChecking(wxmlUri.fsPath);
   }
   private onDidOpenComponentFileHandler(): void {
     vscode.workspace.onDidOpenTextDocument(async (textDocument) => {
-      const uri = textDocument.uri;
-      const wxmlUri = getSiblingUri(uri, ".wxml");
-      if (isComponentUri(uri) && this.shouldCheckFile(wxmlUri)) {
-        this.addCheckingQueue(wxmlUri.fsPath);
-        await wxmlChecker.start(wxmlUri);
-        this.removeCheckingQueue(wxmlUri.fsPath);
-      } else {
-        // console.log("不是组件文件,或者已经有诊断信息了,或者正在检测中",uri.fsPath)
-      }
+      await this.onOpenTextEditor(textDocument.uri);
     });
   }
   private onDidChangeComponentFileHandler(): void {
@@ -101,6 +109,7 @@ class ComponentManager {
     this.onDidOpenComponentFileHandler();
     this.onDidChangeComponentFileHandler();
     this.onDeleteComponentFileHandler();
+    void this.visibleTextEditorsHandler();
   }
 }
 

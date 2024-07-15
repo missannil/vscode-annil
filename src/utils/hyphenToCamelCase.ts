@@ -1,5 +1,5 @@
- // 将连字符(短横线)命名转换为驼峰命名
- export function hyphenToCamelCase<T extends string | string[]>(str: T): T {
+// 将连字符(短横线)命名转换为驼峰命名
+export function hyphenToCamelCase<T extends string | string[]>(str: T): T {
   if (Array.isArray(str)) {
     return str.map((item) => hyphenToCamelCase(item)) as T;
   } else {

@@ -1,0 +1,15 @@
+<view class="{{twWrapper}}">
+	<block
+		wx:for="{{list}}"
+		wx:key="_id"
+	>
+		<goods
+			goods="{{item}}"
+			twImage="{{twImage}}"
+			_twWrapperCol="{{twWrapperCol}}"
+			_direction="{{direction}}"
+			catch:increase="goods_increase_catch"
+			catch:decrease="goods_decrease_catch"
+		/>
+	</block>
+</view>

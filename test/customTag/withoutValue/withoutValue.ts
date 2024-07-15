@@ -9,10 +9,9 @@ const subA = SubComponent<Root, SubA>()({
     subA_numA: 123,
     subA_userList: [],
   },
-  events:{
-    subA_onTap(e) {}
-  
-  }
+  events: {
+    subA_onTap(e) {},
+  },
 });
 type Root = typeof rootComponent;
 

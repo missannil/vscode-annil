@@ -61,8 +61,8 @@
     "publish": "vsce publish",
     "compile": "rollup -c",
     "fmt": "dprint fmt",
-    "watch": "npm run clean && start /b tsc -w -p ./tsconfig-src.json && start /b tsc -w -p ./tsconfig-test.json ", 
-    
+    "watch": "npm run clean && start /b tsc -w -p ./tsconfig-src.json && start /b tsc -w -p ./tsconfig-test.json ",
+
     "type": "tsc -watch --noEmit",
     "lint": "eslint src --fix && npm run fmt"
   },

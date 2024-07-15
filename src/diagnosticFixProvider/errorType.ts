@@ -1,5 +1,4 @@
 type MissingAttrName = string;
-type CorrectValue = string;
 type RepeatedAttrName = string;
 type UnknownAttrName = string;
 type AttrName = string;

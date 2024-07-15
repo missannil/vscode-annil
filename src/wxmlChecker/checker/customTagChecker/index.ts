@@ -29,8 +29,6 @@ import { generateDiagnostic } from "../../generateDiagnostic";
 import { rangeRegexp } from "../../rangeRegexp";
 import type { WxForInfo } from "../checknativeTag/checkBlockTag";
 
-
-
 export class CustomTagChecker {
   private diagnosticList: vscode.Diagnostic[] = [];
   public constructor(

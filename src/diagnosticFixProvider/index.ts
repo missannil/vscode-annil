@@ -14,6 +14,7 @@ import {
   type MissingNeedfulAttr,
   type MissPrerequisite,
   type MustacheSyntax,
+  type ShouldwithoutValue,
   type UnknownAttr,
   type UnknownImport,
   type WithoutValue,
@@ -61,6 +62,9 @@ class DiagnosticFixProvider {
   }
   private InvalidValue(diagnosticMessage: DiagnosticMessage): diagnosticMessage is InvalidValue {
     return diagnosticMessage.split(":")[0] === DiagnosticErrorType.invalidValue;
+  }
+  private isShouldwithoutValue(diagnosticMessage: DiagnosticMessage): diagnosticMessage is ShouldwithoutValue {
+    return diagnosticMessage.split(":")[0] === DiagnosticErrorType.shouldwithoutValue;
   }
   private editInsert(
     wxmlUri: WxmlUri,
@@ -160,6 +164,9 @@ class DiagnosticFixProvider {
       || this.isConditionalAttrExisted(diagnosticMessage)
     ) {
       return this.editDelete(wxmlUri, diagnostic, codeAction);
+    }
+    if (this.isShouldwithoutValue(diagnosticMessage)) {
+      return this.editReplace(wxmlUri, diagnostic, codeAction);
     }
   }
   // 建立每一个选中诊断位置的修复程序

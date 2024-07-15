@@ -3,9 +3,7 @@ type User = {
   name: string;
   age: number;
 };
-const subA = SubComponent<Root, {}>()({
-
-});
+const subA = SubComponent<Root, {}>()({});
 type Root = typeof rootComponent;
 const rootComponent = RootComponent()({
   properties: {

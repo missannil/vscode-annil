@@ -1,0 +1,2 @@
+<block wx:if="{{bool}}"></block>
+<block wx:else="bool"></block>

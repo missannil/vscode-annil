@@ -1,7 +1,7 @@
 import { RootComponent, SubComponent } from "annil";
 
-import type { SubA, User } from "../../subA";
 import { WXML } from "../../../../out/componentManager/tsFileManager";
+import type { SubA, User } from "../../subA";
 
 const subA = SubComponent<Root, SubA>()({
   inherit: {

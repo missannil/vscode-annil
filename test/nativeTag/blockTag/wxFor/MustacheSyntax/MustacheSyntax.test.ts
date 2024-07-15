@@ -10,6 +10,6 @@ const componentUri = getRandomComponentUri(wxmlUri);
 //   "值不符合'{{}}'语法:wx:for",
 //   "值不符合'{{}}'语法:wx:for",
 // ], [
-//   "非数组类型", 
+//   "非数组类型",
 //   "非数组类型",
 // ]);

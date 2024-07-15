@@ -33,10 +33,10 @@ const rootComponent = RootComponent()({
   },
   store: {
     storeList: (): User[] => [],
-    numberStore: ():number => 123, 
+    numberStore: (): number => 123,
   },
-  data:{
-    aaa:123,
+  data: {
+    aaa: 123,
   },
   events: {
     onTap() {

@@ -9,4 +9,4 @@ void test(componentUri, [
   "未知的属性:aaa",
   "未知的属性:bbb",
   "未知的属性:ccc",
-],[]);
+], []);

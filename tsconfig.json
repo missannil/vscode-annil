@@ -6,17 +6,17 @@
     "module": "CommonJS",
     // "sourceMap": true,
     "skipDefaultLibCheck": true,
-    "declaration":true,
+    "declaration": true,
     "skipLibCheck": true,
     "strict": true, /* enable all strict type-checking options */
     "types": [
       "annil",
       "hry-types",
-      "node",
+      "node"
     ]
   },
   "include": [
     "src/**/*.ts",
-    "test/**/*.ts",
+    "test/**/*.ts"
   ]
 }

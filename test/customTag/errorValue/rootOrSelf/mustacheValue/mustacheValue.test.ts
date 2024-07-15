@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import type { WxmlUri } from "../../../../../src/componentManager/isComponentUri";
 import { DiagnosticErrorType, type ErrorValue } from "../../../../../out/diagnosticFixProvider/errorType";
+import type { WxmlUri } from "../../../../../src/componentManager/isComponentUri";
 import { getRandomComponentUri } from "../../../../tools/getComponentUri";
 import { test } from "../../../../tools/testHandle";
 

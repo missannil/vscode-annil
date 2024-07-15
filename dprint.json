@@ -1,6 +1,7 @@
 {
   "incremental": true,
   "typescript": {},
+  "newLineKind": "system",
   "json": {},
   "markdown": {},
   "includes": [

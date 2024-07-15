@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-// import { runTest } from "./runTest";
-import { diagnosticFixProvider } from "./diagnosticFixProvider";
-import { goToDefinition } from "./goToDefinition";
-import { diagnosticManager } from "./diagnosticManager";
 import { componentManager } from "./componentManager";
+import { diagnosticFixProvider } from "./diagnosticFixProvider";
+import { diagnosticManager } from "./diagnosticManager";
+import { goToDefinition } from "./goToDefinition";
+import { runTest } from "./runTest";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -12,7 +12,7 @@ export async function activate(
   componentManager.init();
   diagnosticFixProvider.init(context);
   goToDefinition.init(context);
-  // void runTest();
+  void runTest();
 }
 
 export function deactivate(): void {}

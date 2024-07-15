@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { tsFileManager } from "../componentManager/tsFileManager";
-import { wxmlFileManager } from "../componentManager/wxmlFileManager";
 import { getSiblingUri } from "../componentManager/getSiblingUri";
 import { type WxmlUri } from "../componentManager/isComponentUri";
+import { tsFileManager } from "../componentManager/tsFileManager";
+import { wxmlFileManager } from "../componentManager/wxmlFileManager";
 import { diagnosticManager } from "../diagnosticManager";
 import { Checker } from "./checker";
 
