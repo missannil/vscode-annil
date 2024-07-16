@@ -15,6 +15,7 @@ import {
   type WithoutValue,
 } from "../../../diagnosticFixProvider/errorType";
 import { getMustacheValue } from "../../../utils/getMustacheValue";
+import { hasSpecialCharacter } from "../../../utils/hasSpecialCharacter";
 import { ignoreAttrs } from "../../../utils/ignoreAttrs";
 import { isMustacheStr } from "../../../utils/isMustacheStr";
 import { isVariableStr } from "../../../utils/isVariableStr";
@@ -49,8 +50,18 @@ export class BlockTagChecker {
     private readonly rootComponentInfo: RootComponentInfo,
     private readonly preConditionState: ConditionState | null,
   ) {}
+  /**
+   * 检测值是否合法(只允许使用rootComponentInfo中或wxForInfo中的数据)
+   */
   private islegal(value: string): boolean {
-    return this.rootComponentInfo.dataList.includes(value);
+    // 把所有wxForInfoList中各项的item和index值取出来
+    const allWxForDataList = this.wxForInfoList.reduce<string[]>((acc, cur) => {
+      acc.push(cur.item, cur.index);
+
+      return acc;
+    }, []);
+
+    return [...this.rootComponentInfo.dataList, ...allWxForDataList].includes(value);
   }
   private getConditionAttrs(allRawAttrNames: string[]): string[] {
     return allRawAttrNames.filter((attrName) => this.isConditionalAttr(attrName));
@@ -220,8 +231,9 @@ export class BlockTagChecker {
 
       return;
     }
-    // 2. 值不符合合法值(使用rootComponentInfo中的数据)
-    // 得到所有的值,判断是否合法
+    // 2. 忽略包含特殊字符的值检测(暂时没想到好的解决方案,比如 item > 0 | xxx === ddd ? 1 : 2等值)
+    if (hasSpecialCharacter(rawAttrValue)) return;
+    // 3. 值不符合合法值(使用rootComponentInfo中的数据或wxForInfo中的数据)
     const mustacheValue = getMustacheValue(rawAttrValue);
     if (!this.islegal(mustacheValue)) {
       this.diagnosticList.push(

@@ -90,6 +90,7 @@ export class Checker {
           this.diagnosticList.push(...customTagChecker.start());
           const children = childNode.children;
           if (children.length > 0) {
+            // 自定义组件不包含wx:for,
             this.checkNodeList(children, [...wxForInfoList]);
           }
         } else if (nodeType.isNativeTag(childNode, this.subComponentNameList)) {

@@ -1,10 +1,11 @@
-// // @ts-nocheck
+// @ts-nocheck
 
-// import { RootComponent } from "annil";
+import { RootComponent } from "annil";
 
-// const rootComponent = RootComponent()({
-//   data: {
-//     arr: [1, 2, 3] as number[],
-//     list: [1, 2, 3],
-//   },
-// });
+const rootComponent = RootComponent()({
+  data: {
+    arr: [1, 2, 3] as number[],
+    list: [1, 2, 3],
+    bool: true,
+  },
+});
