@@ -1,15 +1,18 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { RootComponent, SubComponent } from "annil";
+import type { $SubA } from "../../mockComponents/subA";
 
-const subA = SubComponent()({
+const subA = SubComponent<Root, $SubA>()({
   data: {
-    subA_xXX: "normal",
+    subA_numA: 1,
+    subA__id: "id",
+    subA_userList: [],
   },
 });
-
-const root = RootComopnent()({
+type Root = typeof root;
+const root = RootComponent()({
   data: {
     list: [1, 2, 3],
     noList: 123,
   },
-  children: [subA, subB, subC],
 });

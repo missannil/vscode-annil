@@ -51,7 +51,11 @@ export type SubComponentInfo = Record<SubCompName, AttrConfig | undefined>;
 
 export type RootComponentInfo = { arrTypeData: string[]; dataList: string[]; events: string[] };
 
-export type TsFileInfo = { subComponentInfo: SubComponentInfo; rootComponentInfo: RootComponentInfo };
+export type TsFileInfo = {
+  subComponentInfo: SubComponentInfo;
+  rootComponentInfo: RootComponentInfo;
+  importedSubCompTypes: string[];
+};
 
 export function parseWxForValue(wxForValue: WxFor): WxForValueInfo {
   const preTypeAndRename = wxForValue.value.split(":");
@@ -238,6 +242,30 @@ function getInheritValue(valueElement: StringLiteral | Identifier): Custom | Roo
   }
   throw Error("不应出现的错误:getInheritValue");
 }
+
+// 首字母大写
+function capitalizeFirstLetter(str: string): string {
+  if (!str) return str;
+
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// 首字母小写
+function decapitalizeFirstLetter(str: string): string {
+  if (!str) return str;
+
+  return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+function getSubCompName(baseName: string, extensionName: string | undefined): string {
+  baseName = decapitalizeFirstLetter(baseName.startsWith("$") ? baseName.slice(1) : baseName);
+
+  return extensionName === undefined ? baseName : `${baseName}${capitalizeFirstLetter(extensionName)}`;
+}
+
+function intersection(array1: string[], array2: string[]): string[] {
+  return array1.filter(value => array2.includes(value));
+}
 const subComponentExtractedFields = ["inherit", "data", "computed", "store", "events"];
 const rootComponentExtractedFields = ["properties", "data", "computed", "store", "events"];
 
@@ -247,18 +275,26 @@ export function tsFileParser(tsText: string): TsFileInfo {
   const tsFileInfo: TsFileInfo = {
     subComponentInfo: {},
     rootComponentInfo: { arrTypeData: [], dataList: [], events: [] },
+    importedSubCompTypes: [],
   };
   // 对象key为组件名,值为组件的属性,要传递的属性以字符串的形式存储
   const subComponentInfo = tsFileInfo.subComponentInfo;
   const rootComponentInfo = tsFileInfo.rootComponentInfo;
+  const baseCompTypes: string[] = [];
+  const allImportedTypes: string[] = [];
   traverse(tsFileAST, {
     VariableDeclarator(path) {
-      const expression = path.node.init;
-      // @ts-ignore 类型不对,但是不影响使用
+      const expression = path.node.init as any;
       const funcName = expression?.callee?.callee?.name;
       // 提取所有SubComponent函数中的数据和事件
       if (funcName === "SubComponent") {
-        const subCompName = (path.node.id as any).name;
+        // 导入的子组件类型名
+        const baseCompName = (expression as any).callee?.typeParameters?.params[1]?.typeName?.name;
+        baseCompTypes.push(baseCompName);
+        const extensionName = (expression as any).callee?.typeParameters?.params[2]?.literal?.extra?.rawValue;
+        if (baseCompName === undefined) return;
+        const subCompName = getSubCompName(baseCompName, extensionName);
+        // const subCompName = (path.node.id as any).name;
         subComponentInfo[subCompName] = {};
         const subCompAttrs: AttrConfig = assertNonNullable(subComponentInfo[subCompName]);
         // 因为就一个参数,所以直接取第一个 arguments[0]即可,properties为配置对象的第一层配置字段 inherit data store computed watch methods evnets lifetimes等
@@ -366,7 +402,23 @@ export function tsFileParser(tsText: string): TsFileInfo {
         );
       }
     },
+    ImportDeclaration(path) {
+      // 检查整个导入声明是否为类型导入
+      if (path.node.importKind === "type") {
+        path.node.specifiers.forEach((specifier) => {
+          allImportedTypes.push(specifier.local.name);
+        });
+      } else {
+        // 对于非整体类型导入，检查每个 specifier 是否为类型导入
+        path.node.specifiers.forEach((specifier) => {
+          if (specifier.type === "ImportSpecifier" && specifier.importKind === "type") {
+            allImportedTypes.push(specifier.local.name);
+          }
+        });
+      }
+    },
   });
+  tsFileInfo.importedSubCompTypes = intersection([...new Set(baseCompTypes)], allImportedTypes);
 
   return tsFileInfo;
 }

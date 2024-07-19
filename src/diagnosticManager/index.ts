@@ -1,25 +1,24 @@
 import * as vscode from "vscode";
-import type { WxmlUri } from "../componentManager/isComponentUri";
 
 class DiagnosticManager {
   #diagnosticCollection = vscode.languages.createDiagnosticCollection(`annil`);
-  public has(wxmlUri: WxmlUri): boolean {
-    return this.#diagnosticCollection.has(wxmlUri);
+  public has(uri: vscode.Uri): boolean {
+    return this.#diagnosticCollection.has(uri);
   }
-  public delete(wxmlUri: WxmlUri): void {
-    this.#diagnosticCollection.delete(wxmlUri);
+  public delete(uri: vscode.Uri): void {
+    this.#diagnosticCollection.delete(uri);
   }
-  public get(wxmlUri: WxmlUri): readonly vscode.Diagnostic[] | undefined {
-    return this.#diagnosticCollection.get(wxmlUri);
+  public get(uri: vscode.Uri): readonly vscode.Diagnostic[] | undefined {
+    return this.#diagnosticCollection.get(uri);
   }
   public getAll(): vscode.DiagnosticCollection {
     return this.#diagnosticCollection;
   }
   public set(
-    wxmlUri: WxmlUri,
+    uri: vscode.Uri,
     diagnosticList: vscode.Diagnostic[],
   ): void {
-    this.#diagnosticCollection.set(wxmlUri, diagnosticList);
+    this.#diagnosticCollection.set(uri, diagnosticList);
   }
   public init(context: vscode.ExtensionContext): void {
     context.subscriptions.push(this.#diagnosticCollection);

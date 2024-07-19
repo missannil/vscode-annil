@@ -9,11 +9,11 @@ import { test } from "../../../tools/testHandle";
 const wxmlUri = vscode.Uri.file(__filename.replace(".test.js", ".wxml")) as WxmlUri;
 const componentUri = getRandomComponentUri(wxmlUri);
 void test(componentUri, [
-  `${DiagnosticErrorType.errorValue}:_id` satisfies ErrorValue,
-  `${DiagnosticErrorType.mustacheSyntax}:_id` satisfies MustacheSyntax,
-  `${DiagnosticErrorType.mustacheSyntax}:_id` satisfies MustacheSyntax,
+  `${DiagnosticErrorType.errorValue}:numA` satisfies ErrorValue,
+  `${DiagnosticErrorType.mustacheSyntax}:numA` satisfies MustacheSyntax,
+  `${DiagnosticErrorType.mustacheSyntax}:numA` satisfies MustacheSyntax,
 ], [
-  `${DiagnosticErrorType.errorValue}:_id` satisfies ErrorValue,
-  `${DiagnosticErrorType.errorValue}:_id` satisfies ErrorValue,
-  `${DiagnosticErrorType.errorValue}:_id` satisfies ErrorValue,
+  `${DiagnosticErrorType.errorValue}:numA` satisfies ErrorValue,
+  `${DiagnosticErrorType.errorValue}:numA` satisfies ErrorValue,
+  `${DiagnosticErrorType.errorValue}:numA` satisfies ErrorValue,
 ]);

@@ -6,7 +6,8 @@ type JsonConfig = {
   component?: true;
   usingComponents?: UsingComponents;
 };
-type JsonFileInfo = { config: JsonConfig; text: string };
+
+export type JsonFileInfo = { config: JsonConfig; text: string };
 type JsonFileFsPath = string;
 class JsonFile {
   private infoCache: Record<JsonFileFsPath, JsonFileInfo | undefined> = {};

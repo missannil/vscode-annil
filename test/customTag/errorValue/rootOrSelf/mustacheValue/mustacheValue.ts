@@ -1,7 +1,7 @@
 import { RootComponent, SubComponent } from "annil";
-import type { SubA } from "../../../subA";
+import type { $SubA } from "../../../subA";
 
-const subA = SubComponent<Root, SubA>()({
+const subA = SubComponent<Root, $SubA>()({
   inherit: {
     subA__id: "id",
   },

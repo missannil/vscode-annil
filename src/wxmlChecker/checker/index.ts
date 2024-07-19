@@ -2,9 +2,11 @@
 import type { ChildNode } from "domhandler";
 import * as vscode from "vscode";
 import { type RootComponentInfo, type SubComponentInfo, type TsFileInfo } from "../../componentManager/tsFileManager";
-import { DiagnosticErrorType, type MissingComopnent } from "../../diagnosticFixProvider/errorType";
+import { DiagnosticErrorType, type MissingComopnent, type UnknownTag } from "../../diagnosticFixProvider/errorType";
 import { assertNonNullable } from "../../utils/assertNonNullable";
+import { generateDiagnostic } from "../generateDiagnostic";
 import { nodeType } from "../getNodeType";
+import { rangeRegexp } from "../rangeRegexp";
 import {
   BlockTagChecker,
   type BlockTagInfo,
@@ -16,7 +18,7 @@ import { CustomTagChecker } from "./customTagChecker";
 
 export class Checker {
   private diagnosticList: vscode.Diagnostic[] = [];
-  private existingCustomTagList: string[] = [];
+  private existingTagList: string[] = [];
   public constructor(
     private nodeList: ChildNode[],
     private wxmlTextlines: string[],
@@ -28,13 +30,18 @@ export class Checker {
   private get rootComponentInfo(): RootComponentInfo {
     return this.tsFileInfo.rootComponentInfo;
   }
+  // ts定义的组件列表
   private get subComponentNameList(): string[] {
     return Object.keys(this.subComponentInfo);
   }
+  // 匹配过的自定义组件
+  private matchedTagList: string[] = [];
+  // 未匹配的自定义组件
+  private get unMatchedTagList(): string[] {
+    return this.subComponentNameList.filter((subCompKey) => !this.matchedTagList.includes(subCompKey));
+  }
   private checkMissingComponentTag(): void {
-    const missingTags = this.subComponentNameList.filter((subCompKey) =>
-      !this.existingCustomTagList.includes(subCompKey)
-    );
+    const missingTags = this.subComponentNameList.filter((subCompKey) => !this.existingTagList.includes(subCompKey));
     missingTags.forEach((customComponentName) => {
       this.diagnosticList.push(
         new vscode.Diagnostic(
@@ -74,12 +81,20 @@ export class Checker {
       if (nodeType.isElement(childNode)) {
         const tagName = childNode.name;
         const startLine = this.getLineNumber(this.wxmlTextlines, assertNonNullable(childNode.startIndex));
-        if (nodeType.isCustomTag(childNode, this.subComponentNameList)) {
-          // console.log(childNode., "customTag")
+        if (nodeType.isCustomTag(childNode, this.unMatchedTagList)) {
+          // console.log(childNode.name, "customTag");
+          if (this.unMatchedTagList.includes(childNode.attribs.id)) {
+            this.existingTagList.push(childNode.attribs.id);
+            this.matchedTagList.push(childNode.attribs.id);
+          } else {
+            this.existingTagList.push(childNode.name);
+            this.matchedTagList.push(childNode.name);
+          }
+
           const attributeConfig = assertNonNullable(
             this.subComponentInfo[tagName] || this.subComponentInfo[childNode.attribs.id],
           );
-          this.existingCustomTagList.push(tagName);
+
           const customTagChecker = new CustomTagChecker(
             childNode,
             startLine,
@@ -93,7 +108,7 @@ export class Checker {
             // 自定义组件不包含wx:for,
             this.checkNodeList(children, [...wxForInfoList]);
           }
-        } else if (nodeType.isNativeTag(childNode, this.subComponentNameList)) {
+        } else if (nodeType.isNativeTag(childNode)) {
           // 处理原生标签
           if (childNode.tagName === "block") {
             const blockTagChecker: BlockTagChecker = new BlockTagChecker(
@@ -122,6 +137,16 @@ export class Checker {
           if (children.length > 0) {
             this.checkNodeList(children, wxForInfoList);
           }
+        } else {
+          // 生成未知标签错误
+          this.diagnosticList.push(
+            generateDiagnostic(
+              rangeRegexp.getTagNameRegexp(childNode.name),
+              `${DiagnosticErrorType.unknownTag}:${childNode.name}` satisfies UnknownTag,
+              this.wxmlTextlines,
+              startLine,
+            ),
+          );
         }
       } else if (nodeType.isTextNode(childNode)) {
         // const kkk = (childNode as Text).data.trim().split(/\r?\n/);

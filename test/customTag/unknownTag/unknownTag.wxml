@@ -1,0 +1,8 @@
+<!-- subA(自闭合)标签 会被检测 -->
+
+<subA />
+<subB></subB>
+<view>
+	<subC />
+</view>
+<subA id="subAXx" />

@@ -1,9 +1,9 @@
 import type * as Domhandler from "domhandler";
 import * as htmlparser2 from "htmlparser2";
 import * as vscode from "vscode";
-import { ignoreTags } from "../utils/ignoreTags";
 type WxmlFsPath = string;
-type WxmlFileInfo = { text: string; customTagList: string[]; wxmlDocument: Domhandler.Document };
+
+export type WxmlFileInfo = { text: string; customTagList: string[]; wxmlDocument: Domhandler.Document };
 class WxmlFile {
   private infoCache: Record<WxmlFsPath, WxmlFileInfo | undefined> = {};
   public async get(fsPath: WxmlFsPath): Promise<WxmlFileInfo> {
@@ -31,6 +31,8 @@ class WxmlFile {
     return document.type === "tag";
   }
   private removeNativeComponent(customTagsList: string[]): string[] {
+    const ignoreTags: string[] = vscode.workspace.getConfiguration("annil").get("annil.ignoreTags") || [];
+
     return customTagsList.filter(tagName => !ignoreTags.includes(tagName));
   }
   private uniqueArray<T>(array: T[]): T[] {

@@ -1,11 +1,14 @@
 type MissingAttrName = string;
 type RepeatedAttrName = string;
 type UnknownAttrName = string;
+type UnknownTagName = string;
 type AttrName = string;
 
 export type MissingComopnent = `${DiagnosticErrorType.missingComopnent}:${MissingAttrName}`;
 
 export type MissingAttr = `${DiagnosticErrorType.missingAttr}:${MissingAttrName}`;
+
+export type UnknownTag = `${DiagnosticErrorType.unknownTag}:${UnknownTagName}`;
 
 export type ErrorValue = `${DiagnosticErrorType.errorValue}:${AttrName}`;
 
@@ -50,9 +53,11 @@ export type DiagnosticMessage =
   | ConditionalAttrExisted
   | MissPrerequisite
   | WithoutValue
-  | ShouldwithoutValue;
+  | ShouldwithoutValue
+  | UnknownTag;
 
 export enum DiagnosticErrorType {
+  unknownTag = "未知标签",
   nonArrType = "非数组类型",
   conditionalAttrExisted = "已有条件属性",
   missPrerequisite = "缺少先决条件",

@@ -17,6 +17,7 @@ import {
   type ShouldwithoutValue,
   type UnknownAttr,
   type UnknownImport,
+  type UnknownTag,
   type WithoutValue,
 } from "./errorType";
 // /**
@@ -47,6 +48,9 @@ class DiagnosticFixProvider {
   }
   private isMissingNeedful(diagnosticMessage: DiagnosticMessage): diagnosticMessage is MissingNeedfulAttr {
     return diagnosticMessage.split(":")[0] === DiagnosticErrorType.missingNeedfulAttr;
+  }
+  private isUnknownTag(diagnosticMessage: DiagnosticMessage): diagnosticMessage is UnknownTag {
+    return diagnosticMessage.split(":")[0] === DiagnosticErrorType.unknownTag;
   }
   private isUnknownImport(diagnosticMessage: DiagnosticMessage): diagnosticMessage is UnknownImport {
     return diagnosticMessage === DiagnosticErrorType.unknownImport;

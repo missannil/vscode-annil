@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { getSiblingUri } from "../componentManager/getSiblingUri";
 import { diagnosticManager } from "../diagnosticManager";
+import { jsonChecker } from "../jsonChecker";
 import { debounce } from "../utils/debounce";
 import { wxmlChecker } from "../wxmlChecker";
 import { isComponentUri, type JsonUri, type TsUri, type WxmlUri } from "./isComponentUri";
@@ -61,8 +62,14 @@ class ComponentManager {
     const wxmlUri = getSiblingUri(uri, ".wxml");
     if (isComponentUri(uri) && this.shouldCheckFile(wxmlUri)) {
       this.addCheckingQueue(wxmlUri.fsPath);
-      await wxmlChecker.start(wxmlUri);
+      const wxmlFileInfo = await wxmlFileManager.get(wxmlUri.fsPath);
+      const tsFileInfo = await tsFileManager.get(getSiblingUri(wxmlUri, ".ts").fsPath);
+
+      wxmlChecker.start(wxmlUri, wxmlFileInfo, tsFileInfo);
       this.removeCheckingQueue(wxmlUri.fsPath);
+      const jsonUri = getSiblingUri(wxmlUri, ".json");
+      const jsonFileInfo = await jsonFileManager.get(jsonUri.fsPath);
+      jsonChecker.start(jsonUri, jsonFileInfo, tsFileInfo);
     } else {
       // console.log("不是组件文件,或者已经有诊断信息了,或者正在检测中",uri.fsPath)
     }
@@ -92,7 +99,9 @@ class ComponentManager {
       if (isComponentUri(uri)) {
         await this.updateComponentFile(textDocument);
         const wxmlUri = getSiblingUri(uri, ".wxml");
-        debounceCheckerHandler.call(wxmlChecker, wxmlUri);
+        const wxmlFileInfo = await wxmlFileManager.get(wxmlUri.fsPath);
+        const tsFileInfo = await tsFileManager.get(getSiblingUri(wxmlUri, ".ts").fsPath);
+        debounceCheckerHandler.call(wxmlChecker, wxmlUri, wxmlFileInfo, tsFileInfo);
       }
     });
   }

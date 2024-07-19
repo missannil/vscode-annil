@@ -7,9 +7,16 @@
 		wx:for-index="id"
 	>
 		<!-- 缺少属性和不包含胡子语法时修复结果为`{{自定义}}`,还应该报错但是不提供修复  -->
-		<subA _id="{{自定义}}" /> 
-		<!-- 属性值 语法错误 --> 
-		<subA _id="subA_{{id}" />
-		<subA _id="subA_{id}}" />
+		<subA numA="{{自定义}}" />
+		<!-- 属性值 语法错误 -->
+		<subA
+			id="subAXx"
+			numA="subA_{{id}"
+		/>
+
+		<subA
+			id="subAYy"
+			numA="subA_{id}}"
+		/>
 	</block>
 </block>

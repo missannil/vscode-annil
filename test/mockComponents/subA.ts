@@ -28,4 +28,4 @@ const subA = DefineComponent({
   rootComponent,
 });
 
-export type SubA = typeof subA;
+export type $SubA = typeof subA;

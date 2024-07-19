@@ -1,16 +1,57 @@
-import { type ChildNode, Element, Text } from "domhandler";
-
+import { type ChildNode, type Element, type Text } from "domhandler";
+const nativeComponentList = [
+  "view",
+  "scroll-view",
+  "swiper",
+  "movable-view",
+  "cover-view",
+  "icon",
+  "text",
+  "block",
+  "slot",
+  "i",
+  "rich-text",
+  "progress",
+  "button",
+  "checkbox",
+  "form",
+  "input",
+  "label",
+  "picker",
+  "picker-view",
+  "radio",
+  "slider",
+  "switch",
+  "textarea",
+  "navigator",
+  "audio",
+  "camera",
+  "image",
+  "live-player",
+  "video",
+  "map",
+  "canvas",
+  "open-data",
+  "web-view",
+  "ad",
+  "official-account",
+  "editor",
+  "swiper-item",
+  "movable-area",
+  "cover-image",
+  "checkbox-group",
+  "radio-group",
+  "functional-page-navigator",
+];
 class NodeType {
   public isElement(childNode: ChildNode): childNode is Element {
     return childNode.type === "tag";
   }
-  public isCustomTag(childNode: ChildNode, subComponentNameList: string[]): boolean {
-    return this.isElement(childNode)
-      && (subComponentNameList.includes(childNode.name) || subComponentNameList.includes(childNode.attribs.id));
+  public isCustomTag(childNode: Element, subComponentNameList: string[]): boolean {
+    return subComponentNameList.includes(childNode.attribs.id) || subComponentNameList.includes(childNode.name);
   }
-  public isNativeTag(childNode: ChildNode, subComponentNameListL: string[]): boolean {
-    return this.isElement(childNode) && !subComponentNameListL.includes(childNode.name)
-      && !subComponentNameListL.includes(childNode.attribs.id);
+  public isNativeTag(childNode: Element): boolean {
+    return nativeComponentList.includes(childNode.name);
   }
   public isTextNode(childNode: ChildNode): childNode is Text {
     return childNode.type === "text";

@@ -23,7 +23,12 @@ function startTest(): void {
     if (isDeepEqual(tsFileInfo, expectedResult)) {
       console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
     } else {
-      console.error("tsFileParser测试失败");
+      console.error(
+        "tsFileParser测试失败",
+        "预期:",
+        JSON.stringify(expectedResult, null, 2),
+        `实际:${JSON.stringify(tsFileInfo, null, 2)}`,
+      );
     }
   }, console.error);
 }

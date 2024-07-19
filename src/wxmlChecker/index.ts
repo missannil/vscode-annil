@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-import { getSiblingUri } from "../componentManager/getSiblingUri";
-import { type WxmlUri } from "../componentManager/isComponentUri";
-import { tsFileManager } from "../componentManager/tsFileManager";
-import { wxmlFileManager } from "../componentManager/wxmlFileManager";
+import type { WxmlUri } from "../componentManager/isComponentUri";
+import { type TsFileInfo } from "../componentManager/tsFileManager";
+import { type WxmlFileInfo } from "../componentManager/wxmlFileManager";
 import { diagnosticManager } from "../diagnosticManager";
 import { Checker } from "./checker";
 
@@ -16,14 +15,13 @@ class WxmlChecker {
   public deregisterCheckCompletedCallback(wxmlFsPath: string): void {
     delete this.#checkCompletedCallbacks[wxmlFsPath];
   }
-  public async start(wxmlUri: WxmlUri): Promise<void> {
+  public start(wxmlUri: WxmlUri, wxmlFileInfo: WxmlFileInfo, tsFileInfo: TsFileInfo): void {
     // console.log('开启检测', wxmlUri.fsPath)
-    const wxmlFileInfo = await wxmlFileManager.get(wxmlUri.fsPath);
+    // const wxmlFileInfo = await wxmlFileManager.get(wxmlUri.fsPath);
     const wxmlDocument = wxmlFileInfo.wxmlDocument;
     // 这是为了后面手动找到错误位置(行号,开始索引,列号,结束索引),因为解析器(htmlparser2只有startIndex,endIndex,没有position信息)
     const wxmlTextlines = wxmlFileInfo.text.split(/\n/);
-    const tsUri = getSiblingUri(wxmlUri, ".ts");
-    const tsFileInfo = await tsFileManager.get(tsUri.fsPath);
+    // const tsFileInfo = await tsFileManager.get(getSiblingUri(wxmlUri, ".ts").fsPath);
     // 记录已经检查过的自定义标签名称,为了最后检查是否有有缺少的自定义组件
     const checker = new Checker(
       wxmlDocument.children,

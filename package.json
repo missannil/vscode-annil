@@ -82,7 +82,7 @@
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
-    "annil": "^1.7.3",
+    "annil": "^1.7.4",
     "eslint": "^8.56.0",
     "hry-types": "^0.18.1",
     "rollup-plugin-typescript2": "^0.36.0",

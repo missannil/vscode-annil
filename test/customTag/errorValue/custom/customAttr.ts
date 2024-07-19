@@ -1,18 +1,25 @@
 import { RootComponent, SubComponent } from "annil";
+import type { $SubA, User } from "../../../mockComponents/subA";
 
-import { WXML } from "../../../../out/componentManager/tsFileManager";
-import type { SubA, User } from "../../subA";
-
-const subA = SubComponent<Root, SubA>()({
+const subA = SubComponent<Root, $SubA>()({
   inherit: {
-    subA__id: "wxml",
+    subA_numA: "wxml",
   },
 });
-
+const subAXx = SubComponent<Root, $SubA, "xx">()({
+  inherit: {
+    subAXx_numA: "wxml",
+  },
+});
+const subAYy = SubComponent<Root, $SubA, "yy">()({
+  inherit: {
+    subAYy_numA: "wxml",
+  },
+});
 type Root = typeof rootComponent;
 const rootComponent = RootComponent()({
   data: {
-    str: "",
+    num: 123,
     strList: [] as string[],
   },
   store: {

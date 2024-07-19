@@ -1,0 +1,15 @@
+<!--missingTag.wxml -->
+<subA
+	_id="{{subA__id}}"
+	numA="{{subA_numA}}"
+	userList="{{subA_userList}}"
+/>
+
+<view>
+	<subB num="{{subB_num}}"></subB>
+</view>
+
+<view
+	id="subDXx"
+	str="{{subDXx_str}}"
+></view>
