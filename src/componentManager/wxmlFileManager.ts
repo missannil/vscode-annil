@@ -3,7 +3,7 @@ import * as htmlparser2 from "htmlparser2";
 import * as vscode from "vscode";
 type WxmlFsPath = string;
 
-export type WxmlFileInfo = { text: string; customTagList: string[]; wxmlDocument: Domhandler.Document };
+export type WxmlFileInfo = { text: string; wxmlDocument: Domhandler.Document };
 class WxmlFile {
   private infoCache: Record<WxmlFsPath, WxmlFileInfo | undefined> = {};
   public async get(fsPath: WxmlFsPath): Promise<WxmlFileInfo> {
@@ -30,19 +30,6 @@ class WxmlFile {
   private isElement(document: Domhandler.Node): document is Domhandler.Element {
     return document.type === "tag";
   }
-  private removeNativeComponent(customTagsList: string[]): string[] {
-    const ignoreTags: string[] = vscode.workspace.getConfiguration("annil").get("annil.ignoreTags") || [];
-
-    return customTagsList.filter(tagName => !ignoreTags.includes(tagName));
-  }
-  private uniqueArray<T>(array: T[]): T[] {
-    return Array.from(new Set(array));
-  }
-  private getCustomTagList(wxmlDocument: Domhandler.Document): string[] {
-    const customTagList = this.collectCustomTags(wxmlDocument.children);
-
-    return this.uniqueArray(this.removeNativeComponent(customTagList));
-  }
   public async update(fsPath: string, wxmlText?: string): Promise<void> {
     if (wxmlText === undefined) {
       // console.log('更新wxml文件信息');
@@ -57,7 +44,6 @@ class WxmlFile {
 
     this.infoCache[fsPath] = {
       text: wxmlText,
-      customTagList: this.getCustomTagList(wxmlDocument),
       wxmlDocument: wxmlDocument,
     };
   }
