@@ -8,10 +8,11 @@ async function testTsParser(): Promise<void> {
 }
 
 export async function runTest(): Promise<void> {
+  // ts解析器测试
   void testTsParser();
   // 获取当前根目录列表
-  const rootPath = vscode.workspace.workspaceFolders;
-  if (rootPath === undefined) return;
+  // const rootPath = vscode.workspace.workspaceFolders;
+  // if (rootPath === undefined) return;
   // 获取测试文件列表
   const testFileUriList = await vscode.workspace.findFiles("test/**/*.test.js");
   for (const testUri of testFileUriList) {

@@ -72,6 +72,6 @@ export enum DiagnosticErrorType {
   duplicate = "重复的属性",
   unknownAttr = "未知的属性",
   mustacheSyntax = "不符合'{{}}'语法",
-  missingImport = "未导入的组件",
+  missingImport = " 缺少导入的组件",
   unknownImport = "未知的导入",
 }

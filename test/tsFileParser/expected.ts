@@ -72,10 +72,10 @@ export const expectedResult: TsFileInfo = {
     ],
     events: ["onTap"],
   },
-  importedSubCompTypes: [
-    "$SubA",
-    "$SubB",
-    "$SubC",
-    "$SubD",
-  ],
+  importedSubCompInfo: {
+    "subA": "/mockComponents/subA",
+    "subB": "/mockComponents/subB",
+    "subC": "../mockComponents/subC",
+    "subD": "../mockComponents/subD",
+  },
 };

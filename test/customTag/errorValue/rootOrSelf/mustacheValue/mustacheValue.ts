@@ -1,5 +1,5 @@
 import { RootComponent, SubComponent } from "annil";
-import type { $SubA } from "../../../subA";
+import type { $SubA } from "../../../../../test/mockComponents/subA";
 
 const subA = SubComponent<Root, $SubA>()({
   inherit: {

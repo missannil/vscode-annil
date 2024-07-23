@@ -62,14 +62,13 @@ class ComponentManager {
     const wxmlUri = getSiblingUri(uri, ".wxml");
     if (isComponentUri(uri) && this.shouldCheckFile(wxmlUri)) {
       this.addCheckingQueue(wxmlUri.fsPath);
-      const wxmlFileInfo = await wxmlFileManager.get(wxmlUri.fsPath);
       const tsFileInfo = await tsFileManager.get(getSiblingUri(wxmlUri, ".ts").fsPath);
-
-      wxmlChecker.start(wxmlUri, wxmlFileInfo, tsFileInfo);
-      this.removeCheckingQueue(wxmlUri.fsPath);
       const jsonUri = getSiblingUri(wxmlUri, ".json");
       const jsonFileInfo = await jsonFileManager.get(jsonUri.fsPath);
       jsonChecker.start(jsonUri, jsonFileInfo, tsFileInfo);
+      const wxmlFileInfo = await wxmlFileManager.get(wxmlUri.fsPath);
+      wxmlChecker.start(wxmlUri, wxmlFileInfo, tsFileInfo);
+      this.removeCheckingQueue(wxmlUri.fsPath);
     } else {
       // console.log("不是组件文件,或者已经有诊断信息了,或者正在检测中",uri.fsPath)
     }
@@ -92,6 +91,7 @@ class ComponentManager {
   private onDidChangeComponentFileHandler(): void {
     vscode.workspace.onDidChangeTextDocument(async (event) => {
       const debounceCheckerHandler = debounce(wxmlChecker.start, 100);
+      const debounceJsonCheckerHandler = debounce(jsonChecker.start, 100);
       // 如果没有内容变化,则不处理(比如只是保存文件,但是文件内容没有变化)
       if (event.contentChanges.length === 0) return;
       const textDocument = event.document;
@@ -102,6 +102,10 @@ class ComponentManager {
         const wxmlFileInfo = await wxmlFileManager.get(wxmlUri.fsPath);
         const tsFileInfo = await tsFileManager.get(getSiblingUri(wxmlUri, ".ts").fsPath);
         debounceCheckerHandler.call(wxmlChecker, wxmlUri, wxmlFileInfo, tsFileInfo);
+        const jsonUri = getSiblingUri(wxmlUri, ".json");
+        const jsonFileInfo = await jsonFileManager.get(jsonUri.fsPath);
+        jsonChecker.start(jsonUri, jsonFileInfo, tsFileInfo);
+        debounceJsonCheckerHandler.call(jsonChecker, jsonUri, jsonFileInfo, tsFileInfo);
       }
     });
   }

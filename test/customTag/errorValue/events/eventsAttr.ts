@@ -1,5 +1,5 @@
 import { SubComponent } from "annil";
-import type { $SubA } from "../../subA";
+import type { $SubA } from "~/subA";
 
 const subA = SubComponent<{}, $SubA>()({
   events: {

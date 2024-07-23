@@ -1,14 +1,10 @@
-import { DefineComponent, type DetailedType, RootComponent, SubComponent } from "annil";
+import { DefineComponent, RootComponent, SubComponent } from "annil";
+// 故意 二种引入类型的方式
 import type { CreateComponentDoc } from "annil/src/types/CreateComponentDoc";
 import type { $SubB } from "~/ddd/subB";
 import { type $SubA } from "~/subA";
-import { type $SubC } from "../mockComponents/subC";
-import type { $SubD } from "../mockComponents/subD";
-
-type UserA = {
-  name: string;
-  age: number;
-};
+import { type $SubC } from "../../mockComponents/subC";
+import type { $SubD } from "../../mockComponents/subD";
 const subA = SubComponent<Root, $SubA>()({
   data: {
     subA__id: "id",
@@ -16,7 +12,6 @@ const subA = SubComponent<Root, $SubA>()({
     subA_userList: [],
   },
 });
-
 const subB = SubComponent<Root, $SubB>()({
   data: {
     subB_num: 123,
@@ -37,7 +32,6 @@ const subDXx = SubComponent<Root, $SubD, "xx">()({
     subDXx_str: "string",
   },
 });
-
 // 定义私有的子组件类型
 type $SubE = CreateComponentDoc<"subE", {
   properties: {
@@ -50,39 +44,7 @@ const subE = SubComponent<Root, $SubE>()({
   },
 });
 type Root = typeof rootComponent;
-const rootComponent = RootComponent()({
-  properties: {
-    anyList: Array,
-    userListSingle: Array as DetailedType<UserA[]>,
-    anyListFull: {
-      type: Array,
-      value: [],
-    },
-    userListFull: {
-      type: Array as DetailedType<UserA[]>,
-      value: [],
-    },
-  },
-  computed: {
-    userListComputed(): UserA[] {
-      return this.data.userListFull;
-    },
-  },
-  store: {
-    storeList: (): UserA[] => [],
-    numberStore: (): number => 123,
-  },
-  data: {
-    aaa: 567,
-    dataList: [],
-    dataTsList: [] as UserA[],
-  },
-  events: {
-    onTap() {
-      console.log("onTap");
-    },
-  },
-});
+const rootComponent = RootComponent()({});
 DefineComponent({
   name: "missing",
   rootComponent,

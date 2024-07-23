@@ -4,9 +4,14 @@ import traverse, { type Node } from "@babel/traverse";
 import type { ArrowFunctionExpression, Identifier, ObjectMethod } from "@babel/types";
 import * as vscode from "vscode";
 import { assertNonNullable } from "../utils/assertNonNullable";
+const config: AppJsonConfig = require("../../app.json");
 type AttrName = string;
 type Prefix = `${string}_`;
 type Rename = string;
+type ImportName = string;
+type ImportPath = string;
+
+export type ImportInfo = Record<ImportName, ImportPath>;
 
 export type WxForDefault = "item" | "index";
 type WxForValue =
@@ -54,7 +59,7 @@ export type RootComponentInfo = { arrTypeData: string[]; dataList: string[]; eve
 export type TsFileInfo = {
   subComponentInfo: SubComponentInfo;
   rootComponentInfo: RootComponentInfo;
-  importedSubCompTypes: string[];
+  importedSubCompInfo: ImportInfo;
 };
 
 export function parseWxForValue(wxForValue: WxFor): WxForValueInfo {
@@ -111,18 +116,6 @@ function isArrayTypeOfPropertiesFields(node: Node): boolean {
   return isArraySingleType(node) || isTsArraySingleType(node) || isFullConfigOfArrayType(node);
 }
 
-// function propertiesFieldsHandler(
-//   valueNode: Node,
-//   secondLevelFieldName: string,
-//   rootComponentInfo: RootComponentInfo,
-// ): void {
-//   // 配置如:  { properties:{ xxx: Array } } 时
-//   if (isArrayTypeOfPropertiesFields(valueNode)) {
-//     rootComponentInfo.arrTypeData.push(secondLevelFieldName);
-//   }
-//   rootComponentInfo.dataList.push(secondLevelFieldName);
-// }
-
 function isArrayTypeFunction(node: Node): boolean {
   if (
     (node.type === "ObjectMethod" || node.type === "ArrowFunctionExpression") && node.returnType
@@ -135,58 +128,10 @@ function isArrayTypeFunction(node: Node): boolean {
   return false;
 }
 
-// function computedFieldsHandler(
-//   objectMethod: ObjectMethod,
-//   secondLevelFieldName: string,
-//   rootComponentInfo: RootComponentInfo,
-// ): void {
-//   if (isArrayTypeFunction(objectMethod)) {
-//     rootComponentInfo.arrTypeData.push(secondLevelFieldName);
-//   }
-//   rootComponentInfo.dataList.push(secondLevelFieldName);
-// }
-
-// function sotreFieldsHandler(
-//   objectMethod: ArrowFunctionExpression,
-//   secondLevelFieldName: string,
-//   rootComponentInfo: RootComponentInfo,
-// ): void {
-//   if (isArrayTypeFunction(objectMethod)) {
-//     rootComponentInfo.arrTypeData.push(secondLevelFieldName);
-//   }
-//   rootComponentInfo.dataList.push(secondLevelFieldName);
-// }
-
 function isNormalAttrType(node: Node): boolean {
   return node.type === "ArrayExpression"
     || node.type === "TSAsExpression" && node.typeAnnotation.type === "TSArrayType";
 }
-
-// function isArrTypeNode(node: Node): boolean {
-//   return isNormalAttrType(node) || isFullConfigOfArrayType(node) || isArrayTypeFunction(node)
-//     || isArrayTypeOfPropertiesFields(node);
-// }
-
-/**
- * annil插件中 自定义组件配置的inhrit字段中,值如果是一个字符串且包含":",则表示与wxfor相关,否则返回false,例如:
- * ```ts
- * 		inhrit:{
- *  		subA__id: "item:category.id",
- * 			subA__index: "index:category.id",
- *      }
- * ```
- */
-// export function isWxForValue(attrValue: AttrValue): attrValue is WxFor {
-//   return attrValue.type === "WxFor";
-// }
-
-// export function isTernaryValue(attrValue: AttrValue): attrValue is Ternary {
-//   return attrValue.type === "Ternary";
-// }
-
-// export function isCustomValue(attrValue: AttrValue): attrValue is Custom {
-//   return attrValue.type === "Ternary";
-// }
 
 export function isEventsValue(attrValue: AttrValue): attrValue is Events {
   return attrValue.type === "Events";
@@ -206,21 +151,6 @@ export function isSelfValue(attrValue: AttrValue): attrValue is Self {
 // type ArrayExpression = { type: "ArrayExpression"; elements: StringLiteral[] };
 type StringLiteral = { type: "StringLiteral"; value: string };
 
-// 当前inherit字段值有三种,数组, 字符串(无冒号), 字符串(有冒号,wx:for中的值)
-// function getInheritValue(valueElement: ArrayExpression | StringLiteral): WxFor | Ternary | Custom | RootData {
-//   if (valueElement.type === "ArrayExpression") {
-//     return {
-//       type: "Ternary",
-//       value: valueElement.elements.map((el: StringLiteral) => el.value),
-//     } satisfies Ternary;
-//   } else if (valueElement.value.includes(":")) {
-//     return { type: "WxFor", value: valueElement.value as WxForValue } satisfies WxFor;
-//   } else if (valueElement.value === CUSTOMMARK) {
-//     return { type: "Custom", value: CUSTOMMARK } satisfies Custom;
-//   } else {
-//     return { type: "Root", value: valueElement.value } satisfies RootData;
-//   }
-// }
 function isIdentifier(node: Node): node is Identifier {
   return node.type === "Identifier";
 }
@@ -257,14 +187,48 @@ function decapitalizeFirstLetter(str: string): string {
   return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
+function removeDollarPrefix(str: string): string {
+  return str.startsWith("$") ? str.slice(1) : str;
+}
+
 function getSubCompName(baseName: string, extensionName: string | undefined): string {
-  baseName = decapitalizeFirstLetter(baseName.startsWith("$") ? baseName.slice(1) : baseName);
+  baseName = decapitalizeFirstLetter(removeDollarPrefix(baseName));
 
   return extensionName === undefined ? baseName : `${baseName}${capitalizeFirstLetter(extensionName)}`;
 }
+type AppJsonConfig = {
+  resolveAlias: Record<string, string>;
+};
 
-function intersection(array1: string[], array2: string[]): string[] {
-  return array1.filter(value => array2.includes(value));
+// 从长到短匹配别名,并替换路径
+function parseAlias(importPath: string): string {
+  const pathArr = importPath.split("/");
+  // 从整个路径开始匹配，逐渐减少路径的部分
+  for (let i = pathArr.length; i > 0; i--) {
+    const currentPathParts = pathArr.slice(0, i);
+    const currentPath = currentPathParts.join("/") + "/";
+    const configPath: string | undefined = config.resolveAlias[`${currentPath}*`];
+    if (configPath !== undefined) {
+      // 替换匹配的路径部分 slice(0,-1)是为了去掉最后的 * 号(约定配置最后都有一个 * 号)
+      const path = importPath.replace(currentPath, configPath.slice(0, -1));
+
+      return path.startsWith("/") ? path : "/" + path;
+    }
+  }
+
+  // 如果没有找到匹配项，返回原始路径
+  return importPath;
+}
+
+function getImportedSubCompInfo(baseCompTypes: string[], importInfo: ImportInfo): ImportInfo {
+  const importedSubCompInfo: ImportInfo = {};
+  for (const [importName, importPath] of Object.entries(importInfo)) {
+    if (baseCompTypes.includes(importName)) {
+      importedSubCompInfo[decapitalizeFirstLetter(removeDollarPrefix(importName))] = parseAlias(importPath);
+    }
+  }
+
+  return importedSubCompInfo;
 }
 const subComponentExtractedFields = ["inherit", "data", "computed", "store", "events"];
 const rootComponentExtractedFields = ["properties", "data", "computed", "store", "events"];
@@ -275,13 +239,13 @@ export function tsFileParser(tsText: string): TsFileInfo {
   const tsFileInfo: TsFileInfo = {
     subComponentInfo: {},
     rootComponentInfo: { arrTypeData: [], dataList: [], events: [] },
-    importedSubCompTypes: [],
+    importedSubCompInfo: {},
   };
   // 对象key为组件名,值为组件的属性,要传递的属性以字符串的形式存储
   const subComponentInfo = tsFileInfo.subComponentInfo;
   const rootComponentInfo = tsFileInfo.rootComponentInfo;
   const baseCompTypes: string[] = [];
-  const allImportedTypes: string[] = [];
+  const importInfo: ImportInfo = {};
   traverse(tsFileAST, {
     VariableDeclarator(path) {
       const expression = path.node.init as any;
@@ -290,13 +254,14 @@ export function tsFileParser(tsText: string): TsFileInfo {
       if (funcName === "SubComponent") {
         // 导入的子组件类型名
         const baseCompName = (expression as any).callee?.typeParameters?.params[1]?.typeName?.name;
-        baseCompTypes.push(baseCompName);
         const extensionName = (expression as any).callee?.typeParameters?.params[2]?.literal?.extra?.rawValue;
-        if (baseCompName === undefined) return;
+        if (baseCompName === undefined) return; // 避免没有写泛型时报错
+        baseCompTypes.push(baseCompName);
         const subCompName = getSubCompName(baseCompName, extensionName);
         // const subCompName = (path.node.id as any).name;
         subComponentInfo[subCompName] = {};
-        const subCompAttrs: AttrConfig = assertNonNullable(subComponentInfo[subCompName]);
+        // const subCompAttrs: AttrConfig = assertNonNullable(subComponentInfo[subCompName]);
+        const subCompAttrs: AttrConfig = subComponentInfo[subCompName];
         // 因为就一个参数,所以直接取第一个 arguments[0]即可,properties为配置对象的第一层配置字段 inherit data store computed watch methods evnets lifetimes等
         (expression as any).arguments[0].properties.forEach(
           // firstLevelField 为 inherit data store computed evnets methods watch等字段
@@ -406,19 +371,19 @@ export function tsFileParser(tsText: string): TsFileInfo {
       // 检查整个导入声明是否为类型导入
       if (path.node.importKind === "type") {
         path.node.specifiers.forEach((specifier) => {
-          allImportedTypes.push(specifier.local.name);
+          importInfo[specifier.local.name] = path.node.source.value;
         });
       } else {
         // 对于非整体类型导入，检查每个 specifier 是否为类型导入
         path.node.specifiers.forEach((specifier) => {
           if (specifier.type === "ImportSpecifier" && specifier.importKind === "type") {
-            allImportedTypes.push(specifier.local.name);
+            importInfo[specifier.local.name] = path.node.source.value;
           }
         });
       }
     },
   });
-  tsFileInfo.importedSubCompTypes = intersection([...new Set(baseCompTypes)], allImportedTypes);
+  tsFileInfo.importedSubCompInfo = getImportedSubCompInfo([...new Set(baseCompTypes)], importInfo);
 
   return tsFileInfo;
 }

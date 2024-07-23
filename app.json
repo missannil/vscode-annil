@@ -1,0 +1,17 @@
+{
+  "pages": [
+    "index/index",
+    "index/page-isolated"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "WeChat",
+    "navigationBarTextStyle": "black"
+  },
+
+  "resolveAlias": {
+    "~/*": "mockComponents/*",
+    "~/ddd/*": "mockComponents/*"
+  }
+}

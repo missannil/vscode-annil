@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { getSiblingUri } from "../componentManager/getSiblingUri";
-import { isComponentUri, type WxmlUri } from "../componentManager/isComponentUri";
+import { isComponentUri, type JsonUri, type WxmlUri } from "../componentManager/isComponentUri";
+import { jsonFileManager } from "../componentManager/jsonFileManager";
+import type { ImportInfo } from "../componentManager/tsFileManager";
 import { diagnosticManager } from "../diagnosticManager";
 import { assertNonNullable } from "../utils/assertNonNullable";
 import {
@@ -20,10 +22,13 @@ import {
   type UnknownTag,
   type WithoutValue,
 } from "./errorType";
-// /**
-//  * 每个组件的检查都有通过的逻辑,我想把通用的部分提取出来,这样每个组件的检查逻辑就不会重复了
-//  * 如何做到抽象呢，我想到了使用策略模式,每个组件的检查逻辑都是一个策略,这样就可以把通用的部分提取出来了
-//  */
+
+type EOL = "\n" | "\r\n";
+// type UsingComponentsInfo = { startline: number; indent: string; endline: number; endCharacter: number };
+/**
+ * 每个组件的检查都有通过的逻辑,我想把通用的部分提取出来,这样每个组件的检查逻辑就不会重复了
+ * 如何做到抽象呢，我想到了使用策略模式,每个组件的检查逻辑都是一个策略,这样就可以把通用的部分提取出来了
+ */
 class DiagnosticFixProvider {
   private isMissingComponent(diagnosticMessage: DiagnosticMessage): diagnosticMessage is MissingComopnent {
     return diagnosticMessage.split(":")[0] === DiagnosticErrorType.missingComopnent;
@@ -173,6 +178,125 @@ class DiagnosticFixProvider {
       return this.editReplace(wxmlUri, diagnostic, codeAction);
     }
   }
+  private getEOL(text: string): EOL {
+    // 使用 \n 分隔文本
+    const lines = text.split("\n");
+    // 检查第一行是否以 \r 结尾
+    if (lines[0].endsWith("\r")) {
+      return "\r\n"; // Windows 风格的换行符
+    }
+
+    return "\n"; // Unix/Linux/macOS 风格的换行符
+  }
+
+  private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportInfo): string {
+    let res = `${indent}"usingComponents": {${eol}`;
+    const entries = Object.entries(importedSubCompInfo);
+    entries.forEach(([compName, compPath], index) => {
+      // 判断当前元素是否为最后一个元素
+      const isLastElement = index === entries.length - 1;
+      // 如果是最后一个元素，则不添加逗号；否则，添加逗号
+      res += `${indent.repeat(2)}"${compName}": "${compPath}"${isLastElement ? "" : ","}${eol}`;
+    });
+    res += `${indent}}`;
+
+    return res;
+  }
+  /**
+   * 针对三种情况:
+   * 1. 有usingComponents,后面是  `{}`
+   * 2. 有usingComponents,后面是 `{`
+   * 3. 没有usingComponents
+   */
+  // eslint-disable-next-line complexity
+  private getReplaceRange(jsonText: string): vscode.Range {
+    let startLine = -1, startCharacter = 0, endLine = 0, endCharacter = 0;
+    const textLines = jsonText.split("\n");
+    const allBreace = /"usingComponents":\s*{\s*}\s*/;
+    const onlyLeftBrace = /"usingComponents":\s*{\s*$/;
+    for (let i = 0; i < textLines.length; i++) {
+      const line = textLines[i];
+      const matchAllBreace = allBreace.exec(line);
+      if (matchAllBreace !== null) {
+        startCharacter = matchAllBreace.index;
+        endCharacter = startCharacter + matchAllBreace[0].length;
+
+        return new vscode.Range(i, startCharacter, i, endCharacter);
+      } else {
+        const matchLeftBreace = onlyLeftBrace.exec(line);
+        if (matchLeftBreace !== null) {
+          startLine = i;
+          startCharacter = matchLeftBreace.index;
+          continue;
+        } else {
+          // startLine改变后接着找右边的花括号行(初始值为-1)
+          if (startLine !== -1 && /\s*}/.test(line)) {
+            endLine = i;
+            endCharacter = line.length;
+
+            return new vscode.Range(startLine, startCharacter, endLine, endCharacter);
+          }
+        }
+      }
+    }
+    // console.log("没有找到usingComponents定义");
+    // 没有usingComponents时 重新遍历,虽然代码臃肿了,但是逻辑更清晰
+    for (let i = 0; i < textLines.length; i++) {
+      const line = textLines[i];
+      // {} 的情况时
+      const matchAll = /^\s*{\s*}\s*/.exec(line);
+      if (matchAll !== null) {
+        const startLine = i;
+        const beforeBraceLength = matchAll[0].indexOf("{");
+        const startCharacter = matchAll.index + beforeBraceLength + 1; // 位置在{的后面
+
+        return new vscode.Range(startLine, startCharacter, startLine, startCharacter);
+      }
+
+      // 找到}就赋值，这样最后赋值的}所在的行为结束行
+      if (/\s*}/.test(line)) {
+        startLine = i;
+        endLine = i;
+      }
+    }
+
+    return new vscode.Range(startLine, startCharacter, endLine, endCharacter);
+  }
+  private editCodeActionOfJson(
+    jsonUri: JsonUri,
+    jsonText: string,
+    diagnostic: vscode.Diagnostic,
+    // 未传入codeAction时,会根据诊断错误类型生成一个codeAction并编辑修复程序(单错误修复),传入时则直接编辑修复程序(用于修复全部)
+    codeAction?: vscode.CodeAction,
+  ): vscode.CodeAction | undefined {
+    // 没传入codeAction时,生成一个codeAction
+    // const diagnosticMessage = diagnostic.message.split(":")[0] as DiagnosticMessage;
+    if (!codeAction) {
+      codeAction = new vscode.CodeAction(
+        "写入预期导入组件",
+        vscode.CodeActionKind.QuickFix,
+      );
+      codeAction.edit = new vscode.WorkspaceEdit();
+    }
+
+    const replaceRange = this.getReplaceRange(jsonText);
+    const expectedImport = JSON.parse(diagnostic.code as string);
+    const replaceContent = this.getReplaceContent(
+      this.getEOL(jsonText),
+      "  ",
+      expectedImport,
+    ) as string;
+
+    codeAction.edit?.replace(
+      jsonUri,
+      replaceRange,
+      replaceContent,
+    );
+
+    this.addFormatDocumentCommand(jsonUri, codeAction);
+
+    return codeAction;
+  }
   // 建立每一个选中诊断位置的修复程序
   private generateFixActions(
     wxmlUri: WxmlUri,
@@ -180,6 +304,26 @@ class DiagnosticFixProvider {
   ): vscode.CodeAction[] {
     return diagnosticList
       .map(diagnostic => this.editCodeAction(wxmlUri, diagnostic)).filter(Boolean) as vscode.CodeAction[];
+  }
+  private generateFixActionsOfJson(
+    jsonUri: JsonUri,
+    jsonText: string,
+    diagnosticList: readonly vscode.Diagnostic[],
+  ): vscode.CodeAction[] {
+    return diagnosticList
+      .map(diagnostic => this.editCodeActionOfJson(jsonUri, jsonText, diagnostic)).filter(
+        Boolean,
+      ) as vscode.CodeAction[];
+  }
+  private addFormatDocumentCommand(uri: vscode.Uri, codeAction: vscode.CodeAction): void {
+    codeAction.command = {
+      title: "Format Document",
+      command: "editor.action.formatDocument",
+      arguments: [uri],
+    };
+  }
+  private isJsonFile(uri: vscode.Uri): uri is JsonUri {
+    return uri.fsPath.endsWith(".json");
   }
   public generateFixAllAction(
     wxmlUri: WxmlUri,
@@ -191,7 +335,26 @@ class DiagnosticFixProvider {
     );
     // 都是对同一个文件进行编辑,所以只需要一个WorkspaceEdit实例
     fixAllAction.edit = new vscode.WorkspaceEdit();
+
     diagnosticList.forEach(diagnostic => this.editCodeAction(wxmlUri, diagnostic, fixAllAction));
+    this.addFormatDocumentCommand(wxmlUri, fixAllAction);
+
+    return fixAllAction;
+  }
+  public generateFixAllActionOfJson(
+    uri: JsonUri,
+    diagnosticList: readonly vscode.Diagnostic[],
+    uriText: string,
+  ): vscode.CodeAction {
+    const fixAllAction = new vscode.CodeAction(
+      "修复全部",
+      vscode.CodeActionKind.QuickFix,
+    );
+    // 都是对同一个文件进行编辑,所以只需要一个WorkspaceEdit实例
+    fixAllAction.edit = new vscode.WorkspaceEdit();
+
+    diagnosticList.forEach(diagnostic => this.editCodeActionOfJson(uri, uriText, diagnostic, fixAllAction));
+    this.addFormatDocumentCommand(uri, fixAllAction);
 
     return fixAllAction;
   }
@@ -211,25 +374,55 @@ class DiagnosticFixProvider {
 
     return codeActionList;
   }
+  private provideCodeActionsOfJson(
+    document: vscode.TextDocument,
+    context: vscode.CodeActionContext,
+  ): vscode.ProviderResult<vscode.CodeAction[]> {
+    const jsonUri = document.uri as JsonUri;
+    if (!isComponentUri(jsonUri) || context.diagnostics.length === 0) return;
+    const jsonText = document.getText();
+    const codeActionList: vscode.CodeAction[] = [];
+    // 选中诊断的修复程序
+    const selectedDiagnosticListFixActions = this.generateFixActionsOfJson(jsonUri, jsonText, context.diagnostics);
+    codeActionList.push(...selectedDiagnosticListFixActions);
+    // 当前缺少和多余导入都是一个解决方案，所以不用修复全部的codeAction了
+
+    return codeActionList;
+  }
+  /**
+   * @param context
+   */
   private registerFixProvider(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
       vscode.languages.registerCodeActionsProvider("wxml", {
         provideCodeActions: (document, _range, context) => this.provideCodeActions(document, context),
       }),
+      vscode.languages.registerCodeActionsProvider("json", {
+        provideCodeActions: (document, _range, context) => this.provideCodeActionsOfJson(document, context),
+      }),
     );
   }
   private registerAllFixCommand(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
-      vscode.commands.registerCommand("annil.fix-diagnostics", () => {
+      vscode.commands.registerCommand("annil.fix-diagnostics", async () => {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) return;
         const uri = activeEditor.document.uri;
         if (!isComponentUri(uri)) return;
+
         const wxmlUri = getSiblingUri(uri, ".wxml");
-        const diagnosticList = diagnosticManager.get(wxmlUri);
-        if (!diagnosticList) return;
-        const fixAllAction = this.generateFixAllAction(wxmlUri, diagnosticList);
-        void vscode.workspace.applyEdit(assertNonNullable(fixAllAction.edit));
+        const wxmlDiagnosticList = diagnosticManager.get(wxmlUri);
+        if (wxmlDiagnosticList) {
+          const fixAllAction = this.generateFixAllAction(wxmlUri, wxmlDiagnosticList);
+          void vscode.workspace.applyEdit(assertNonNullable(fixAllAction.edit));
+        }
+        const jsonUri = getSiblingUri(uri, ".json");
+        const jsonDiagnosticList = diagnosticManager.get(jsonUri);
+        if (jsonDiagnosticList) {
+          const jsonText = (await jsonFileManager.get(jsonUri.fsPath)).text;
+          const fixAllAction = this.generateFixAllActionOfJson(jsonUri, jsonDiagnosticList, jsonText);
+          void vscode.workspace.applyEdit(assertNonNullable(fixAllAction.edit));
+        }
       }),
     );
   }
