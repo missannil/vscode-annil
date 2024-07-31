@@ -36,35 +36,28 @@ module.exports = {
   rules: {
     // 0 1 2 对应 off warning error
     "@typescript-eslint/explicit-member-accessibility": 2, // 类要显示声明访问权限修饰符 public private  protected
-    "@typescript-eslint/no-var-requires": 0, // 不运行使用require的方式引入模块
-    "no-prototype-builtins": 0, // 不接受 Object.prototype的方法调用，需要用 call的方法调用
-    "@typescript-eslint/no-explicit-any": 0, // 不可以显示的写any
-    "@typescript-eslint/no-floating-promises": "error", // 禁止没有返回值的promise
-    "@typescript-eslint/explicit-module-boundary-types": 0, // 函数返回和参数都应该明确写类型
+    "@typescript-eslint/no-var-requires": 2, // 不运行使用require的方式引入模块
+    "no-prototype-builtins": 2, // 不接受 Object.prototype的方法调用，需要用 call的方法调用
+    "@typescript-eslint/no-explicit-any": 2, // 不可以显示的写any
+    "@typescript-eslint/no-floating-promises": 2, // 禁止没有返回值的promise
+    "@typescript-eslint/explicit-module-boundary-types": 2, // 函数返回和参数都应该明确写类型
     "@typescript-eslint/no-unused-vars": 1, // 没有使用的变量,
-    "@typescript-eslint/ban-types": 0, // 不可以使用特殊的类型 比如 {}
-    "@typescript-eslint/no-namespace": 0, // 不可以使用namespace
-    "prefer-const": 1, // 为什么不写const 呢？
+    "@typescript-eslint/ban-types": 2, // 不可以使用特殊的类型 比如 {}
+    "@typescript-eslint/no-namespace": 2, // 不可以使用namespace
+    "prefer-const": 1, // 优先使用const
     "@typescript-eslint/no-empty-interface": 2, // 不可以写空接口
-    "no-mixed-spaces-and-tabs": "off",
-    "@typescript-eslint/ban-ts-comment": 0,
-    "padding-line-between-statements": 0,
-    "no-implicit-coercion": 2,
-    "@typescript-eslint/no-non-null-assertion": "error",
-    "@typescript-eslint/strict-boolean-expressions": "error",
-    "@typescript-eslint/explicit-function-return-type": "error", // 函数必须有返回类型
+    "no-mixed-spaces-and-tabs": 2, // 不可以混合使用空格和tab
+
+    "no-implicit-coercion": 2, // 不可以使用隐式类型转换
+    "@typescript-eslint/no-non-null-assertion": 2, // 不可以使用非空断言
+    "@typescript-eslint/strict-boolean-expressions": 2, // 不可以使用隐式类型转换
+    "@typescript-eslint/explicit-function-return-type": 2, // 函数必须有返回类型
     "@typescript-eslint/padding-line-between-statements": [
       "warn",
-      { blankLine: "always", prev: "*", next: "function" },
-      { blankLine: "always", prev: "*", next: "export" },
-      // { blankLine: "always", prev: "const", next: "expression" },
-      // { blankLine: "always", prev: "*", next: "class" },
-      // { blankLine: "always", prev: "class", next: "*" },
-      { blankLine: "always", prev: "*", next: "return" },
-      // { blankLine: "always", prev: "expression", next: "*" },
-      // { blankLine: "always", prev: "*", next: ["interface", "type"] },
-      // { blankLine: "always", prev: ["interface", "type"], next: "*" },
+      { blankLine: "always", prev: "*", next: "function" }, // 函数上一行必须有空行
+      { blankLine: "always", prev: "*", next: "export" }, // export上一行必须有空行
+      { blankLine: "always", prev: "*", next: "return" }, // return上一行必须有空行
     ],
-    "complexity": ["error", 10], // 代码复杂度
+    "complexity": [2, 10], // 代码复杂度
   },
 };

@@ -1,8 +1,5 @@
-<!-- 不可同时多个条件属性 即 wx:if wx:elif wx:else不可同时存在-->
 <block
 	wx:if="{{bool}}"
 	wx:elif="{{bool}}"
 	wx:else
 ></block>
-
-

@@ -1,10 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /* eslint-disable complexity */
 import { parse } from "@babel/parser";
 import traverse, { type Node } from "@babel/traverse";
 import type { ArrowFunctionExpression, Identifier, ObjectMethod } from "@babel/types";
 import * as vscode from "vscode";
 import { assertNonNullable } from "../utils/assertNonNullable";
-const config: AppJsonConfig = require("../../app.json");
+import type { TsUri } from "./uriHelper";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 type AttrName = string;
 type Prefix = `${string}_`;
 type Rename = string;
@@ -207,6 +211,8 @@ function parseAlias(importPath: string): string {
   for (let i = pathArr.length; i > 0; i--) {
     const currentPathParts = pathArr.slice(0, i);
     const currentPath = currentPathParts.join("/") + "/";
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const config: AppJsonConfig = require("../../app.json");
     const configPath: string | undefined = config.resolveAlias[`${currentPath}*`];
     if (configPath !== undefined) {
       // 替换匹配的路径部分 slice(0,-1)是为了去掉最后的 * 号(约定配置最后都有一个 * 号)
@@ -311,7 +317,7 @@ export function tsFileParser(tsText: string): TsFileInfo {
           },
         );
       }
-      // @ts-ignore 提取RootComponent函数中数据和事件
+      // 提取RootComponent函数中数据和事件
       if (funcName === "RootComponent") {
         (expression as any).arguments[0].properties.forEach(
           (firstLevelField: any) => {
@@ -390,22 +396,26 @@ export function tsFileParser(tsText: string): TsFileInfo {
 type TsFileFsPath = string;
 class TsFile {
   private infoCache: Record<TsFileFsPath, TsFileInfo | undefined> = {};
-  public async get(fsPath: TsFileFsPath): Promise<TsFileInfo> {
-    const fileInfo = this.infoCache[fsPath];
-    if (!fileInfo) {
-      await this.update(fsPath);
+  public async get(tsUri: TsUri): Promise<TsFileInfo> {
+    const fsPath = tsUri.fsPath;
+    const tsFileInfo = this.infoCache[fsPath];
+    if (!tsFileInfo) {
+      await this.update(tsUri);
     } else {
-      return fileInfo;
+      return tsFileInfo;
     }
 
-    return this.get(fsPath);
+    return this.get(tsUri);
   }
-  public async update(fsPath: TsFileFsPath, text?: string): Promise<void> {
+  public async update(tsUri: TsUri, text?: string): Promise<TsFileInfo> {
+    const fsPath = tsUri.fsPath;
     if (text === undefined) {
       text = (await vscode.workspace.openTextDocument(fsPath)).getText();
     }
-    this.infoCache[fsPath] = tsFileParser(text);
-    // console.log(this.infoCache[fsPath]?.rootComponentInfo);
+    const tsFileInfo = tsFileParser(text);
+    this.infoCache[fsPath] = tsFileInfo;
+
+    return tsFileInfo;
   }
 }
 

@@ -9,7 +9,7 @@ type SubA = {
   };
 };
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const subA = SubComponent<{}, SubA>()({
+const subA = SubComponent<object, SubA>()({
   data: {
     subA_numAA: 1,
     // subA_userList: [{ _id: "1", name: "1" }],

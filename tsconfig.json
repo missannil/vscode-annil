@@ -7,9 +7,10 @@
     // "sourceMap": true,
     "skipDefaultLibCheck": true,
     "declaration": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true, /* enable all strict type-checking options */
-    "baseUrl": ".", // 添加这行，设置基准目录为项目根目录
+    "baseUrl": "./", // 添加这行，设置基准目录为项目根目录
     "paths": {
       "~/*": ["test/mockComponents/*"], // 将`~/`设置为`src/test`目录的别名
       "~/ddd/*": ["test/mockComponents/*"]

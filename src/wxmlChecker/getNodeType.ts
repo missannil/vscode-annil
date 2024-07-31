@@ -47,8 +47,19 @@ class NodeType {
   public isElement(childNode: ChildNode): childNode is Element {
     return childNode.type === "tag";
   }
+  /**
+   * 判断是否是自定义组件
+   * 1. 标签名不在原生组件列表中
+   * 2. 标签id值在子组件列表中 且id值以标签名开头
+   * 3. 标签名在子组件列表中
+   */
   public isCustomTag(childNode: Element, subComponentNameList: string[]): boolean {
-    return subComponentNameList.includes(childNode.attribs.id) || subComponentNameList.includes(childNode.name);
+    const tagName = childNode.name;
+    const id: string | undefined = childNode.attribs.id;
+
+    return !nativeComponentList.includes(tagName)
+        && (subComponentNameList.includes(childNode.attribs.id) && id?.startsWith(`${tagName}`))
+      || subComponentNameList.includes(tagName);
   }
   public isNativeTag(childNode: Element): boolean {
     return nativeComponentList.includes(childNode.name);

@@ -1,20 +1,22 @@
 import type * as Domhandler from "domhandler";
 import * as htmlparser2 from "htmlparser2";
 import * as vscode from "vscode";
+import type { WxmlUri } from "./uriHelper";
 type WxmlFsPath = string;
 
 export type WxmlFileInfo = { text: string; wxmlDocument: Domhandler.Document };
 class WxmlFile {
   private infoCache: Record<WxmlFsPath, WxmlFileInfo | undefined> = {};
-  public async get(fsPath: WxmlFsPath): Promise<WxmlFileInfo> {
-    const wxmlInfo = this.infoCache[fsPath];
-    if (!wxmlInfo) {
-      await this.update(fsPath);
+  public async get(wxmlUri: WxmlUri): Promise<WxmlFileInfo> {
+    const fsPath = wxmlUri.fsPath;
+    const wxmlFileInfo = this.infoCache[fsPath];
+    if (wxmlFileInfo !== undefined) {
+      return wxmlFileInfo;
     } else {
-      return wxmlInfo;
+      await this.update(wxmlUri);
     }
 
-    return this.get(fsPath);
+    return this.get(wxmlUri);
   }
   // 收集wxml文件中的自定义标签
   private collectCustomTags(childNodeList: Domhandler.ChildNode[], customTagsList: string[] = []): string[] {
@@ -30,7 +32,8 @@ class WxmlFile {
   private isElement(document: Domhandler.Node): document is Domhandler.Element {
     return document.type === "tag";
   }
-  public async update(fsPath: string, wxmlText?: string): Promise<void> {
+  public async update(wxmlUri: WxmlUri, wxmlText?: string): Promise<void> {
+    const fsPath = wxmlUri.fsPath;
     if (wxmlText === undefined) {
       // console.log('更新wxml文件信息');
       wxmlText = (await vscode.workspace.openTextDocument(fsPath)).getText();

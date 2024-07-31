@@ -1,18 +1,3 @@
-<!-- subA(自闭合)标签 会被检测 -->
-<subA id="subA" xxx= />
-<view xxx>
-	<!--原生标签内部自定义组件标签(非自闭合) 会被检测  -->
-	<subB
-		id="subB"
-		xxx
-	>
-		<!--自定义组件标签内部(自闭合) 会被检测  -->
-		<subC
-			id="subC"
-			xxx
-		/>
-	</subB>
-</view>
-<block xxx></block>
-<block xxx=></block>
-<block xxx=""></block>
+<!-- 忽略属性是诊断原生标签的 -->
+
+<view xxx></view>

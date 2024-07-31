@@ -1,13 +1,14 @@
 /**
+ * 防抖函数
  * @param func
  * @param delay
  * @returns
  */
 export function debounce<A extends unknown[]>(
-  func: (...args: A) => unknown,
+  func: (...args: A) => void,
   delay: number,
 ): (...args: A) => void {
-  let timeoutId: NodeJS.Timeout | null = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   return function(this: unknown, ...args: A): void {
     if (timeoutId !== null) {

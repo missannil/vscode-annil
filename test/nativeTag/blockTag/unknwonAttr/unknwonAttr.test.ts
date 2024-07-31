@@ -1,15 +1,16 @@
-import * as vscode from "vscode";
+import { DiagnosticErrorType, type UnknownAttr } from "../../../../src/diagnosticFixProvider/errorType";
 
-import type { WxmlUri } from "../../../../src/componentManager/isComponentUri";
-import { getRandomComponentUri } from "../../../tools/getComponentUri";
-import { test } from "../../../tools/testHandle";
+import type { CheckType } from "../../../../src/runTest";
 
-// 把当前文件的路径替换成wxml文件的路径,注意路径是以.test.js结尾的,因为运行时ts文件已被编译成js文件
-const wxmlUri = vscode.Uri.file(__filename.replace(".test.js", ".wxml")) as WxmlUri;
-const componentUri = getRandomComponentUri(wxmlUri);
-void test(componentUri, "wxml", [
-  "未知的属性:wx:forA",
-  "未知的属性:wx:forB",
-  "未知的属性:wx:forC",
-  "未知的属性:wx:forD",
-], []);
+export const state: boolean = true;
+
+export const checkType: CheckType = "wxml";
+
+export const expectedDiagnosticList = [
+  `${DiagnosticErrorType.unknownAttr}:wx:forA` satisfies UnknownAttr,
+  `${DiagnosticErrorType.unknownAttr}:wx:forB` satisfies UnknownAttr,
+  `${DiagnosticErrorType.unknownAttr}:wx:forC` satisfies UnknownAttr,
+  `${DiagnosticErrorType.unknownAttr}:wx:forD` satisfies UnknownAttr,
+];
+
+export const fiexedDiagnosticList = [];

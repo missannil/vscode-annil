@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-import { getSiblingUri } from "../componentManager/getSiblingUri";
-import { isComponentUri, type JsonUri, type WxmlUri } from "../componentManager/isComponentUri";
 import { jsonFileManager } from "../componentManager/jsonFileManager";
 import type { ImportInfo } from "../componentManager/tsFileManager";
+import { type JsonUri, uriHelper, type WxmlUri } from "../componentManager/uriHelper";
 import { diagnosticManager } from "../diagnosticManager";
 import { assertNonNullable } from "../utils/assertNonNullable";
 import {
@@ -363,7 +362,7 @@ class DiagnosticFixProvider {
     context: vscode.CodeActionContext,
   ): vscode.ProviderResult<vscode.CodeAction[]> {
     const wxmlUri = document.uri as WxmlUri;
-    if (!isComponentUri(wxmlUri) || context.diagnostics.length === 0) return;
+    if (!uriHelper.isComponentUri(wxmlUri) || context.diagnostics.length === 0) return;
     const codeActionList: vscode.CodeAction[] = [];
     // 选中诊断的修复程序
     const selectedDiagnosticListFixActions = this.generateFixActions(wxmlUri, context.diagnostics);
@@ -379,7 +378,7 @@ class DiagnosticFixProvider {
     context: vscode.CodeActionContext,
   ): vscode.ProviderResult<vscode.CodeAction[]> {
     const jsonUri = document.uri as JsonUri;
-    if (!isComponentUri(jsonUri) || context.diagnostics.length === 0) return;
+    if (!uriHelper.isComponentUri(jsonUri) || context.diagnostics.length === 0) return;
     const jsonText = document.getText();
     const codeActionList: vscode.CodeAction[] = [];
     // 选中诊断的修复程序
@@ -408,18 +407,17 @@ class DiagnosticFixProvider {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) return;
         const uri = activeEditor.document.uri;
-        if (!isComponentUri(uri)) return;
-
-        const wxmlUri = getSiblingUri(uri, ".wxml");
+        if (!uriHelper.isComponentUri(uri)) return;
+        const wxmlUri = uriHelper.getSiblingUri(uri, ".wxml");
         const wxmlDiagnosticList = diagnosticManager.get(wxmlUri);
-        if (wxmlDiagnosticList) {
+        if (wxmlDiagnosticList && wxmlDiagnosticList.length > 0) {
           const fixAllAction = this.generateFixAllAction(wxmlUri, wxmlDiagnosticList);
           void vscode.workspace.applyEdit(assertNonNullable(fixAllAction.edit));
         }
-        const jsonUri = getSiblingUri(uri, ".json");
+        const jsonUri = uriHelper.getSiblingUri(uri, ".json");
         const jsonDiagnosticList = diagnosticManager.get(jsonUri);
-        if (jsonDiagnosticList) {
-          const jsonText = (await jsonFileManager.get(jsonUri.fsPath)).text;
+        if (jsonDiagnosticList && jsonDiagnosticList.length > 0) {
+          const jsonText = (await jsonFileManager.get(jsonUri)).text;
           const fixAllAction = this.generateFixAllActionOfJson(jsonUri, jsonDiagnosticList, jsonText);
           void vscode.workspace.applyEdit(assertNonNullable(fixAllAction.edit));
         }

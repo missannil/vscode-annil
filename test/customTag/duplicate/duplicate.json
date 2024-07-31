@@ -1,8 +1,5 @@
 {
   "component": true,
   "usingComponents": {
-    "subA": "../subA/subA",
-    "subA1": "../subA/subA",
-    "subA2": "../subA/subA"
   }
 }

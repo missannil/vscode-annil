@@ -2,6 +2,7 @@
 
 <subA />
 <subB></subB>
+<subB></subB>
 <view>
 	<subC />
 </view>

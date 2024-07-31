@@ -5,11 +5,12 @@
   "json": {},
   "markdown": {},
   "includes": [
-    "**/*.{ts,cjs,mjs,json,md}"
+    "**/*.{ts,json,md}"
   ],
   "excludes": [
     "**/node_modules",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "**/*.d.ts"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.85.0.wasm",

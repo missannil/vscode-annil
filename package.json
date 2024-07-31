@@ -34,6 +34,27 @@
       }
     ]
   },
+  "configuration": {
+    "title": "annil",
+    "properties": {
+      "annil.ignoreTags": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [],
+        "description": "忽略检查的标签 - 插件没有及时更新导致新增的原生标签可能报错,可以通过这个配置忽略"
+      },
+      "annil.ignoreAttrs": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [],
+        "description": "忽略检查的属性 - 插件没有及时更新导致原生标签新增的属性可能报错,可以通过这个配置忽略"
+      }
+    }
+  },
   "scripts": {
     "clean": "rm -rf ./out",
     "vscode:prepublish": " npm run clean && npm run compile",

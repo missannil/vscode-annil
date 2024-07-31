@@ -1,11 +1,17 @@
-// 找出当前集合与原始集合相比多出的项
-export function findDiffItems(originalList: string[], currentList: string[], match: "missing" | "extra"): string[] {
-  const originalSet = new Set(originalList);
-  const currentSet = new Set(currentList);
+// 去除2个数组中相同的元素(不考虑顺序)
+export function findDiffItems(arrA: string[], arrB: string[]): string[] {
+  const compA = arrA.slice();
+  const compB = arrB.slice();
+  const commonItems = compA.filter(str => {
+    const index = compB.indexOf(str);
+    if (index !== -1) {
+      compB.splice(index, 1);
 
-  if (match === "missing") {
-    return originalList.filter((item) => !currentSet.has(item));
-  }
+      return false;
+    }
 
-  return currentList.filter((item) => !originalSet.has(item));
+    return true;
+  });
+
+  return commonItems.concat(compB);
 }

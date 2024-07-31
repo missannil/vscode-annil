@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { getSiblingUri } from "../componentManager/getSiblingUri";
+import { uriHelper } from "../componentManager/uriHelper";
+
 type SubComponentTag = string;
 type SubComponentPath = string;
 type UsingComponents = Record<SubComponentTag, SubComponentPath>;
@@ -57,7 +58,7 @@ class GoToDefinition {
     return wxmlFsPath;
   }
   private async getJsonConfig(uri: vscode.Uri): Promise<JsonConfig | undefined> {
-    const jsonUri = getSiblingUri(uri, ".json");
+    const jsonUri = uriHelper.getSiblingUri(uri, ".json");
     try {
       return JSON.parse((await vscode.workspace.openTextDocument(jsonUri)).getText()) as JsonConfig;
     } catch (error) {

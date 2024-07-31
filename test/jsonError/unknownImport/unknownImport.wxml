@@ -15,3 +15,4 @@
 	id="subDXx"
 	str="{{subDXx_str}}"
 ></view>
+<subDXx str="{{subDXx_str}}" />
