@@ -2,8 +2,8 @@ import { DefineComponent, type DetailedType, RootComponent, SubComponent } from 
 import type { CreateComponentDoc } from "annil/src/types/CreateComponentDoc";
 import type { $SubB } from "~/ddd/subB";
 import { type $SubA } from "~/subA";
-import { type $SubC } from "../mockComponents/subC";
-import type { $SubD } from "../mockComponents/subD";
+import { type $Image } from "../mockComponents/image";
+import type { $SubC } from "../mockComponents/subC";
 
 type UserA = {
   name: string;
@@ -27,14 +27,9 @@ const subC = SubComponent<Root, $SubC>()({
     subC_bool: true,
   },
 });
-const subD = SubComponent<Root, $SubD>()({
+const h_image = SubComponent<Root, $Image>()({
   data: {
-    subD_str: "string",
-  },
-});
-const subDXx = SubComponent<Root, $SubD, "xx">()({
-  data: {
-    subDXx_str: "string",
+    image_str: "string",
   },
 });
 
@@ -86,5 +81,5 @@ const rootComponent = RootComponent()({
 DefineComponent({
   name: "missing",
   rootComponent,
-  subComponents: [subA, subB, subC, subD, subDXx, subE],
+  subComponents: [subA, subB, subC, h_image, subE],
 });

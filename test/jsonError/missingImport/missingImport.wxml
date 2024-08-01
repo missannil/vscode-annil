@@ -10,7 +10,3 @@
 <view>
 	<subB num="{{subB_num}}"></subB>
 </view>
-<subD
-	id="subDXx"
-	str="{{subD_str}}"
-></subD>

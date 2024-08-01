@@ -27,11 +27,7 @@ const subD = SubComponent<Root, $SubD>()({
     subD_str: "string",
   },
 });
-const subDXx = SubComponent<Root, $SubD, "xx">()({
-  data: {
-    subDXx_str: "string",
-  },
-});
+
 // 定义私有的子组件类型
 type $SubE = CreateComponentDoc<"subE", {
   properties: {
@@ -48,5 +44,5 @@ const rootComponent = RootComponent()({});
 DefineComponent({
   name: "missing",
   rootComponent,
-  subComponents: [subA, subB, subC, subD, subDXx, subE],
+  subComponents: [subA, subB, subC, subD, subE],
 });

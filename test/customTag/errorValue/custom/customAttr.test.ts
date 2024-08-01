@@ -1,5 +1,5 @@
 import type { CheckType } from "src/runTest";
-import { DiagnosticErrorType, type ErrorValue } from "../../../../out/diagnosticFixProvider/errorType";
+import { DiagnosticErrorType, type ErrorValue } from "../../../../src/diagnosticFixProvider/errorType";
 import type { MustacheSyntax } from "../../../../src/diagnosticFixProvider/errorType";
 
 export const state: boolean = true;

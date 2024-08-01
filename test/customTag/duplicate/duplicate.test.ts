@@ -1,4 +1,4 @@
-import { DiagnosticErrorType } from "../../../out/diagnosticFixProvider/errorType";
+import { DiagnosticErrorType } from "../../../src/diagnosticFixProvider/errorType";
 import type { CheckType } from "../../../src/runTest";
 
 export const state: boolean = true;

@@ -28,16 +28,10 @@ export const expectedResult: TsFileInfo = {
         value: "subC_bool",
       },
     },
-    subD: {
+    h_image: {
       str: {
         type: "Self",
-        value: "subD_str",
-      },
-    },
-    subDXx: {
-      str: {
-        type: "Self",
-        value: "subDXx_str",
+        value: "image_str",
       },
     },
     subE: {
@@ -73,9 +67,9 @@ export const expectedResult: TsFileInfo = {
     events: ["onTap"],
   },
   importedSubCompInfo: {
-    "subA": "/mockComponents/subA",
-    "subB": "/mockComponents/subB",
-    "subC": "../mockComponents/subC",
-    "subD": "../mockComponents/subD",
+    subA: "/mockComponents/subA",
+    subB: "/mockComponents/subB",
+    subC: "../mockComponents/subC",
+    h_image: "../mockComponents/image",
   },
 };

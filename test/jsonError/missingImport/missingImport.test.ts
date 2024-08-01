@@ -7,7 +7,7 @@ export const state: boolean = true;
 export const checkType: CheckType = "json";
 
 export const expectedDiagnosticList = [
-  `${DiagnosticErrorType.missingImport}:subB,subA`,
+  `${DiagnosticErrorType.missingImport}:subA,subB`,
 ];
 
 export const fiexedDiagnosticList = [];

@@ -5,6 +5,11 @@ import type { $SubB } from "~/ddd/subB";
 import { type $SubA } from "~/subA";
 import { type $SubC } from "../../mockComponents/subC";
 import type { $SubD } from "../../mockComponents/subD";
+// "subB": "/mockComponents/subB",
+// "subA": "/mockComponents/subA",
+// "subC": "../../mockComponents/subC",
+// "subD": "../../mockComponents/subD",
+// "subDe": "../../mockComponents/subDe"
 const subA = SubComponent<Root, $SubA>()({
   data: {
     subA__id: "id",
@@ -27,11 +32,7 @@ const subD = SubComponent<Root, $SubD>()({
     subD_str: "string",
   },
 });
-const subDXx = SubComponent<Root, $SubD, "xx">()({
-  data: {
-    subDXx_str: "string",
-  },
-});
+
 // 定义私有的子组件类型
 type $SubE = CreateComponentDoc<"subE", {
   properties: {
@@ -48,5 +49,5 @@ const rootComponent = RootComponent()({});
 DefineComponent({
   name: "missing",
   rootComponent,
-  subComponents: [subA, subB, subC, subD, subDXx, subE],
+  subComponents: [subA, subB, subC, subD, subE],
 });

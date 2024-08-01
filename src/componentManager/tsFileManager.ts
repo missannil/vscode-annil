@@ -16,7 +16,7 @@ type Rename = string;
 type ImportName = string;
 type ImportPath = string;
 
-export type ImportInfo = Record<ImportName, ImportPath>;
+export type ImportInfo = Record<ImportName, ImportPath | undefined>;
 
 export type WxForDefault = "item" | "index";
 type WxForValue =
@@ -178,29 +178,29 @@ function getInheritValue(valueElement: StringLiteral | Identifier): Custom | Roo
   throw Error("不应出现的错误:getInheritValue");
 }
 
-// 首字母大写
-function capitalizeFirstLetter(str: string): string {
-  if (!str) return str;
+// // 首字母大写
+// function capitalizeFirstLetter(str: string): string {
+//   if (!str) return str;
 
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
+//   return str.charAt(0).toUpperCase() + str.slice(1);
+// }
 
-// 首字母小写
-function decapitalizeFirstLetter(str: string): string {
-  if (!str) return str;
+// // 首字母小写
+// function decapitalizeFirstLetter(str: string): string {
+//   if (!str) return str;
 
-  return str.charAt(0).toLowerCase() + str.slice(1);
-}
+//   return str.charAt(0).toLowerCase() + str.slice(1);
+// }
 
-function removeDollarPrefix(str: string): string {
-  return str.startsWith("$") ? str.slice(1) : str;
-}
+// function removeDollarPrefix(str: string): string {
+//   return str.startsWith("$") ? str.slice(1) : str;
+// }
 
-function getSubCompName(baseName: string, extensionName: string | undefined): string {
-  baseName = decapitalizeFirstLetter(removeDollarPrefix(baseName));
+// function getSubCompName(baseName: string, extensionName: string | undefined): string {
+//   baseName = decapitalizeFirstLetter(removeDollarPrefix(baseName));
 
-  return extensionName === undefined ? baseName : `${baseName}${capitalizeFirstLetter(extensionName)}`;
-}
+//   return extensionName === undefined ? baseName : `${baseName}${capitalizeFirstLetter(extensionName)}`;
+// }
 
 // 获取app.json文件(从project.config.json中获取小程序代码的根目录,app.json在根目录下)的resolveAlias字段
 function getAppJsonResolveAlias(tsUri: TsUri): Record<string, string> | undefined {
@@ -241,17 +241,21 @@ function parseAlias(importPath: string, resolveAlias: Record<string, string>): s
   return importPath;
 }
 
-// 获取导入的子组件信息, 从baseCompTypes和importInfo中比较,得到导入的子组件信息
-function getImportedSubCompInfo(baseCompTypes: string[], importInfo: ImportInfo, tsUri: TsUri): ImportInfo {
+// 获取json文件导入的信息
+function getImportedSubCompInfo(nameMap: NameMap, importInfo: ImportInfo, tsUri: TsUri): ImportInfo {
   const importedSubCompInfo: ImportInfo = {};
   const resolveAlias = getAppJsonResolveAlias(tsUri);
-  for (const [importName, importPath] of Object.entries(importInfo)) {
+  for (const compName in nameMap) {
     // 如果导入的子组件类型名在baseCompTypes中,则加入到importedSubCompInfo中
-    if (baseCompTypes.includes(importName)) {
-      // importName 可能有前缀$,去掉前缀并首字母小写,作为key
-      importedSubCompInfo[decapitalizeFirstLetter(removeDollarPrefix(importName))] = resolveAlias
-        ? parseAlias(importPath, resolveAlias)
-        : importPath;
+    const compTypeName = nameMap[compName];
+
+    if (compTypeName === null) continue;
+    // importName 可能有前缀$,去掉前缀并首字母小写,作为key
+    if (!resolveAlias || importInfo[compTypeName] === undefined) {
+      // 如果没有resolveAlias或者没有找到对应的importInfo,则跳过 在SubComponent使用了非导入的组件类型(自定义组件类型)的情况下会出现这种情况
+      continue;
+    } else {
+      importedSubCompInfo[compName] = parseAlias(importInfo[compTypeName], resolveAlias);
     }
   }
 
@@ -261,6 +265,9 @@ const subComponentExtractedFields = ["inherit", "data", "computed", "store", "ev
 const rootComponentExtractedFields = ["properties", "data", "computed", "store", "events"];
 
 type TsFileFsPath = string;
+type ComponentName = string;
+type ComponentTypeName = string;
+type NameMap = Record<ComponentName, ComponentTypeName | null>;
 class TsFile {
   private infoCache: Record<TsFileFsPath, TsFileInfo | undefined> = {};
   public tsFileParser(tsText: string, tsUri: TsUri): TsFileInfo {
@@ -273,8 +280,8 @@ class TsFile {
     // 对象key为组件名,值为组件的属性,要传递的属性以字符串的形式存储
     const subComponentInfo = tsFileInfo.subComponentInfo;
     const rootComponentInfo = tsFileInfo.rootComponentInfo;
-    // baseCompTypes 是所有SubComponent函数中的泛型参数1的类型名 例如 SubComponent<root,SubA,"xx"> 中的 SubA
-    const baseCompTypes: string[] = [];
+    // 组件名和组件类型名的映射关系表 例如  const h_iamge =  SubComponent<root,$Image,"xx">  映射后为 {h_image: $Image}
+    const nameMap: NameMap = {};
     const importInfo: ImportInfo = {};
     // 提取组件ts文件中的各个子组件(SubComponent函数建立的)的属性配置信息。
     traverse(tsFileAST, {
@@ -283,14 +290,14 @@ class TsFile {
         const funcName = expression?.callee?.callee?.name;
         // 提取所有SubComponent函数中的数据和事件
         if (funcName === "SubComponent") {
-          // 导入的子组件类型名
-          const baseCompName = (expression as any).callee?.typeParameters?.params[1]?.typeName?.name;
-          const extensionName = (expression as any).callee?.typeParameters?.params[2]?.literal?.extra?.rawValue;
-          if (baseCompName === undefined) return; // 避免没有写泛型时报错
-          baseCompTypes.push(baseCompName);
-          const subCompName = getSubCompName(baseCompName, extensionName);
-          // const subCompName = (path.node.id as any).name;
+          // 变量名作为组件名
+          const subCompName = (path.node.id as any).name;
           subComponentInfo[subCompName] = {};
+          const componentTypeName: string | undefined = (expression as any).callee?.typeParameters?.params[1]?.typeName
+            ?.name;
+          // 将组件名和组件类型名加入到nameMap中
+          nameMap[subCompName] = componentTypeName ?? null;
+
           // const subCompAttrs: AttrConfig = assertNonNullable(subComponentInfo[subCompName]);
           const subCompAttrs: AttrConfig = subComponentInfo[subCompName];
           // 因为就一个参数,所以直接取第一个 arguments[0]即可,properties为配置对象的第一层配置字段 inherit data store computed watch methods evnets lifetimes等
@@ -414,7 +421,7 @@ class TsFile {
         }
       },
     });
-    tsFileInfo.importedSubCompInfo = getImportedSubCompInfo([...new Set(baseCompTypes)], importInfo, tsUri);
+    tsFileInfo.importedSubCompInfo = getImportedSubCompInfo(nameMap, importInfo, tsUri);
 
     return tsFileInfo;
   }
