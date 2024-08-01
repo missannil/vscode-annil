@@ -1,4 +1,4 @@
-import { DiagnosticErrorType } from "../../../out/diagnosticFixProvider/errorType";
+import { DiagnosticErrorType } from "../../../src/diagnosticFixProvider/errorType";
 
 import type { CheckType } from "../../../src/runTest";
 
@@ -7,7 +7,7 @@ export const state: boolean = true;
 export const checkType: CheckType = "json";
 
 export const expectedDiagnosticList = [
-  `${DiagnosticErrorType.missingImport}:subB`,
+  `${DiagnosticErrorType.missingImport}:subB,subA`,
 ];
 
 export const fiexedDiagnosticList = [];

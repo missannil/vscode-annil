@@ -121,6 +121,7 @@ class ComponentManager {
     if (!tsFileInfo) {
       tsFileInfo = await tsFileManager.get(uriHelper.getSiblingUri(wxmlUri, ".ts"));
     }
+
     const wxmlFileInfo = await wxmlFileManager.get(wxmlUri);
     const checker = new WxmlChecker();
     const diagnosticList = checker.start(wxmlFileInfo, tsFileInfo);

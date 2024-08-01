@@ -1,6 +1,7 @@
 import path = require("path");
 import * as vscode from "vscode";
-import type { TsFileInfo } from "../../src/componentManager/tsFileManager";
+import { type TsFileInfo, tsFileManager } from "../../src/componentManager/tsFileManager";
+import type { TsUri } from "../../src/componentManager/uriHelper";
 import { debounce } from "../../src/utils/debounce";
 import { isDeepEqual } from "../../src/utils/isDeepEqual";
 const demoFsPath = path.resolve(__dirname, "./demo.ts");
@@ -13,9 +14,7 @@ async function start(): Promise<void> {
   const textDocument = await vscode.workspace.openTextDocument(demoFsPath);
   // console.log("测试开始", expectedResult.rootComponentInfo.dataList);
   const expectedResult: TsFileInfo = (await import(expectedFsPath)).expectedResult;
-  const { tsFileParser } = await import(tsFileManagerFspath);
-  const tsFileInfo: TsFileInfo = tsFileParser(textDocument.getText());
-  // console.log("expectedResult", expectedResult,111,tsFileInfo);
+  const tsFileInfo: TsFileInfo = tsFileManager.tsFileParser(textDocument.getText(), textDocument.uri as TsUri);
   if (isDeepEqual(tsFileInfo, expectedResult)) {
     console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
   } else {

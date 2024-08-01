@@ -1,6 +1,5 @@
 {
   "usingComponents": {
-    "subA": "/mockComponents/subA",
     "subC": "../../mockComponents/subC",
     "subD": "../../mockComponents/subD"
   }
