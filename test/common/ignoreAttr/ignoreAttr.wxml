@@ -1,3 +1,7 @@
 <!-- 忽略属性是诊断原生标签的 -->
 
-<view xxx></view>
+
+
+<subA xxx></subA>
+
+

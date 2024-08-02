@@ -5,3 +5,5 @@ const userIgnoreAttrs: string[] = vscode.workspace.getConfiguration("annil").get
 // console.log(userIgnoreAttrs, "配置的忽略属性列表");
 
 export const ignoreAttrs: string[] = [...defualtIgnoreAttrs, ...userIgnoreAttrs];
+
+export const ignoreTags: string[] = vscode.workspace.getConfiguration("annil").get("ignoreTags") || [];

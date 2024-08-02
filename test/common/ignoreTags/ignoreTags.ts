@@ -3,9 +3,9 @@ import { RootComponent, SubComponent } from "annil";
 import type { $SubA } from "../../mockComponents/subA";
 import type { $SubB } from "../../mockComponents/subB";
 
-const subA = SubComponent<Root, $SubA>()({
-  data: {},
-});
+// const subA = SubComponent<Root, $SubA>()({
+//   data: {},
+// });
 
 // const subB = SubComponent<Root, $SubB>()({
 //   data: {},

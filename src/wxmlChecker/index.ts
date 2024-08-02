@@ -1,6 +1,7 @@
 /* eslint-disable complexity */
 import type { ChildNode, Element } from "domhandler";
 import * as vscode from "vscode";
+import { ignoreTags } from "../../src/utils/ignoreAttrs";
 import { type TsFileInfo } from "../componentManager/tsFileManager";
 import { type WxmlFileInfo } from "../componentManager/wxmlFileManager";
 import {
@@ -125,6 +126,15 @@ export class WxmlChecker {
 
     return false;
   }
+  private isIgnoreTag(childNode: Element): boolean {
+    const tagName = childNode.tagName;
+    // 忽略的标签
+    if (ignoreTags.includes(tagName)) {
+      return true;
+    }
+
+    return false;
+  }
   /**
    * 递归检测节点列表
    * 1. 一层的节点共用一个wxForInfoList,下一层的节点会继承上一层的wxForInfoList
@@ -146,7 +156,10 @@ export class WxmlChecker {
         if (this.duplicatedIdCheck(childNode)) {
           continue;
         }
-
+        // 被忽略时返回true,不再继续检测
+        if (this.isIgnoreTag(childNode)) {
+          continue;
+        }
         const tagName = childNode.tagName;
         // 获取当前节点的行号,后续查找位置时从行号开始找,性能更好
         const startLine = this.getLineNumber(this.wxmlTextlines, assertNonNullable(childNode.startIndex));

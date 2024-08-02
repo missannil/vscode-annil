@@ -231,7 +231,6 @@ export class CustomTagChecker {
       const rawAttrValue = eleAttribs[rawAttrName];
       // 1. 忽略属性名跳过
       if (ignoreAttrs.includes(rawAttrName)) {
-        // console.log(`${rawAttrName}属性被忽略了`);
         continue;
       }
       const expectAttrName = hyphenToCamelCase(rawAttrName);
