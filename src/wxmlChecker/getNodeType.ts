@@ -53,13 +53,12 @@ class NodeType {
    * 2. 标签id值在子组件列表中 且id值以标签名开头
    * 3. 标签名在子组件列表中
    */
-  public isCustomTag(childNode: Element, subComponentNameList: string[]): boolean {
+  public isCustomTag(childNode: Element, subComponentNameList: readonly string[]): boolean {
     const tagName = childNode.name;
-    const id: string | undefined = childNode.attribs.id;
+    // childNode.attribs.id 有可能是undefined
+    const id = childNode.attribs.id as string | undefined;
 
-    return !nativeComponentList.includes(tagName)
-        && (subComponentNameList.includes(childNode.attribs.id) && id?.startsWith(`${tagName}`))
-      || subComponentNameList.includes(tagName);
+    return id !== undefined && subComponentNameList.includes(id) || subComponentNameList.includes(tagName);
   }
   public isNativeTag(childNode: Element): boolean {
     return nativeComponentList.includes(childNode.name);

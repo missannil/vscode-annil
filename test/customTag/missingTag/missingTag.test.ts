@@ -9,5 +9,4 @@ export const expectedDiagnosticList = [
   `${DiagnosticErrorType.missingComopnent}:subC`,
   `${DiagnosticErrorType.missingComopnent}:subD`,
   `${DiagnosticErrorType.missingComopnent}:subE`,
-  `${DiagnosticErrorType.missingComopnent}:subDXx`,
 ];

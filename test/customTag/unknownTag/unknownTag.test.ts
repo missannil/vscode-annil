@@ -9,5 +9,4 @@ export const checkType: CheckType = "wxml";
 
 export const expectedDiagnosticList = [
   `${DiagnosticErrorType.unknownTag}:subC` satisfies UnknownTag,
-  `${DiagnosticErrorType.unknownTag}:subB` satisfies UnknownTag,
 ];

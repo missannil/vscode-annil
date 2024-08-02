@@ -40,6 +40,8 @@ export type WithoutValue = `${DiagnosticErrorType.withoutValue}:${AttrName}`;
 
 export type ShouldwithoutValue = `${DiagnosticErrorType.shouldwithoutValue}:${AttrName}`;
 
+export type DuplicateId = `${DiagnosticErrorType.duplicateId}`;
+
 export type DiagnosticMessage =
   | MissingComopnent
   | MissingAttr
@@ -57,9 +59,11 @@ export type DiagnosticMessage =
   | WithoutValue
   | ShouldwithoutValue
   | UnknownTag
-  | ErrorImportPath;
+  | ErrorImportPath
+  | DuplicateId;
 
 export enum DiagnosticErrorType {
+  duplicateId = "重复的id",
   errorImportPath = "错误的导入路径",
   unknownTag = "未知标签",
   nonArrType = "非数组类型",

@@ -10,6 +10,7 @@ import {
   DiagnosticErrorType,
   type DiagnosticMessage,
   type Duplicate,
+  type DuplicateId,
   type ErrorImportPath,
   type InvalidValue,
   type MissingAttr,
@@ -83,7 +84,9 @@ class DiagnosticFixProvider {
   private isErrorImportPath(diagnosticMessage: DiagnosticMessage): diagnosticMessage is ErrorImportPath {
     return diagnosticMessage.split(":")[0] === DiagnosticErrorType.errorImportPath;
   }
-
+  private isDuplicateId(diagnosticMessage: DiagnosticMessage): diagnosticMessage is DuplicateId {
+    return diagnosticMessage === DiagnosticErrorType.duplicateId;
+  }
   private editInsert(
     wxmlUri: WxmlUri,
     diagnostic: vscode.Diagnostic,
@@ -180,6 +183,7 @@ class DiagnosticFixProvider {
       || this.isUnknown(diagnosticMessage)
       || this.isUnknownImport(diagnosticMessage)
       || this.isConditionalAttrExisted(diagnosticMessage)
+      || this.isDuplicateId(diagnosticMessage)
     ) {
       return this.editDelete(wxmlUri, diagnostic, codeAction);
     }

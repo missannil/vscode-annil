@@ -78,7 +78,7 @@ async function getFixAllAction(
   throw new Error("Invalid checkType");
 }
 // 测试用例数量
-const checkExampleCount = 24;
+const checkExampleCount = 25;
 // 完成用例数量
 let completedCountOfExample = 0;
 
