@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import * as vscode from "vscode";
 import { jsonFileManager } from "../componentManager/jsonFileManager";
 import type { ImportInfo } from "../componentManager/tsFileManager";
@@ -9,9 +10,11 @@ import {
   DiagnosticErrorType,
   type DiagnosticMessage,
   type Duplicate,
+  type ErrorImportPath,
   type InvalidValue,
   type MissingAttr,
   type MissingComopnent,
+  type MissingImport,
   type MissingNeedfulAttr,
   type MissPrerequisite,
   type MustacheSyntax,
@@ -57,7 +60,7 @@ class DiagnosticFixProvider {
     return diagnosticMessage.split(":")[0] === DiagnosticErrorType.unknownTag;
   }
   private isUnknownImport(diagnosticMessage: DiagnosticMessage): diagnosticMessage is UnknownImport {
-    return diagnosticMessage === DiagnosticErrorType.unknownImport;
+    return diagnosticMessage.split(":")[0] === DiagnosticErrorType.unknownImport;
   }
   private isConditionalAttrExisted(diagnosticMessage: DiagnosticMessage): diagnosticMessage is ConditionalAttrExisted {
     return diagnosticMessage.split(":")[0] === DiagnosticErrorType.conditionalAttrExisted;
@@ -74,6 +77,13 @@ class DiagnosticFixProvider {
   private isShouldwithoutValue(diagnosticMessage: DiagnosticMessage): diagnosticMessage is ShouldwithoutValue {
     return diagnosticMessage.split(":")[0] === DiagnosticErrorType.shouldwithoutValue;
   }
+  private isMissingImport(diagnosticMessage: DiagnosticMessage): diagnosticMessage is MissingImport {
+    return diagnosticMessage.split(":")[0] === DiagnosticErrorType.missingImport;
+  }
+  private isErrorImportPath(diagnosticMessage: DiagnosticMessage): diagnosticMessage is ErrorImportPath {
+    return diagnosticMessage.split(":")[0] === DiagnosticErrorType.errorImportPath;
+  }
+
   private editInsert(
     wxmlUri: WxmlUri,
     diagnostic: vscode.Diagnostic,
@@ -189,7 +199,7 @@ class DiagnosticFixProvider {
   }
 
   private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportInfo): string {
-    let res = `${indent}"usingComponents": {${eol}`;
+    let res = `"usingComponents": {${eol}`;
     const entries = Object.entries(importedSubCompInfo);
     entries.forEach(([compName, compPath], index) => {
       // 判断当前元素是否为最后一个元素
@@ -261,28 +271,17 @@ class DiagnosticFixProvider {
 
     return new vscode.Range(startLine, startCharacter, endLine, endCharacter);
   }
-  private editCodeActionOfJson(
+  private replaceUsingComponentsOfJson(
     jsonUri: JsonUri,
     jsonText: string,
     diagnostic: vscode.Diagnostic,
-    // 未传入codeAction时,会根据诊断错误类型生成一个codeAction并编辑修复程序(单错误修复),传入时则直接编辑修复程序(用于修复全部)
-    codeAction?: vscode.CodeAction,
+    codeAction: vscode.CodeAction,
   ): vscode.CodeAction | undefined {
-    // 没传入codeAction时,生成一个codeAction
-    // const diagnosticMessage = diagnostic.message.split(":")[0] as DiagnosticMessage;
-    if (!codeAction) {
-      codeAction = new vscode.CodeAction(
-        "写入预期导入组件",
-        vscode.CodeActionKind.QuickFix,
-      );
-      codeAction.edit = new vscode.WorkspaceEdit();
-    }
-
     const replaceRange = this.getReplaceRange(jsonText);
     const expectedImport = JSON.parse(diagnostic.code as string);
     const replaceContent = this.getReplaceContent(
       this.getEOL(jsonText),
-      "  ",
+      "  ", // 两个空格缩进
       expectedImport,
     ) as string;
 
@@ -304,25 +303,22 @@ class DiagnosticFixProvider {
     return diagnosticList
       .map(diagnostic => this.editCodeAction(wxmlUri, diagnostic)).filter(Boolean) as vscode.CodeAction[];
   }
-  private generateFixActionsOfJson(
-    jsonUri: JsonUri,
-    jsonText: string,
-    diagnosticList: readonly vscode.Diagnostic[],
-  ): vscode.CodeAction[] {
-    return diagnosticList
-      .map(diagnostic => this.editCodeActionOfJson(jsonUri, jsonText, diagnostic)).filter(
-        Boolean,
-      ) as vscode.CodeAction[];
-  }
+  // private generateFixActionsOfJson(
+  //   jsonUri: JsonUri,
+  //   jsonText: string,
+  //   diagnosticList: readonly vscode.Diagnostic[],
+  // ): vscode.CodeAction[] {
+  //   return diagnosticList
+  //     .map(diagnostic => this.editCodeActionOfJson(jsonUri, jsonText, diagnostic)).filter(
+  //       Boolean,
+  //     ) as vscode.CodeAction[];
+  // }
   private addFormatDocumentCommand(uri: vscode.Uri, codeAction: vscode.CodeAction): void {
     codeAction.command = {
       title: "Format Document",
       command: "editor.action.formatDocument",
       arguments: [uri],
     };
-  }
-  private isJsonFile(uri: vscode.Uri): uri is JsonUri {
-    return uri.fsPath.endsWith(".json");
   }
   public generateFixAllAction(
     wxmlUri: WxmlUri,
@@ -341,9 +337,9 @@ class DiagnosticFixProvider {
     return fixAllAction;
   }
   public generateFixAllActionOfJson(
-    uri: JsonUri,
+    jsonUri: JsonUri,
     diagnosticList: readonly vscode.Diagnostic[],
-    uriText: string,
+    jsonText: string,
   ): vscode.CodeAction {
     const fixAllAction = new vscode.CodeAction(
       "修复全部",
@@ -352,8 +348,20 @@ class DiagnosticFixProvider {
     // 都是对同一个文件进行编辑,所以只需要一个WorkspaceEdit实例
     fixAllAction.edit = new vscode.WorkspaceEdit();
 
-    diagnosticList.forEach(diagnostic => this.editCodeActionOfJson(uri, uriText, diagnostic, fixAllAction));
-    this.addFormatDocumentCommand(uri, fixAllAction);
+    // 多种错误类型,处理方式都是replace,所以只需要一个replaceAction
+    let needReplaceAction = false;
+
+    diagnosticList.forEach(diagnostic => {
+      const message = diagnostic.message as DiagnosticMessage;
+      if (this.isMissingImport(message) || this.isUnknownImport(message) || this.isErrorImportPath(message)) {
+        needReplaceAction = true;
+      }
+    });
+    if (needReplaceAction) {
+      this.replaceUsingComponentsOfJson(jsonUri, jsonText, diagnosticList[0], fixAllAction);
+    }
+    this.addFormatDocumentCommand(jsonUri, fixAllAction);
+    // 还没有其他错误,后续添加
 
     return fixAllAction;
   }
@@ -375,16 +383,16 @@ class DiagnosticFixProvider {
   }
   private provideCodeActionsOfJson(
     document: vscode.TextDocument,
-    context: vscode.CodeActionContext,
   ): vscode.ProviderResult<vscode.CodeAction[]> {
     const jsonUri = document.uri as JsonUri;
-    if (!uriHelper.isComponentUri(jsonUri) || context.diagnostics.length === 0) return;
+    // 不是组件文件(考虑到可能是其他插件给json的诊断,这里还不够严谨),不提供修复程序
+    if (!uriHelper.isComponentUri(jsonUri)) return;
     const jsonText = document.getText();
     const codeActionList: vscode.CodeAction[] = [];
     // 选中诊断的修复程序
-    const selectedDiagnosticListFixActions = this.generateFixActionsOfJson(jsonUri, jsonText, context.diagnostics);
-    codeActionList.push(...selectedDiagnosticListFixActions);
-    // 当前缺少和多余导入都是一个解决方案，所以不用修复全部的codeAction了
+    const jsonDiagnosticList = assertNonNullable(diagnosticManager.get(jsonUri));
+    const fixAllAction = this.generateFixAllActionOfJson(jsonUri, jsonDiagnosticList, jsonText);
+    codeActionList.push(fixAllAction);
 
     return codeActionList;
   }
@@ -397,7 +405,7 @@ class DiagnosticFixProvider {
         provideCodeActions: (document, _range, context) => this.provideCodeActions(document, context),
       }),
       vscode.languages.registerCodeActionsProvider("json", {
-        provideCodeActions: (document, _range, context) => this.provideCodeActionsOfJson(document, context),
+        provideCodeActions: (document) => this.provideCodeActionsOfJson(document),
       }),
     );
   }

@@ -78,7 +78,6 @@ export class WxmlChecker {
   private checkBlockTag(
     childNode: Element,
     startLine: number,
-    tsFileInfo: TsFileInfo,
     wxForInfoList: WxForInfo[],
     preConditionState: ConditionState | null,
   ): { curWxForInfoList: WxForInfo[]; preConditionState: ConditionState | null } {
@@ -87,7 +86,7 @@ export class WxmlChecker {
       startLine,
       this.wxmlTextlines,
       wxForInfoList,
-      tsFileInfo.rootComponentInfo,
+      this.tsFileInfo.rootComponentInfo,
       preConditionState,
     );
     const blockTagInfo: BlockTagInfo = blockTagChecker.start();
@@ -110,7 +109,6 @@ export class WxmlChecker {
    */
   private checkNodeList(
     childNodeList: ChildNode[],
-    tsFileInfo: TsFileInfo,
     wxForInfoList: WxForInfo[],
   ): void {
     // 在遍历同级子节点前初始化一个条件节点的状态(null),作为后续同级条件节点的诊断条件之一,后续的条件节点诊断后应更新这个状态。
@@ -128,27 +126,26 @@ export class WxmlChecker {
             const res = this.checkBlockTag(
               childNode,
               startLine,
-              tsFileInfo,
               wxForInfoList,
               preConditionState,
             );
             preConditionState = res.preConditionState;
             const children = childNode.children;
             if (children.length > 0) {
-              this.checkNodeList(children, tsFileInfo, res.curWxForInfoList);
+              this.checkNodeList(children, res.curWxForInfoList);
               continue;
             }
           }
           const children = childNode.children;
           if (children.length > 0) {
-            this.checkNodeList(children, tsFileInfo, wxForInfoList);
+            this.checkNodeList(children, wxForInfoList);
           }
         } else if (nodeType.isCustomTag(childNode, this.currentCustomComponentList)) {
           // 如果是根据id匹配的自定义组件,则使用id作为key,否则使用tagName作为key
           this.removeCurrentCustomComponentList(childNode);
           // 获取自定义组件的配置
           const attributeConfig = assertNonNullable(
-            tsFileInfo.subComponentInfo[tagName] || tsFileInfo.subComponentInfo[childNode.attribs.id],
+            this.tsFileInfo.subComponentInfo[tagName] || this.tsFileInfo.subComponentInfo[childNode.attribs.id],
           );
           const customTagChecker = new CustomTagChecker(
             childNode,
@@ -161,7 +158,7 @@ export class WxmlChecker {
           const children = childNode.children;
           if (children.length > 0) {
             // wx:for 属于原生(block)组件,所以把上一层的wxForInfoList直接传递给下一层的节点,为了避免同层后面(相比这里)节点的wx:for影响到前面(这里)的节点(后续如果遇到wxFor信息会加入wxForInfoList中),所以这里传递时要用扩展运算符,好比克隆了一份。
-            this.checkNodeList(children, tsFileInfo, [...wxForInfoList]);
+            this.checkNodeList(children, [...wxForInfoList]);
           }
         } else {
           // 生成未知标签错误
@@ -182,11 +179,13 @@ export class WxmlChecker {
       }
     }
   }
-  public start(wxmlFileInfo: WxmlFileInfo, tsFileInfo: TsFileInfo): vscode.Diagnostic[] {
+  public constructor(private wxmlFileInfo: WxmlFileInfo, private tsFileInfo: TsFileInfo) {
     this.currentCustomComponentList = Object.keys(tsFileInfo.subComponentInfo);
     // 把wxml按`\n`变为数组,为了后面手动找到错误位置(行号,开始索引,列号,结束索引),因为解析器(htmlparser2只有startIndex,endIndex,没有position信息)
-    this.wxmlTextlines = wxmlFileInfo.text.split(/\n/);
-    this.checkNodeList(wxmlFileInfo.wxmlDocument.children, tsFileInfo, []);
+    this.wxmlTextlines = this.wxmlFileInfo.text.split(/\n/);
+  }
+  public start(): vscode.Diagnostic[] {
+    this.checkNodeList(this.wxmlFileInfo.wxmlDocument.children, []);
     this.checkMissingComponentTag();
 
     return this.diagnosticList;

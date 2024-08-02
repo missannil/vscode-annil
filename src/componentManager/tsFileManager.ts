@@ -248,12 +248,12 @@ function getImportedSubCompInfo(nameMap: NameMap, importInfo: ImportInfo, tsUri:
   for (const compName in nameMap) {
     // 如果导入的子组件类型名在baseCompTypes中,则加入到importedSubCompInfo中
     const compTypeName = nameMap[compName];
-
-    if (compTypeName === null) continue;
+    // 类型不是导入的(自定义的组件类型时),则compTypeName为undefined
+    if (importInfo[compTypeName] === undefined) continue;
     // importName 可能有前缀$,去掉前缀并首字母小写,作为key
-    if (!resolveAlias || importInfo[compTypeName] === undefined) {
+    if (!resolveAlias) {
       // 如果没有resolveAlias或者没有找到对应的importInfo,则跳过 在SubComponent使用了非导入的组件类型(自定义组件类型)的情况下会出现这种情况
-      continue;
+      importedSubCompInfo[compName] = importInfo[compTypeName];
     } else {
       importedSubCompInfo[compName] = parseAlias(importInfo[compTypeName], resolveAlias);
     }
@@ -267,7 +267,7 @@ const rootComponentExtractedFields = ["properties", "data", "computed", "store",
 type TsFileFsPath = string;
 type ComponentName = string;
 type ComponentTypeName = string;
-type NameMap = Record<ComponentName, ComponentTypeName | null>;
+type NameMap = Record<ComponentName, ComponentTypeName>;
 class TsFile {
   private infoCache: Record<TsFileFsPath, TsFileInfo | undefined> = {};
   public tsFileParser(tsText: string, tsUri: TsUri): TsFileInfo {
@@ -293,10 +293,10 @@ class TsFile {
           // 变量名作为组件名
           const subCompName = (path.node.id as any).name;
           subComponentInfo[subCompName] = {};
-          const componentTypeName: string | undefined = (expression as any).callee?.typeParameters?.params[1]?.typeName
+          const componentTypeName: string = (expression as any).callee?.typeParameters?.params[1]?.typeName
             ?.name;
           // 将组件名和组件类型名加入到nameMap中
-          nameMap[subCompName] = componentTypeName ?? null;
+          nameMap[subCompName] = componentTypeName;
 
           // const subCompAttrs: AttrConfig = assertNonNullable(subComponentInfo[subCompName]);
           const subCompAttrs: AttrConfig = subComponentInfo[subCompName];

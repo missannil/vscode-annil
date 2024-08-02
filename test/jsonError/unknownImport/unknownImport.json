@@ -3,7 +3,8 @@
     "subB": "/mockComponents/subB",
     "subA": "/mockComponents/subA",
     "subC": "../../mockComponents/subC",
+    "subDe": "../../mockComponents/subDe",
     "subD": "../../mockComponents/subD",
-    "subDe": "../../mockComponents/subDe"
+    "subEE": "../../mockComponents/subDe"
   }
 }

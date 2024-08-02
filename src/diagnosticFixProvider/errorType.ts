@@ -26,6 +26,8 @@ export type MustacheSyntax = `${DiagnosticErrorType.mustacheSyntax}:${AttrName}`
 
 export type MissingImport = DiagnosticErrorType.missingImport;
 
+export type ErrorImportPath = DiagnosticErrorType.errorImportPath;
+
 export type UnknownImport = DiagnosticErrorType.unknownImport;
 
 export type MissingNeedfulAttr = `${DiagnosticErrorType.missingNeedfulAttr}:${AttrName}`;
@@ -54,9 +56,11 @@ export type DiagnosticMessage =
   | MissPrerequisite
   | WithoutValue
   | ShouldwithoutValue
-  | UnknownTag;
+  | UnknownTag
+  | ErrorImportPath;
 
 export enum DiagnosticErrorType {
+  errorImportPath = "错误的导入路径",
   unknownTag = "未知标签",
   nonArrType = "非数组类型",
   conditionalAttrExisted = "已有条件属性",

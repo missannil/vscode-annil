@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import { diagnosticManager } from "../diagnosticManager";
-import { jsonChecker } from "../jsonChecker";
+import { JsonChecker } from "../jsonChecker";
 import { debounce } from "../utils/debounce";
 import { WxmlChecker } from "../wxmlChecker";
 import { jsonFileManager } from "./jsonFileManager";
@@ -123,8 +123,8 @@ class ComponentManager {
     }
 
     const wxmlFileInfo = await wxmlFileManager.get(wxmlUri);
-    const checker = new WxmlChecker();
-    const diagnosticList = checker.start(wxmlFileInfo, tsFileInfo);
+    const checker = new WxmlChecker(wxmlFileInfo, tsFileInfo);
+    const diagnosticList = checker.start();
     // 删除原有的诊断信息
     diagnosticManager.delete(wxmlUri);
     diagnosticManager.set(wxmlUri, diagnosticList);
@@ -139,7 +139,8 @@ class ComponentManager {
       tsFileInfo = await tsFileManager.get(uriHelper.getSiblingUri(jsonUri, ".ts"));
     }
     const jsonFileInfo = await jsonFileManager.get(jsonUri);
-    const diagnosticList = jsonChecker.start(jsonFileInfo, tsFileInfo);
+    const checker = new JsonChecker(jsonFileInfo, tsFileInfo);
+    const diagnosticList = checker.start();
     diagnosticManager.delete(jsonUri);
     diagnosticManager.set(jsonUri, diagnosticList);
     // 为了测试

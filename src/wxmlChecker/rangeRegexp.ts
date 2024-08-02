@@ -36,6 +36,12 @@ class RangeRegexp {
       ),
     ];
   }
+  public getImportLineRegexp(importedComponentName: string): RegExp[] {
+    return [new RegExp(`"${importedComponentName}"\\s*:\\s*".*",?`)];
+  }
+  public getImportPathRegexp(componentName: string, componentPath: string): RegExp[] {
+    return [new RegExp(`(?<="${componentName}"\\s*:\\s*)"${componentPath}",?`)];
+  }
 }
 
 export const rangeRegexp = new RangeRegexp();
