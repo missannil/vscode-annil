@@ -436,9 +436,11 @@ class DiagnosticFixProvider {
       }),
     );
   }
+  public registerCommandOfFixAll(context: vscode.ExtensionContext): void {
+    this.registerAllFixCommand(context);
+  }
   public init(context: vscode.ExtensionContext): void {
     this.registerFixProvider(context);
-    this.registerAllFixCommand(context);
   }
 }
 
