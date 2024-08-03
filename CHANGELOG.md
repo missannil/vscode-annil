@@ -26,3 +26,6 @@ readme
 增加忽略属性配置(如 { "annil.ignoreAttrs" : ["wx:if","wx:for","wx:key"] } ),默认忽略的属性有 `class`、`style`、`id`和以`data-`开头的属性
 
 增加点击自定义组件标签跳转功能
+### 0.7.0
+修复已知错误
+新增: json文件检测(缺少导入,未知导入,错误的导入路径)
