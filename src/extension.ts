@@ -3,7 +3,7 @@ import { componentManager } from "./componentManager";
 import { diagnosticFixProvider } from "./diagnosticFixProvider";
 import { diagnosticManager } from "./diagnosticManager";
 import { goToDefinition } from "./goToDefinition";
-// import { runTest } from "./runTest";
+import { runTest } from "./runTest";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -14,7 +14,7 @@ export async function activate(
   // diagnosticFixProvider.registerCommandOfFixAll(context);
   goToDefinition.init(context);
   console.log("annil 拓展已激活");
-  // void runTest();
+  void runTest();
 }
 
 export function deactivate(): void {}

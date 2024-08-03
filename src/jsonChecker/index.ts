@@ -43,9 +43,14 @@ export class JsonChecker {
   }
 
   private unknownImportCheck(): void {
-    this.usingComponentsImported.forEach((importedComponentName) => {
+    [...this.usingComponentsImported].forEach((importedComponentName) => {
       // 如果期望导入的组件配置中不包含当前导入的组件名,则说明导入了一个多余组件
-      if (!this.expectImportComponentName.includes(importedComponentName)) {
+      if (
+        // 如果期望导入的组件配置中不包含当前导入的组件名
+        !this.expectImportComponentName.includes(importedComponentName)
+        // 并且当前导入的组件名不在wxml自定义组件中(这样可以忽略wxml中已经使用组件的导入报错)
+        && !this.wxmlCustomComponents.includes(importedComponentName)
+      ) {
         const diagnostic = generateDiagnostic(
           rangeRegexp.getImportLineRegexp(importedComponentName),
           `${DiagnosticErrorType.unknownImport}:${importedComponentName}`,
@@ -97,7 +102,11 @@ export class JsonChecker {
 
     return this.diagnosticList;
   }
-  public constructor(private jsonFileInfo: JsonFileInfo, private tsFileInfo: TsFileInfo) {
+  public constructor(
+    private jsonFileInfo: JsonFileInfo,
+    private wxmlCustomComponents: string[],
+    private tsFileInfo: TsFileInfo,
+  ) {
     this.jsonFileUsingComponents = this.jsonFileInfo.config.usingComponents ?? {};
     this.usingComponentsImported = Object.keys(this.jsonFileUsingComponents);
     this.tsFileExpectImport = this.tsFileInfo.importedSubCompInfo;

@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import type { WxmlUri } from "./uriHelper";
 type WxmlFsPath = string;
 
-export type WxmlFileInfo = { text: string; wxmlDocument: Domhandler.Document };
+export type WxmlFileInfo = { text: string; wxmlDocument: Domhandler.Document; componentTagNameList: string[] };
 class WxmlFile {
   private infoCache: Record<WxmlFsPath, WxmlFileInfo | undefined> = {};
   public async get(wxmlUri: WxmlUri): Promise<WxmlFileInfo> {
@@ -48,6 +48,7 @@ class WxmlFile {
     this.infoCache[fsPath] = {
       text: wxmlText,
       wxmlDocument: wxmlDocument,
+      componentTagNameList: this.collectCustomTags(wxmlDocument.childNodes, []),
     };
   }
 }

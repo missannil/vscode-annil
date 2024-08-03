@@ -85,9 +85,12 @@ class ComponentManager {
   // 组件文件内容变化时,重新检测组件文件
   private onDidChangeComponentFileHandler(): void {
     const debounceWxmlHandler = debounce(async (wxmlUri: WxmlUri) => {
+      // wxml文件变化时,检测wxml文件,并检测json文件(因为json检测时依赖wxml文件,所以wxml文件变化时,需要检测json文件)
       await this.checkWxmlFile(wxmlUri);
+      await this.checkJsonFile(uriHelper.getSiblingUri(wxmlUri, ".json"));
     }, 100);
     const debounceJsonHandler = debounce(async (jsonUri: JsonUri) => {
+      // json文件变化时,只检测json文件
       await this.checkJsonFile(jsonUri);
     }, 100);
     const debounceCheckComopnentHandler = debounce(async (tsUri: TsUri, tsFileInfo: TsFileInfo) => {
@@ -134,12 +137,20 @@ class ComponentManager {
     wxmlCb && wxmlCb(diagnosticList);
   }
   // 检测json文件,如果有回调函数,则执行回调函数(为了测试)
-  private async checkJsonFile(jsonUri: JsonUri, tsFileInfo?: TsFileInfo): Promise<void> {
+  private async checkJsonFile(
+    jsonUri: JsonUri,
+    tsFileInfo?: TsFileInfo,
+    wxmlCustomComponents?: string[],
+  ): Promise<void> {
     if (!tsFileInfo) {
       tsFileInfo = await tsFileManager.get(uriHelper.getSiblingUri(jsonUri, ".ts"));
     }
+    if (!wxmlCustomComponents) {
+      const wxmlUri = uriHelper.getSiblingUri(jsonUri, ".wxml");
+      wxmlCustomComponents = (await wxmlFileManager.get(wxmlUri)).componentTagNameList;
+    }
     const jsonFileInfo = await jsonFileManager.get(jsonUri);
-    const checker = new JsonChecker(jsonFileInfo, tsFileInfo);
+    const checker = new JsonChecker(jsonFileInfo, wxmlCustomComponents, tsFileInfo);
     const diagnosticList = checker.start();
     diagnosticManager.delete(jsonUri);
     diagnosticManager.set(jsonUri, diagnosticList);
@@ -163,10 +174,11 @@ class ComponentManager {
       const componentDirPath = uriHelper.getComponentDirPath(uri);
       this.addCheckingQueue(componentDirPath);
       const tsFileInfo = await tsFileManager.get(uriHelper.getSiblingUri(uri, ".ts"));
-      const jsonUri = uriHelper.getSiblingUri(uri, ".json");
-      await this.checkJsonFile(jsonUri, tsFileInfo);
       const wxmlUri = uriHelper.getSiblingUri(uri, ".wxml");
       await this.checkWxmlFile(wxmlUri, tsFileInfo);
+      const jsonUri = uriHelper.getSiblingUri(uri, ".json");
+      await this.checkJsonFile(jsonUri, tsFileInfo);
+
       diagnosticManager.addChecked(componentDirPath);
       this.removeCheckingQueue(componentDirPath);
     } else {
