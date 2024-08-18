@@ -11,7 +11,7 @@ export async function activate(
   diagnosticManager.init(context);
   componentManager.init();
   diagnosticFixProvider.init(context);
-  // diagnosticFixProvider.registerCommandOfFixAll(context);
+  diagnosticFixProvider.registerCommandOfFixAll(context);
   goToDefinition.init(context);
   console.log("annil 拓展已激活");
   // void runTest();

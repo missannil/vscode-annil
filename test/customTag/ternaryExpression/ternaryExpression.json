@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "h_image": "/mockComponents/image"
+  }
+}

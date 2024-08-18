@@ -1,6 +1,5 @@
 /**
- * 1. `{{bool}}` | `{{ bool }}` => `bool`
- * 2. `aaa_{{bool}}_{{ aaa }} ` => [`bool`, `aaa`]
+ *  `{{bool}}` | `{{ bool }}` => `bool`
  */
 export function getMustacheValue(value: string): string {
   const temp = value.trim().slice(2, -2);

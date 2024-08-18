@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import type { Element } from "domhandler";
 import * as vscode from "vscode";
-import { type RootComponentInfo, type WxForDefault } from "../../../componentManager/tsFileManager";
+import { type RootComponentInfo } from "../../../componentManager/tsFileManager";
 import {
   type ConditionalAttrExisted,
   DiagnosticErrorType,
@@ -29,6 +29,7 @@ const loopAttrs: LoopAttrs[] = ["wx:for", "wx:for-item", "wx:for-index", "wx:key
 const blockTagLegalAttrList = [...conditionalAttrs, ...loopAttrs];
 
 export type ConditionState = "wx:if" | "wx:elif" | "wx:else";
+type WxForDefault = Exclude<LoopAttrs, "wx:key">;
 
 export type WxForInfo = Record<WxForDefault, string>;
 
@@ -40,7 +41,7 @@ export type BlockTagInfo = ConditionBlock | WxForBlock;
 
 export class BlockTagChecker {
   private diagnosticList: vscode.Diagnostic[] = [];
-  private wxForInfo: WxForInfo = { item: "item", index: "index" };
+  private wxForInfo: WxForInfo = { "wx:for": "", "wx:for-index": "index", "wx:for-item": "item" };
   private currentConditionState?: ConditionState;
   public constructor(
     private readonly element: Element,
@@ -56,7 +57,7 @@ export class BlockTagChecker {
   private islegal(value: string): boolean {
     // 把所有wxForInfoList中各项的item和index值取出来
     const allWxForDataList = this.wxForInfoList.reduce<string[]>((acc, cur) => {
-      acc.push(cur.item, cur.index);
+      acc.push(cur["wx:for-item"], cur["wx:for-index"]);
 
       return acc;
     }, []);
@@ -143,7 +144,7 @@ export class BlockTagChecker {
     }
     if (rawAttrName === "wx:for-item") {
       if (isVariableStr(rawAttrValue)) {
-        this.wxForInfo.item = rawAttrValue;
+        this.wxForInfo["wx:for-item"] = rawAttrValue;
       } else {
         this.diagnosticList.push(
           generateDiagnostic(
@@ -160,7 +161,7 @@ export class BlockTagChecker {
     }
     if (rawAttrName === "wx:for-index") {
       if (isVariableStr(rawAttrValue)) {
-        this.wxForInfo.index = rawAttrValue;
+        this.wxForInfo["wx:for-index"] = rawAttrValue;
       } else {
         this.diagnosticList.push(
           generateDiagnostic(

@@ -1,0 +1,20 @@
+<view class="flex flex-wrap {{twWrapper1}}">
+	<block
+		wx:for="{{list}}"
+		wx:for-item="itemA"
+		wx:for-index="indexB"
+		wx:key="index"
+	>
+		<!-- item -->
+		<view
+			id="item_{{index1}}"
+			class="flex-center flex-none flex-col {{twItem1}}"
+			data-index="{{index1}}"
+			style="width:{{itemWidth1}}"
+			bind:tap="onTapItem"
+		>
+			<!-- 每个item的下面name  item.text -->
+			<text class="{{activeIndex === index ? twActiveName:twInactiveName}} {{twName}}">{{item.name}}</text>
+		</view>
+	</block>
+</view>

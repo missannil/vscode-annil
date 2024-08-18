@@ -4,12 +4,12 @@ export const expectedResult: TsFileInfo = {
   subComponentInfo: {
     subA: {
       _id: {
-        type: "Self",
-        value: "subA__id",
+        type: "UnionRoot",
+        value: ["aaa", "bbb"],
       },
       numA: {
-        type: "Self",
-        value: "subA_numA",
+        type: "Custom",
+        value: "自定义",
       },
       userList: {
         type: "Self",
@@ -61,6 +61,7 @@ export const expectedResult: TsFileInfo = {
       "storeList",
       "numberStore",
       "aaa",
+      "bbb",
       "dataList",
       "dataTsList",
     ],

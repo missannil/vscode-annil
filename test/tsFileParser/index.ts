@@ -18,7 +18,7 @@ async function start(): Promise<void> {
   if (isDeepEqual(tsFileInfo, expectedResult)) {
     console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
   } else {
-    console.error("tsFileParser测试失败", tsFileInfo.importedSubCompInfo, expectedResult.importedSubCompInfo);
+    console.error("tsFileParser测试失败", tsFileInfo);
   }
 }
 const debounceStartTest = debounce(start, 500);

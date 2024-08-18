@@ -47,7 +47,7 @@ module.exports = {
     "prefer-const": 1, // 优先使用const
     "@typescript-eslint/no-empty-interface": 2, // 不可以写空接口
     "no-mixed-spaces-and-tabs": 2, // 不可以混合使用空格和tab
-
+    "@typescript-eslint/ban-ts-comment":"off", // 不可以使用ts注释
     "no-implicit-coercion": 2, // 不可以使用隐式类型转换
     "@typescript-eslint/no-non-null-assertion": 2, // 不可以使用非空断言
     "@typescript-eslint/strict-boolean-expressions": 2, // 不可以使用隐式类型转换

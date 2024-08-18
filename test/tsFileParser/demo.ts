@@ -10,9 +10,11 @@ type UserA = {
   age: number;
 };
 const subA = SubComponent<Root, $SubA>()({
+  inherit: {
+    subA__id: ["aaa", "bbb"],
+    subA_numA: "wxml",
+  },
   data: {
-    subA__id: "id",
-    subA_numA: 123,
     subA_userList: [],
   },
 });
@@ -68,7 +70,8 @@ const rootComponent = RootComponent()({
     numberStore: (): number => 123,
   },
   data: {
-    aaa: 567,
+    aaa: "aaa",
+    bbb: "bbb",
     dataList: [],
     dataTsList: [] as UserA[],
   },

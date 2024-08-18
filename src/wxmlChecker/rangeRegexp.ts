@@ -36,6 +36,13 @@ class RangeRegexp {
       ),
     ];
   }
+  public getTernaryValueRegexp(attrName: string, attrValue: string): RegExp[] {
+    return [
+      new RegExp(
+        `(?<=\\b${attrName}\\b\\s*=\\s*['"]\\s*{{.*[\\?:]\\s*)(\\b${attrValue}\\b)(?=.*}}\\s*['"])`,
+      ), // (?=\\s*:\\s*[^}]+}}
+    ];
+  }
   public getImportLineRegexp(importedComponentName: string): RegExp[] {
     return [new RegExp(`"${importedComponentName}"\\s*:\\s*".*",?`)];
   }

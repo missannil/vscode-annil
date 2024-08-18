@@ -1,9 +1,9 @@
 import { RootComponent, SubComponent } from "annil";
 import type { $SubA } from "~/subA";
-import { WXML } from "../../../src/componentManager/tsFileManager";
+
 const subA = SubComponent<Root, $SubA>()({
   inherit: {
-    subA__id: WXML,
+    subA__id: "wxml",
   },
   data: {
     subA_numA: 123,

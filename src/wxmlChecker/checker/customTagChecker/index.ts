@@ -4,11 +4,12 @@ import {
   type AttrConfig,
   type AttrValue,
   CUSTOM,
-  type Custom,
   isCustomValue,
   isEventsValue,
   isRootValue,
   isSelfValue,
+  isUnionRootValue,
+  type UnionRoot,
 } from "../../../componentManager/tsFileManager";
 import {
   DiagnosticErrorType,
@@ -18,12 +19,13 @@ import {
   type WithoutValue,
 } from "../../../diagnosticFixProvider/errorType";
 
-// import type { DuplicateAttrsTest } from "../../../../test/customTag/duplicate/duplicate.test";
 import { getDuplicate } from "../../../utils/getDuplicate";
 import { getMustacheValue } from "../../../utils/getMustacheValue";
+import { getTernaryValue, type TernaryValue } from "../../../utils/getTernaryValue";
 import { hyphenToCamelCase } from "../../../utils/hyphenToCamelCase";
 import { ignoreAttrs } from "../../../utils/ignoreAttrs";
 import { isMustacheStr, isValidSyntax } from "../../../utils/isMustacheStr";
+import { isTernaryExpression } from "../../../utils/isTernaryExpression";
 import { isWithoutValue } from "../../../utils/isWithoutValue";
 import { generateDiagnostic } from "../../generateDiagnostic";
 import { rangeRegexp } from "../../rangeRegexp";
@@ -40,13 +42,17 @@ export class CustomTagChecker {
   ) {
   }
   private getFixValue(configAttrValue: AttrValue): string {
-    const expectAttrValue = configAttrValue.value;
+    if (isEventsValue(configAttrValue)) {
+      return configAttrValue.value;
+    } else if (isCustomValue(configAttrValue)) {
+      return `{{${CUSTOM}}}`;
+    } else if (isUnionRootValue(configAttrValue)) {
+      const expectAttrValue = configAttrValue.value;
 
-    return isEventsValue(configAttrValue)
-      ? expectAttrValue
-      : isCustomValue(configAttrValue)
-      ? `{{${CUSTOM}}}`
-      : `{{${expectAttrValue}}}`;
+      return `{{ 三元表达式 ? ${expectAttrValue[0]} : ${expectAttrValue[1]}}}`;
+    } else {
+      return `{{${configAttrValue.value}}}`;
+    }
   }
   private checkEventsValue(
     rawAttrName: string,
@@ -85,7 +91,6 @@ export class CustomTagChecker {
   private checkCustomValue(
     rawAttrName: string,
     rawAttrValue: string,
-    configAttrValue: Custom,
     textlines: string[],
     startLine: number,
   ): void {
@@ -108,11 +113,82 @@ export class CustomTagChecker {
 
       return;
     }
-    // 3. mustache值的诊断
-    // const mustacheValueList = getMustacheValueList(rawAttrValue);
-    // for (const mustacheValue of mustacheValueList) {
-    //   this.checkMustacheExpression(mustacheValue, rawAttrName, textlines, startLine);
-    // }
+  }
+  private getAllTernaryValue(ternaryValue: TernaryValue): string[] {
+    const allValue: string[] = [];
+
+    if (typeof ternaryValue.trueValue === "string") {
+      allValue.push(ternaryValue.trueValue);
+    } else {
+      allValue.push(...this.getAllTernaryValue(ternaryValue.trueValue));
+    }
+    if (typeof ternaryValue.falseValue === "string") {
+      allValue.push(ternaryValue.falseValue);
+    } else {
+      allValue.push(...this.getAllTernaryValue(ternaryValue.falseValue));
+    }
+
+    return allValue;
+  }
+  private checkTernaryValue(
+    rawAttrName: string,
+    ternaryValue: TernaryValue,
+    expectValue: string[],
+    textlines: string[],
+    startLine: number,
+  ): void {
+    const allTernaryValue = this.getAllTernaryValue(ternaryValue);
+    // console.log("allTernaryValue", allTernaryValue);
+    allTernaryValue.forEach((currentValue) => {
+      if (expectValue.includes(currentValue)) {
+        // 删除expectValue中的currentValue
+        const index = expectValue.indexOf(currentValue);
+        expectValue.splice(index, 1);
+      } else {
+        // 不在期望值中
+        this.diagnosticList.push(
+          generateDiagnostic(
+            rangeRegexp.getTernaryValueRegexp(rawAttrName, currentValue),
+            `${DiagnosticErrorType.errorValue}:${currentValue}` satisfies ErrorValue,
+            textlines,
+            startLine,
+          ),
+        );
+      }
+    });
+  }
+  /**
+   *  1. 值为{{自定义}}的诊断,报错,无修复。
+   *  2. 语法诊断 全值报错,修复为{{自定义}}
+   *  3. mustache值的诊断
+   */
+  private checkUnionRootValue(
+    rawAttrName: string,
+    rawAttrValue: string,
+    configAttrValue: UnionRoot,
+    textlines: string[],
+    startLine: number,
+  ): void {
+    const expectValue = configAttrValue.value;
+    // 1. 语法诊断(必须有插值表达式,不存在非插值意外的`{` 或 `}` ) 全值报错,修复为`{{ 表达式 ? ${expectValut[0]} : ${expectValut[1]}}}`
+    if (!isValidSyntax(rawAttrValue) || !isTernaryExpression(rawAttrValue)) {
+      this.diagnosticList.push(
+        this.generateMustacheSyntaxDiagnostic(
+          rawAttrName,
+          rawAttrValue,
+          textlines,
+          startLine,
+          `{{ 表达式 ? ${expectValue[0]} : ${expectValue[1]}}}`,
+        ),
+      );
+
+      return;
+    }
+    const mustacheValue = getMustacheValue(rawAttrValue);
+    // 获取 三元表达式的值
+    const ternaryValue = getTernaryValue(mustacheValue);
+
+    return this.checkTernaryValue(rawAttrName, ternaryValue, [...configAttrValue.value], textlines, startLine);
   }
   private generateMustacheSyntaxDiagnostic(
     rawAttrName: string,
@@ -139,7 +215,13 @@ export class CustomTagChecker {
     const expectAttrValue = configAttrValue.value;
     if (!isMustacheStr(rawAttrValue)) {
       this.diagnosticList.push(
-        this.generateMustacheSyntaxDiagnostic(rawAttrName, rawAttrValue, textlines, startLine, expectAttrValue),
+        this.generateMustacheSyntaxDiagnostic(
+          rawAttrName,
+          rawAttrValue,
+          textlines,
+          startLine,
+          expectAttrValue as string,
+        ),
       );
 
       return;
@@ -171,7 +253,11 @@ export class CustomTagChecker {
       return this.checkRootOrSelfValue(rawAttrName, rawAttrValue, configAttrValue, textlines, startLine);
     }
     if (isCustomValue(configAttrValue)) {
-      return this.checkCustomValue(rawAttrName, rawAttrValue, configAttrValue, textlines, startLine);
+      return this.checkCustomValue(rawAttrName, rawAttrValue, textlines, startLine);
+    }
+
+    if (isUnionRootValue(configAttrValue)) {
+      return this.checkUnionRootValue(rawAttrName, rawAttrValue, configAttrValue, textlines, startLine);
     }
 
     throw Error("不应该报错 checkErrorValue");

@@ -4,52 +4,54 @@
 /* eslint-disable complexity */
 import { parse } from "@babel/parser";
 import traverse, { type Node } from "@babel/traverse";
-import type { ArrowFunctionExpression, Identifier, ObjectMethod } from "@babel/types";
+import type { ArrayExpression, ArrowFunctionExpression, Identifier, ObjectMethod } from "@babel/types";
 import * as vscode from "vscode";
 import { assertNonNullable } from "../utils/assertNonNullable";
 import type { TsUri } from "./uriHelper";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 
 type AttrName = string;
-type Prefix = `${string}_`;
-type Rename = string;
+// type Prefix = `${string}_`;
+// type Rename = string;
 type ImportName = string;
 type ImportPath = string;
 
 export type ImportInfo = Record<ImportName, ImportPath | undefined>;
 
-export type WxForDefault = "item" | "index";
-type WxForValue =
-  | `${WxForDefault}:`
-  | `${WxForDefault}:${Rename}`
-  | `${Prefix}${WxForDefault}:`
-  | `${Prefix}${WxForDefault}:${Rename}`;
+// export type WxForDefault = "item" | "index";
+// type WxForValue =
+//   | `${WxForDefault}:`
+//   | `${WxForDefault}:${Rename}`
+//   | `${Prefix}${WxForDefault}:`
+//   | `${Prefix}${WxForDefault}:${Rename}`;
 
-export type WxFor = {
-  type: "WxFor";
-  value: WxForValue;
-};
+// type WxFor = {
+//   type: "WxFor";
+//   value: WxForValue;
+// };
 
-export type WxForValueInfo = {
-  pre: string;
-  type: WxForDefault;
-  rename: Rename;
-};
-
-// 当前annil插件中,表达自定义值时,使用wxml作为标记。
-export const WXML = "wxml";
+// export type WxForValueInfo = {
+//   pre: string;
+//   type: WxForDefault;
+//   rename: Rename;
+// };
 
 export const CUSTOM = "自定义";
 
 // export type Ternary = { type: "Ternary"; value: string[] };
 export type Custom = { type: "Custom"; value: typeof CUSTOM };
-type Root = { type: "Root"; value: string };
+
+export type Root = { type: "Root"; value: string };
+
+export type UnionRoot = { type: "UnionRoot"; value: string[] };
 
 // export type InheritValue = WxFor | Ternary | Custom | RootData;
-export type Inherit = Custom | Root;
+export type Inherit = Custom | Root | UnionRoot;
 
+// events字段的值
 export type Events = { type: "Events"; value: string };
 
+// 自身数据 例如 { data, computed, store的属性值 }
 export type Self = { type: "Self"; value: string };
 
 export type AttrValue = Inherit | Events | Self;
@@ -67,25 +69,25 @@ export type TsFileInfo = {
   importedSubCompInfo: ImportInfo;
 };
 
-export function parseWxForValue(wxForValue: WxFor): WxForValueInfo {
-  const preTypeAndRename = wxForValue.value.split(":");
-  const rename = preTypeAndRename[1];
-  const preAndType = preTypeAndRename[0].split("_");
-  let pre = "";
-  let type: WxForDefault;
-  if (preAndType.length === 2) {
-    type = preAndType[1] as WxForDefault;
-    pre = `${preAndType[0]}_`;
-  } else {
-    type = preAndType[0] as WxForDefault;
-  }
+// function parseWxForValue(wxForValue: WxFor): WxForValueInfo {
+//   const preTypeAndRename = wxForValue.value.split(":");
+//   const rename = preTypeAndRename[1];
+//   const preAndType = preTypeAndRename[0].split("_");
+//   let pre = "";
+//   let type: WxForDefault;
+//   if (preAndType.length === 2) {
+//     type = preAndType[1] as WxForDefault;
+//     pre = `${preAndType[0]}_`;
+//   } else {
+//     type = preAndType[0] as WxForDefault;
+//   }
 
-  return {
-    pre,
-    type,
-    rename,
-  };
-}
+//   return {
+//     pre,
+//     type,
+//     rename,
+//   };
+// }
 
 function isArraySingleType(node: Node): boolean {
   // 例如 `{ xxx: Array}` 时(后面没有as 类型的情况 )
@@ -146,6 +148,10 @@ export function isCustomValue(attrValue: AttrValue): attrValue is Custom {
   return attrValue.type === "Custom";
 }
 
+export function isUnionRootValue(attrValue: AttrValue): attrValue is UnionRoot {
+  return attrValue.type === "UnionRoot";
+}
+
 export function isRootValue(attrValue: AttrValue): attrValue is Root {
   return attrValue.type === "Root";
 }
@@ -156,24 +162,28 @@ export function isSelfValue(attrValue: AttrValue): attrValue is Self {
 // type ArrayExpression = { type: "ArrayExpression"; elements: StringLiteral[] };
 type StringLiteral = { type: "StringLiteral"; value: string };
 
-function isIdentifier(node: Node): node is Identifier {
-  return node.type === "Identifier";
+function isArrayExpression(node: Node): node is ArrayExpression {
+  return node.type === "ArrayExpression";
 }
 
 function isStringLiteral(node: Node): node is StringLiteral {
   return node.type === "StringLiteral";
 }
 
-function getInheritValue(valueElement: StringLiteral | Identifier): Custom | Root {
-  if (
-    isStringLiteral(valueElement) && valueElement.value === WXML
-    || isIdentifier(valueElement) && valueElement.name === "WXML"
-  ) {
-    // 如果是wxml字符串或者是WXML变量,则表示自定义值
-    return { type: "Custom", value: CUSTOM } satisfies Custom;
-  }
+function getInheritValue(valueElement: StringLiteral | Identifier | ArrayExpression): Custom | Root | UnionRoot {
   if (isStringLiteral(valueElement)) {
+    if (valueElement.value === "wxml") {
+      // 如果是wxml字符串或者是WXML变量,则表示自定义值
+      return { type: "Custom", value: CUSTOM } satisfies Custom;
+    }
+
     return { type: "Root", value: valueElement.value } satisfies Root;
+  }
+  if (isArrayExpression(valueElement)) {
+    return {
+      type: "UnionRoot",
+      value: valueElement.elements.map((element) => (element as StringLiteral).value),
+    } satisfies UnionRoot;
   }
   throw Error("不应出现的错误:getInheritValue");
 }
