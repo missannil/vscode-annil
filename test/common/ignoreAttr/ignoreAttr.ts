@@ -7,9 +7,19 @@ const subA = SubComponent<Root, $SubA>()({
   data: {},
 });
 
-// const subB = SubComponent<Root, $SubB>()({
-//   data: {},
-// });
-
+const subB = SubComponent<Root, $SubB>()({
+  data: {
+    // @ts-ignore
+    subB_twClass: "twClassSubB",
+  },
+});
+// @ts-ignore
+const subC = SubComponent<Root, $SubC>()({
+  // @ts-ignore
+  data: {
+    // @ts-ignore
+    subC_twClass: "twClassSubC",
+  },
+});
 type Root = typeof rootComponent;
 const rootComponent = RootComponent()({});

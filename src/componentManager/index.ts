@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 import { diagnosticManager } from "../diagnosticManager";
 import { JsonChecker } from "../jsonChecker";
+import { assertNonNullable } from "../utils/assertNonNullable";
 import { debounce } from "../utils/debounce";
 import { WxmlChecker } from "../wxmlChecker";
 import { jsonFileManager } from "./jsonFileManager";
@@ -71,15 +72,36 @@ class ComponentManager {
   // 监听删除组件文件时,删除组件文件的诊断信息
   private onDeleteComponentFileHandler(): void {
     vscode.workspace.onDidDeleteFiles(async (event) => {
-      event.files.forEach((uri) => {
-        if (uriHelper.isComponentUri(uri)) {
-          const componentDirPath = uriHelper.getComponentDirPath(uri);
-          this.removeCheckingQueue(componentDirPath);
-          diagnosticManager.removeChecked(componentDirPath);
-          diagnosticManager.delete(uriHelper.getSiblingUri(uri, ".json"));
-          diagnosticManager.delete(uriHelper.getSiblingUri(uri, ".wxml"));
+      // vscode 1.92.0版本event内uri的schema为file,无法判断是文件还是文件夹,所以只能通过文件路径判断,有缺陷(比如文件夹名字中包含 . 时)。
+      for (const uri of event.files) {
+        // 获取文件夹路径
+        const dirPath = uriHelper.getComponentDirPath(uri as ComponentUri);
+        // 删除检测过的缓存记录,再新建立同名组件后,确保可以重新检测。
+        const arr = uri.path.split("/");
+        const lastName = assertNonNullable(arr.pop());
+        if (lastName.includes(".")) {
+          // console.log("删除的是文件", uri.path);
+          if (uriHelper.isComponentUri(uri)) {
+            // console.log("删除组件文件", uri.path);
+            // 删除检测过的缓存记录,再新建立同名组件后,确保可以重新检测。
+            diagnosticManager.removeChecked(dirPath);
+            // 删除组件的诊断信息
+            diagnosticManager.delete(uriHelper.getSiblingUri(uri, ".json"));
+            diagnosticManager.delete(uriHelper.getSiblingUri(uri, ".wxml"));
+          } else {
+            // console.log("删除的不是组件文件", uri.path);
+          }
+        } else {
+          diagnosticManager.removeChecked(dirPath);
+          // console.log("删除文件夹", uri.path);
+          // 认为是文件夹,删除文件夹下的以index命名的诊断信息
+          diagnosticManager.delete(vscode.Uri.joinPath(uri, "index.json"));
+          diagnosticManager.delete(vscode.Uri.joinPath(uri, "index.wxml"));
+          // 删除同组件目录名命名的组件诊断信息
+          diagnosticManager.delete(vscode.Uri.joinPath(uri, `${lastName}.json`));
+          diagnosticManager.delete(vscode.Uri.joinPath(uri, `${lastName}.wxml`));
         }
-      });
+      }
     });
   }
   // 组件文件内容变化时,重新检测组件文件
@@ -182,7 +204,7 @@ class ComponentManager {
       diagnosticManager.addChecked(componentDirPath);
       this.removeCheckingQueue(componentDirPath);
     } else {
-      // console.log("不需要检测", componentDirPath);
+      // console.log("不需要检测");
     }
   }
   private onDidOpenComponentFileHandler(): void {

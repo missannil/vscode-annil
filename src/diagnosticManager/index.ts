@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import type { ComponentDirPath } from "../componentManager/uriHelper";
-
 class DiagnosticManager {
   #diagnosticCollection = vscode.languages.createDiagnosticCollection(`annil`);
   #checkedComponents: ComponentDirPath[] = [];

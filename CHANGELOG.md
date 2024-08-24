@@ -38,3 +38,10 @@ readme
 
 ### 0.7.2
 修复已知问题
+
+### 0.7.5
+修复已知问题
+
+### 0.7.6 
+
+fixed issue [#3](https://github.com/missannil/vscode-annil/issues/3) 和 [#4](https://github.com/missannil/vscode-annil/issues/4)

@@ -2,7 +2,7 @@
 <block wx:for="{{numberStore}}"></block>
 <block wx:for="{{aaa}}"></block>
 <block wx:for="{{onTap}}"></block>
-
+<block wx:for="{{onTap.xxx}}"></block>
 <!-- 正确的值是RootComponent中定义的数组类型 -->
 <block wx:for="{{anyList}}"></block>
 <block wx:for="{{userListSingle}}"></block>

@@ -178,7 +178,7 @@ export class CustomTagChecker {
           rawAttrValue,
           textlines,
           startLine,
-          `{{ 表达式 ? ${expectValue[0]} : ${expectValue[1]}}}`,
+          `表达式 ? ${expectValue[0]} : ${expectValue[1]}`,
         ),
       );
 
@@ -246,6 +246,11 @@ export class CustomTagChecker {
     textlines: string[],
     startLine: number,
   ): void {
+    // 1. 忽略属性名跳过
+
+    if (ignoreAttrs.includes(rawAttrName) && configAttrValue === undefined) {
+      return;
+    }
     if (isEventsValue(configAttrValue)) {
       return this.checkEventsValue(rawAttrName, rawAttrValue, configAttrValue, textlines, startLine);
     }
@@ -315,13 +320,13 @@ export class CustomTagChecker {
     this.checkMissingAttr(this.attributeConfig, hyphenToCamelCase(remainingAttrNames));
     for (const rawAttrName of remainingAttrNames) {
       const rawAttrValue = eleAttribs[rawAttrName];
-      // 1. 忽略属性名跳过
-      if (ignoreAttrs.includes(rawAttrName)) {
+      // 1. 忽略id属性
+      if (["id"].includes(rawAttrName)) {
         continue;
       }
       const expectAttrName = hyphenToCamelCase(rawAttrName);
       // 2. 未知属性名的诊断
-      if (!expectedAttrNameList.includes(expectAttrName)) {
+      if (!expectedAttrNameList.includes(expectAttrName) && !ignoreAttrs.includes(rawAttrName)) {
         // console.log('未知属性', rawAttrName);
         this.diagnosticList.push(
           generateDiagnostic(

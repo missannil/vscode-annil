@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
+import { assertNonNullable } from "../utils/assertNonNullable";
 
 // 小程序组件必要的三个文件扩展名
 type ComponentFileExtensions = ".wxml" | ".json" | ".ts";
@@ -36,7 +37,7 @@ class UriHelper {
   }
   public isComponentUri(uri: vscode.Uri): uri is ComponentUri {
     const uriExtname = path.extname(uri.fsPath);
-    if (uriExtname === ".ts" || uriExtname == ".wxml" || uriExtname == ".json") {
+    if (uriExtname === ".ts") {
       const wxmlUri = this.getSiblingUri(uri, ".wxml");
       if (!fs.existsSync(wxmlUri.fsPath)) {
         return false;
@@ -47,8 +48,27 @@ class UriHelper {
         return false;
       }
 
+      return true;
+    } else if (uriExtname === ".wxml") {
       const tsUri = this.getSiblingUri(uri, ".ts");
       if (!fs.existsSync(tsUri.fsPath)) {
+        return false;
+      }
+
+      const jsonUri = this.getSiblingUri(uri, ".json");
+      if (!fs.existsSync(jsonUri.fsPath)) {
+        return false;
+      }
+
+      return true;
+    } else if (uriExtname === ".json") {
+      const tsUri = this.getSiblingUri(uri, ".ts");
+      if (!fs.existsSync(tsUri.fsPath)) {
+        return false;
+      }
+
+      const wxmlUri = this.getSiblingUri(uri, ".wxml");
+      if (!fs.existsSync(wxmlUri.fsPath)) {
         return false;
       }
 
@@ -84,9 +104,13 @@ class UriHelper {
     }
   }
   public getComponentDirPath(uri: ComponentUri): ComponentDirPath {
-    const uriExtname = path.extname(uri.fsPath);
-
-    return uri.fsPath.replace(uriExtname, "") as ComponentDirPath;
+    const arr = uri.path.split("/");
+    const lastName = assertNonNullable(arr.pop());
+    if (lastName.includes(".")) {
+      return arr.join("/") as ComponentDirPath;
+    } else {
+      return uri.path as ComponentDirPath;
+    }
   }
 }
 

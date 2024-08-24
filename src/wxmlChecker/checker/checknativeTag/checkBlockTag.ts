@@ -125,8 +125,10 @@ export class BlockTagChecker {
 
         return;
       }
-      // 2. wx:for的值不合法(只允许使用rootComponentInfo中的数组数据)
+      // 2. wx:for的值不合法(只允许使用rootComponentInfo中的数组数据(变量)或非单一变量,例如'xxx.ddd'的情况,不做处理)
       const mustacheValue = getMustacheValue(rawAttrValue);
+      if (mustacheValue.includes(".")) return; // 不是单一变量和`{{数组类型变量名}}`,不做处理
+      // 单一变量的情况,检测是否为数组类型
       const legalVaueList = this.rootComponentInfo.arrTypeData;
       if (!legalVaueList.includes(mustacheValue)) {
         this.diagnosticList.push(

@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "engines": {
     "vscode": "^1.85.0"
   },
