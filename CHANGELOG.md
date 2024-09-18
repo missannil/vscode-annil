@@ -50,4 +50,8 @@ fixed issue [#3](https://github.com/missannil/vscode-annil/issues/3) 和 [#4](ht
 
 feat:  1. 如果wx:if的值以_isReady结尾并且在ts中以前缀名定义的子组件中有对应的值则通过检测。
 	   2. 忽略检测 id 、以data- 开头的属性、
-	   3. 自定义组件无定义以下属性时 twClass twHoverClass style,忽略属性值检测。 
+	   3. 自定义组件无定义以下属性时 twClass twHoverClass  style,忽略属性值检测。 
+### 0.7.8
+
+feat: 1. 自定义组件默认忽略属性增加class,便于对原生组件属性定义类型变为自定义组件后忽略class
+	  2. 监控setting.json中配置的修改,无需重新加载拓展。

@@ -16,7 +16,8 @@ import {
 } from "../../../diagnosticFixProvider/errorType";
 import { getMustacheValue } from "../../../utils/getMustacheValue";
 import { hasSpecialCharacter } from "../../../utils/hasSpecialCharacter";
-import { ignoreAttrs } from "../../../utils/ignoreAttrs";
+
+import { configuration } from "src/configuration";
 import { isMustacheStr } from "../../../utils/isMustacheStr";
 import { isVariableStr } from "../../../utils/isVariableStr";
 import { isWithoutValue } from "../../../utils/isWithoutValue";
@@ -345,7 +346,7 @@ export class BlockTagChecker {
     isHasWxFor: boolean,
   ): boolean {
     // 0. 忽略的属性跳过
-    if (ignoreAttrs.includes(rawAttrName)) {
+    if (configuration.ignoreAttrs.includes(rawAttrName)) {
       // console.log(`${rawAttrName}属性被忽略了`);
       return true;
     }

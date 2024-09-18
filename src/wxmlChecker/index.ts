@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import type { ChildNode, Element } from "domhandler";
 import * as vscode from "vscode";
-import { ignoreTags } from "../../src/utils/ignoreAttrs";
+
 import { type TsFileInfo } from "../componentManager/tsFileManager";
 import { type WxmlFileInfo } from "../componentManager/wxmlFileManager";
 import {
@@ -22,6 +22,7 @@ import { CustomTagChecker } from "./checker/customTagChecker";
 import { generateDiagnostic } from "./generateDiagnostic";
 import { nodeType } from "./getNodeType";
 import { rangeRegexp } from "./rangeRegexp";
+import { configuration } from "src/configuration";
 
 export class WxmlChecker {
   // 诊断错误的集合,最后返回给调用者
@@ -130,7 +131,7 @@ export class WxmlChecker {
   private isIgnoreTag(childNode: Element): boolean {
     const tagName = childNode.tagName;
     // 忽略的标签
-    if (ignoreTags.includes(tagName)) {
+    if (configuration.ignoreTags.includes(tagName)) {
       return true;
     }
 

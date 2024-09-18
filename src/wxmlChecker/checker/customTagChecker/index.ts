@@ -23,13 +23,14 @@ import { getDuplicate } from "../../../utils/getDuplicate";
 import { getMustacheValue } from "../../../utils/getMustacheValue";
 import { getTernaryValue, type TernaryValue } from "../../../utils/getTernaryValue";
 import { hyphenToCamelCase } from "../../../utils/hyphenToCamelCase";
-import { ignoreAttrs } from "../../../utils/ignoreAttrs";
+
 import { isMustacheStr, isValidSyntax } from "../../../utils/isMustacheStr";
 import { isTernaryExpression } from "../../../utils/isTernaryExpression";
 import { isWithoutValue } from "../../../utils/isWithoutValue";
 import { generateDiagnostic } from "../../generateDiagnostic";
 import { rangeRegexp } from "../../rangeRegexp";
 import type { WxForInfo } from "../checknativeTag/checkBlockTag";
+import { configuration } from "src/configuration";
 
 export class CustomTagChecker {
   private diagnosticList: vscode.Diagnostic[] = [];
@@ -247,7 +248,7 @@ export class CustomTagChecker {
     startLine: number,
   ): void {
     // 1. 忽略值检测的属性名跳过
-    if (ignoreAttrs.includes(rawAttrName) && configAttrValue === undefined) {
+    if (configuration.ignoreAttrs.includes(rawAttrName) && configAttrValue === undefined) {
       return;
     }
     if (isEventsValue(configAttrValue)) {
@@ -325,7 +326,7 @@ export class CustomTagChecker {
       }
       const expectAttrName = hyphenToCamelCase(rawAttrName);
       // 2. 未知属性名的诊断
-      if (!expectedAttrNameList.includes(expectAttrName) && !ignoreAttrs.includes(rawAttrName)) {
+      if (!expectedAttrNameList.includes(expectAttrName) && !configuration.ignoreAttrs.includes(rawAttrName)) {
         // console.log('未知属性', rawAttrName);
         this.diagnosticList.push(
           generateDiagnostic(
