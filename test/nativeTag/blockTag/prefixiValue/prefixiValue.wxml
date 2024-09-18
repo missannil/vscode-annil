@@ -1,0 +1,4 @@
+<!-- 如果wx:if的值以_isReady结尾并且前缀组件信息中有值则通过 -->
+<block wx:if="{{home_isReady}}">
+	<home hidden="{{home_hidden}}" />
+</block>

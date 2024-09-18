@@ -1,0 +1,7 @@
+<subA
+	style="color: red;"
+	data-attr1="value1"
+	data-attr2="value2"
+	twClass=" w-100"
+	twHoverClass="hover:bg-blue-500"
+/>

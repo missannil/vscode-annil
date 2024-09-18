@@ -91,6 +91,7 @@ export class WxmlChecker {
       this.wxmlTextlines,
       wxForInfoList,
       this.tsFileInfo.rootComponentInfo,
+      this.tsFileInfo.subComponentInfo,
       preConditionState,
     );
     const blockTagInfo: BlockTagInfo = blockTagChecker.start();

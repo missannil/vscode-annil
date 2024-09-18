@@ -246,8 +246,7 @@ export class CustomTagChecker {
     textlines: string[],
     startLine: number,
   ): void {
-    // 1. 忽略属性名跳过
-
+    // 1. 忽略值检测的属性名跳过
     if (ignoreAttrs.includes(rawAttrName) && configAttrValue === undefined) {
       return;
     }
@@ -285,7 +284,7 @@ export class CustomTagChecker {
   private checkMissingAttr(attrConfig: AttrConfig, currentAttrNames: string[]): void {
     const expectedAttrNameList = Object.keys(attrConfig);
     const missingAttr = expectedAttrNameList.filter(
-      (attrName) => !currentAttrNames.includes(attrName),
+      (attrName) => !currentAttrNames.includes(attrName) && attrName !== "isReady",
     );
     missingAttr.forEach((attrName) => {
       const fixValue = this.getFixValue(attrConfig[attrName]);
@@ -320,8 +319,8 @@ export class CustomTagChecker {
     this.checkMissingAttr(this.attributeConfig, hyphenToCamelCase(remainingAttrNames));
     for (const rawAttrName of remainingAttrNames) {
       const rawAttrValue = eleAttribs[rawAttrName];
-      // 1. 忽略id属性
-      if (["id"].includes(rawAttrName)) {
+      // 1. 忽略data-属性
+      if (rawAttrName === "id" || rawAttrName.startsWith("data")) {
         continue;
       }
       const expectAttrName = hyphenToCamelCase(rawAttrName);

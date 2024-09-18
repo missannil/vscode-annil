@@ -10,6 +10,7 @@ const subA = SubComponent<Root, $SubA>()({
   },
   data: {
     subA_self: "Self",
+    subA_isReady: false, // 忽略isReady属性检测
   },
   events: {
     subA_eventA(e) {},

@@ -3,7 +3,7 @@
 
 <view>
 
-	<subB bbb= >
+	<subB class="xxx" bbb= >
 
 	<subC ccc="{{xxx}}" />
 </view>

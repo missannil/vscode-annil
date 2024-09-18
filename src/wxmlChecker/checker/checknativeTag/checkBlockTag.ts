@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import type { Element } from "domhandler";
 import * as vscode from "vscode";
-import { type RootComponentInfo } from "../../../componentManager/tsFileManager";
+import { type RootComponentInfo, type SubComponentInfo } from "../../../componentManager/tsFileManager";
 import {
   type ConditionalAttrExisted,
   DiagnosticErrorType,
@@ -49,6 +49,7 @@ export class BlockTagChecker {
     private readonly wxmlTextlines: string[],
     private readonly wxForInfoList: WxForInfo[],
     private readonly rootComponentInfo: RootComponentInfo,
+    private readonly subComponentInfo: SubComponentInfo,
     private readonly preConditionState: ConditionState | null,
   ) {}
   /**
@@ -236,8 +237,21 @@ export class BlockTagChecker {
     }
     // 2. 忽略包含特殊字符的值检测(暂时没想到好的解决方案,比如 item > 0 | xxx === ddd ? 1 : 2等值)
     if (hasSpecialCharacter(rawAttrValue)) return;
-    // 3. 值不符合合法值(使用rootComponentInfo中的数据或wxForInfo中的数据)
+
     const mustacheValue = getMustacheValue(rawAttrValue);
+    // 2.1 加入对isReady值的检测
+    const valueList = mustacheValue.split("_");
+
+    if (valueList[1] === "isReady") {
+      // 找到前缀的组件名,检测是否存在对应属性值
+      const prefix = valueList[0];
+      const attrConfig = this.subComponentInfo[prefix];
+      // 不存在对应组件信息或对应组件信息中没有对应属性值
+      if (attrConfig && Object.keys(attrConfig).includes("isReady")) {
+        return;
+      }
+    }
+    // 3. 值不符合合法值(使用rootComponentInfo中的数据或wxForInfo中的数据)
     if (!this.islegal(mustacheValue)) {
       this.diagnosticList.push(
         generateDiagnostic(
