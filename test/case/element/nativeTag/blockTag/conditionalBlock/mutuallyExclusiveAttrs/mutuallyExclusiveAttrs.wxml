@@ -1,0 +1,6 @@
+<!-- 互斥属性 -->
+<block
+	wx:if="{{bool}}"
+	wx:elif="{{bool}}"
+	wx:else
+></block>

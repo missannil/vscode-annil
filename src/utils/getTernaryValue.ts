@@ -1,14 +1,14 @@
-import { isTernaryExpression } from "./isTernaryExpression";
+import { isValidTernaryExpressionSyntax } from "../wxmlChecker/tools/isValidTernaryExpressionSyntax";
 
-export type TernaryValue = {
-  condition: string;
-  trueValue: TernaryValue | string;
-  falseValue: TernaryValue | string;
+export type TernaryInfo = {
+  conditions: string[];
+  trueBranches: string[];
+  falseBranches: string[];
 };
 type OuterTernary = {
   condition: string;
-  trueValue: string;
-  falseValue: string;
+  trueBranche: string;
+  falseBranche: string;
 };
 
 /**
@@ -49,23 +49,36 @@ function extractOuterTernary(expression: string): OuterTernary {
 
   return {
     condition,
-    trueValue,
-    falseValue,
+    trueBranche: trueValue,
+    falseBranche: falseValue,
   };
 }
 
+function _getTernaryExpressionInfo(expression: string, result: TernaryInfo): TernaryInfo {
+  // 获取最外层的三元表达式的条件, 真值, 假值
+  const { condition, trueBranche: trueValue, falseBranche: falseValue } = extractOuterTernary(expression);
+
+  result.conditions.push(condition);
+  // 递归获取下一个三元表达式
+  if (isValidTernaryExpressionSyntax(trueValue)) {
+    _getTernaryExpressionInfo(trueValue, result);
+  } else {
+    result.trueBranches.push(trueValue);
+  }
+  if (isValidTernaryExpressionSyntax(falseValue)) {
+    _getTernaryExpressionInfo(falseValue, result);
+  } else {
+    result.falseBranches.push(falseValue);
+  }
+
+  return result;
+}
+
 /**
- * 获取字符串中所有三元表达式的值
+ * 获取字符串中所有三元表达式的值(条件, 真值, 假值),递归获取，值不会在包含三元表达式
  * @param expression 字符串表达式
  * @returns 三元表达式的值
  */
-export function getTernaryValue(expression: string): TernaryValue {
-  // 获取最外层的三元表达式的条件, 真值, 假值
-  const { condition, trueValue, falseValue } = extractOuterTernary(expression);
-
-  return {
-    condition,
-    trueValue: isTernaryExpression(trueValue) ? getTernaryValue(trueValue) : trueValue,
-    falseValue: isTernaryExpression(falseValue) ? getTernaryValue(falseValue) : falseValue,
-  };
+export function getTernaryExpressionInfo(expression: string): TernaryInfo {
+  return _getTernaryExpressionInfo(expression, { conditions: [], trueBranches: [], falseBranches: [] });
 }

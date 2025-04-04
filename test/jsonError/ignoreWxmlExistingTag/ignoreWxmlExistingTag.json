@@ -1,7 +1,0 @@
-{
-  "usingComponents": {
-    "subC": "../../mockComponents/subC",
-    "subD": "../../mockComponents/subD",
-    "divider": "../../components/divider/divider"
-  }
-}

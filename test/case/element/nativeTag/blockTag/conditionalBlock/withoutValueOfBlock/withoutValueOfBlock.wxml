@@ -1,0 +1,12 @@
+<block wx:if></block>
+<block wx:elif></block>
+<block wx:elif></block>
+<!-- wx:else 空值正常 -->
+<block wx:else></block>
+
+<!-- annil disable start backup -->
+<block wx:if></block>
+<block wx:elif></block>
+<block wx:elif></block>
+<!-- wx:else 空值正常 -->
+<block wx:else></block>

@@ -1,0 +1,61 @@
+<!-- annil disable repeatTag -->
+<!-- 三元表达式中的错误验证-->
+<block
+	wx:key="*this"
+	wx:for="{{ list }}"
+	wx:for-item="category"
+>
+	<!-- 正常 -->
+	<block wx:if="{{ category.type === 'SingleCategory' ?  true : false }}">
+		<view id="chunk1"></view>
+	</block>
+	<!-- annil disable repeatTag -->
+	<!-- 报错 1 无效的三元表达式语法-->
+	<block wx:elif="{{  category.type === 'SingleCategory' ?  true ? false }}">
+		<view id="chunk1"></view>
+	</block>
+	<!-- annil disable repeatTag -->
+	<!-- 报错 2 无效的运算表达式-->
+	<block wx:elif="{{ demo_isReady ? demo_isReady : demo_isReady ===   }}">
+		<view id="chunk1"></view>
+	</block>
+	<!-- annil disable repeatTag -->
+	<!-- 报错 3 语法错误-->
+	<block
+		wx:elif="{{ 1xxx.1type[1item][0]['1axx'] === 'SingleCategory' ? 1demo_isReady : #demo_isReady  }}"
+	> 
+		<view id="chunk1"></view>
+	</block>
+	<!-- annil disable repeatTag -->
+	<!-- 报错 4 非自定义组件或wx:for产生的变量-->
+	<block wx:elif="{{ xxx.type === 'SingleCategory' ? index : demo_isReady2  }}">
+		<view id="chunk1"></view>
+	</block>
+</block>
+<!-- 非三元表达式 检测 -->
+<block
+	wx:key="*this"
+	wx:for="{{ list }}"
+	wx:for-item="category"
+>
+	<!-- annil disable repeatTag -->
+	<!-- 正常 -->
+	<block wx:if="{{ category.type === 'SingleCategory' }}">
+		<view id="chunk1"></view>
+	</block>
+	<!-- annil disable repeatTag -->
+	<!-- 报错1 无效的运算表达式 -->
+	<block wx:elif="{{ item.type >  }}">
+		<view id="chunk1"></view>
+	</block>
+	<!-- annil disable repeatTag -->
+	<!-- 报错2 语法错误 -->
+	<block wx:elif="{{ 1item.type > item.type = 0  }}">
+		<view id="chunk1"></view>
+	</block>
+	<!-- annil disable repeatTag -->
+	<!-- 报错2 非自定义组件或wx:for产生的变量 -->
+	<block wx:elif="{{ index >  activeIndex }}">
+		<view id="chunk1"></view>
+	</block>
+</block>

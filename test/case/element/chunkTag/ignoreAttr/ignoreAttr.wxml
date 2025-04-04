@@ -1,0 +1,12 @@
+<view
+	id="chunk"
+	compId="{{xxx}}"
+	class="ddd"
+>{{num}}</view>
+
+<!-- annil disable line -->
+<view
+	id="chunk"
+	compId="{{xxx}}"
+	class="ddd"
+>{{num}}</view>

@@ -1,0 +1,18 @@
+<view>
+	<block
+		wx:for
+		wx:for-index
+		wx:for-item
+		wx:key
+	></block>
+</view>
+
+<!-- annil disable line  备份  -->
+<view>
+	<block
+		wx:for
+		wx:for-index
+		wx:for-item
+		wx:key
+	></block>
+</view>

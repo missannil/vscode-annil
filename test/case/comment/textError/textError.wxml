@@ -1,0 +1,14 @@
+ <!-- annil disable all1 -->
+ <view class>
+ 	<!-- annil disable line2  error -->
+ 	<!-- annil disable line ok -->
+ 	<view></view>
+ 	<!-- annil disable start3 -->
+ 	<!-- annil disable start  -->
+ 	<view></view>
+ 	<!-- annil disable end4-->
+ 	<!-- annil disable end -->
+ 	<!-- annil disable repeatTag5-->
+ 	<!-- annil disable repeatTag-->
+ </view>
+ 

@@ -1,39 +1,73 @@
 import path = require("path");
 import * as vscode from "vscode";
-import { type TsFileInfo, tsFileManager } from "../../src/componentManager/tsFileManager";
-import type { TsUri } from "../../src/componentManager/uriHelper";
-import { debounce } from "../../src/utils/debounce";
-import { isDeepEqual } from "../../src/utils/isDeepEqual";
-const demoFsPath = path.resolve(__dirname, "./demo.ts");
-const expectedFsPath = path.resolve(__dirname, "./expected.js");
-const tsFileManagerFspath = path.resolve(__dirname, "../../out/componentManager/tsFileManager.js");
+import { tsFileManager } from "../../out/componentManager/tsFileManager/index";
+import type {
+  ChunkComponentInfos,
+  CustomComponentInfos,
+  ImportTypeInfo,
+  RootComponentInfo,
+} from "../../out/componentManager/tsFileManager/types";
+import type { TsUri } from "../../out/componentManager/uriHelper";
+import { debounce } from "../../out/utils/debounce";
+import { isDeepEqual } from "../../out/utils/isDeepEqual";
+const demoCompFsPath = path.resolve(__dirname, "./demoComp/demoComp.ts");
+const expectedFsPath = path.resolve(__dirname, "./expectedTsFileInfo.js");
 
-async function start(): Promise<void> {
+const debounceStartTest = debounce(tsFileParserTest, 300);
+// 监控文件变化并重新测试,当前文件的js文件,expected.js和demoCompFsPath
+vscode.workspace.onDidChangeTextDocument(
+  (event) => {
+    if (event.contentChanges.length === 0) return;
+    const textDocument = event.document;
+    const changedFsPath = textDocument.uri.fsPath;
+    // console.log("文件变化");
+    if (changedFsPath === __filename || changedFsPath === expectedFsPath || changedFsPath === demoCompFsPath) {
+      debounceStartTest();
+    }
+  },
+);
+
+export async function tsFileParserTest(): Promise<void> {
+  // console.log("tsFileParser测试开始");
   // @ts-expect-error 由于缓存机制,在修改expected.js时,需要修改两次才能让第一次的修改生效。
   delete require.cache[expectedFsPath];
-  const textDocument = await vscode.workspace.openTextDocument(demoFsPath);
-  // console.log("测试开始", expectedResult.rootComponentInfo.dataList);
-  const expectedResult: TsFileInfo = (await import(expectedFsPath)).expectedResult;
-  const tsFileInfo: TsFileInfo = tsFileManager.tsFileParser(textDocument.getText(), textDocument.uri as TsUri);
-  if (isDeepEqual(tsFileInfo, expectedResult)) {
+  // 打开文件
+  await vscode.workspace.openTextDocument(expectedFsPath);
+  await vscode.workspace.openTextDocument(__filename);
+  const textDocument = await vscode.workspace.openTextDocument(demoCompFsPath);
+  // 获取生成的TsFileInfo
+  const currentTsFileInfo = await tsFileManager.get(textDocument.uri as TsUri);
+  const expectedTsFileInfo = (await import("./expectedTsFileInfo.js")).expectedTsFileInfo;
+  if (isDeepEqual(currentTsFileInfo, expectedTsFileInfo)) {
     console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
   } else {
-    console.error("tsFileParser测试失败", tsFileInfo);
+    Object.keys(currentTsFileInfo).forEach((key) => {
+      const currentVal = currentTsFileInfo[key as keyof typeof currentTsFileInfo];
+      const expectedVal = expectedTsFileInfo[key as keyof typeof expectedTsFileInfo];
+      if (!isDeepEqual(currentVal, expectedVal)) {
+        console.error(
+          "测试失败",
+          key,
+          findDiffItem(currentVal, expectedVal),
+        );
+      }
+    });
   }
 }
-const debounceStartTest = debounce(start, 500);
-// 启动初始化测试
-start().then(() => {
-  // 监控文件变化,重新测试
-  vscode.workspace.onDidChangeTextDocument(
-    (event) => {
-      if (event.contentChanges.length === 0) return;
-      const textDocument = event.document;
-      const uri = textDocument.uri;
-      const changedFsPath = uri.fsPath;
-      if (changedFsPath === demoFsPath || changedFsPath === tsFileManagerFspath || changedFsPath === expectedFsPath) {
-        debounceStartTest();
-      }
-    },
-  );
-}, console.error);
+
+// 找到不同的属性并返回
+function findDiffItem(
+  currentVal: CustomComponentInfos | RootComponentInfo | ImportTypeInfo | ChunkComponentInfos,
+  expectedVal: CustomComponentInfos | RootComponentInfo | ImportTypeInfo | ChunkComponentInfos,
+): unknown[][] {
+  const diffList: unknown[][] = [];
+  Object.keys(currentVal).forEach((key) => {
+    const currentValItem = currentVal[key as keyof typeof currentVal];
+    const expectedValItem = expectedVal[key as keyof typeof expectedVal];
+    if (!isDeepEqual(currentValItem, expectedValItem)) {
+      diffList.push([currentValItem, expectedValItem]);
+    }
+  });
+
+  return diffList;
+}

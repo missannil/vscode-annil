@@ -1,7 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "subA": "../../mockComponents/subA",
-    "subB": "../../mockComponents/subB"
-  }
-}

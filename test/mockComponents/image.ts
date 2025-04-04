@@ -2,7 +2,11 @@ import { DefineComponent, RootComponent } from "annil";
 
 const rootComponent = RootComponent()({
   properties: {
-    str: String,
+    src: String,
+    twClass: {
+      type: String,
+      value: "",
+    },
   },
 });
 

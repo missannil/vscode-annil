@@ -1,0 +1,11 @@
+ <block></block>
+
+<view class>
+	<block wx:if="{{bool}}"></block>
+	<block></block>
+</vie
+<view class>
+	<block wx:if="{{bool}}"></block>
+	<block wx:elif="{{bool}}"></block>
+	<block></block>
+</view>

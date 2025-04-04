@@ -1,0 +1,8 @@
+{
+  "component": true,
+  "usingComponents": {
+    "subA": "/mockComponents/subA",
+    "subB": "/mockComponents/subB",
+    "subC": "/mockComponents/subC"
+  }
+}

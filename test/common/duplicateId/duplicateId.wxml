@@ -1,7 +1,0 @@
-<!-- 忽略属性是诊断原生标签的 -->
-
-<view id="aaa"></view>
-
-<view id="aaa"></view>
-
-<view id='aaa'></view>

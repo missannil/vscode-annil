@@ -1,6 +1,0 @@
-<!-- subA(自闭合)标签 会被检测 -->
-<subA
-	numAA="{{subA_numAA}}"
-	num-aA
-	numA-a="any"
-/>

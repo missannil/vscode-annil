@@ -1,0 +1,22 @@
+<!-- 需要必要的wx:for属性 -->
+<block
+	wx:for-item="item"
+	wx:for-index="index"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{arr}}"
+	wx:for-item="item"
+	wx:for-index="index"
+></block>
+<!-- annil disable start -->
+<block
+	wx:for-item="item"
+	wx:for-index="index"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{arr}}"
+	wx:for-item="item"
+	wx:for-index="index"
+></block>

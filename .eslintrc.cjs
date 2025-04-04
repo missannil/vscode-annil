@@ -14,6 +14,7 @@ module.exports = {
     "rollup.config.mjs",
     "**/*.js",
     "**/*.d.ts",
+    "test/**",
   ], // 忽略检查的文件 优先级低于外部定义
   globals: {
     wx: true,

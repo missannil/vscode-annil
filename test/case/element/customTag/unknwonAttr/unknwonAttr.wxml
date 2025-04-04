@@ -1,0 +1,34 @@
+<subA aaa />
+<block
+	wx:key="wxkey"
+	wx:for="{{list}}"
+>
+	<view>
+		<subB bbb />
+		<!--  配置了 "annil.allowUnknownAttributes": ["twClass","class"], twClass无对应属性 验证mustache值,class有对应属性还按正常检测,style就是未知属性了-->
+		<subC
+			ccc="{{xxx}}"
+			class="{{ subCClass }}"
+			twClass=" w-110 h-110 rounded-20 {{index === subC_class > item ? 'border-4 border-primary' : '123' === xxx}}"
+			style="wdith:{{xxx}};"
+		/>
+	</view>
+</block>
+
+<!-- annil disable start -->
+<subA aaa />
+<block
+	wx:key="wxkey"
+	wx:for="{{list}}"
+>
+	<view>
+		<subB bbb />
+		<!--  配置了 "annil.allowUnknownAttributes": ["twClass","class"], twClass无对应属性 验证mustache值,class有对应属性还按正常检测,style就是未知属性了-->
+		<subC
+			ccc="{{xxx}}"
+			class="{{ subCClass }}"
+			twClass=" w-110 h-110 rounded-20 {{index === subC_class > item ? 'border-4 border-primary' : '123' === xxx}}"
+			style="wdith:{{xxx}};"
+		/>
+	</view>
+</block>

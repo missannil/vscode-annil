@@ -1,0 +1,40 @@
+<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据 -->
+<view
+	id="chunk"
+	style="color:{{xxx}}"
+	class="ddd {{bool[0]}}"
+></view>
+
+<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据和wxfor产生的变量 -->
+<block
+	wx:for="{{list}}"
+	wx:key="*this"
+	wx:for-item="user"
+>
+	<view
+		id="chunk1"
+		style="color:{{xxx}};text-align:{{user}}"
+		class="{{bool.xxx }}"
+	></view>
+</block>
+
+<!-- annil disable start backup -->
+<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据 -->
+<view
+	id="chunk"
+	style="color:{{xxx}}"
+	class="ddd {{bool[0]}}"
+></view>
+
+<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据和wxfor产生的变量 -->
+<block
+	wx:for="{{list}}"
+	wx:key="*this"
+	wx:for-item="user"
+>
+	<view
+		id="chunk1"
+		style="color:{{xxx}};text-align:{{user}}"
+		class="{{bool.xxx }}"
+	></view>
+</block>

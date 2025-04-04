@@ -1,0 +1,26 @@
+<!-- 嵌套chunk 内部可以使用外部定义的变量 -->
+<view
+	id="chunk1"
+	style="color:{{xxx}};text-align:{{user}}"
+	class="{{bool.xxx }}"
+>
+	<view
+		id="chunk"
+		style="color:{{chunk1_num}}"
+		class="ddd {{bool[0] === chunk1_num}}"
+	></view>
+</view>
+
+<!-- annil disable start -->
+<!-- 嵌套chunk 内部可以使用外部定义的变量 -->
+<view
+	id="chunk1"
+	style="color:{{xxx}};text-align:{{user}}"
+	class="{{bool.xxx }}"
+>
+	<view
+		id="chunk"
+		style="color:{{chunk1_num}}"
+		class="ddd {{bool[0] === chunk1_num}}"
+	></view>
+</view>

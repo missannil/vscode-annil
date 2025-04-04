@@ -3,9 +3,9 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.7.8",
+  "version": "0.8.0",
   "engines": {
-    "vscode": "^1.85.0"
+    "vscode": "^1.98.2"
   },
   "repository": {
     "type": "git",
@@ -19,59 +19,109 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "wxml",
+        "extensions": [".wxml"],
+        "aliases": ["WXML"]
+      }
+    ],
     "commands": [
       {
-        "command": "annil.fix-diagnostics",
-        "title": "fix-diagnostics"
+        "command": "annil.fix-all",
+        "title": "修复当前组件的错误"
+      },
+      {
+        "command": "annil.check-all",
+        "title": "检测所有组件的错误"
+      },
+      {
+        "command": "commentConsole.toggleConsoleComments",
+        "title": "Toggle Console Comments"
+      },
+      {
+        "command": "annil.createComponent",
+        "title": "新建自定义组件"
+      },
+      {
+        "command": "annil.createPage",
+        "title": "新建页面组件"
       }
     ],
     "keybindings": [
       {
-        "command": "annil.fix-diagnostics",
-        "key": "alt + s",
-        "mac": "alt + s",
+        "command": "annil.fix-all",
+        "key": "alt+s",
+        "mac": "ctrl+s",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "annil.check-all",
+        "key": "alt+z",
+        "mac": "ctrl+z",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "commentConsole.toggleConsoleComments",
+        "key": "ctrl+q",
         "when": "editorTextFocus"
       }
-    ]
-  },
-  "configuration": {
-    "title": "annil",
-    "properties": {
-      "annil.ignoreTags": {
-        "type": "array",
-        "items": {
-          "type": "string"
+    ],
+    "configuration": {
+      "title": "annil",
+      "properties": {
+        "annil.ignoreFeilds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "忽略检查的字段"
         },
-        "default": [],
-        "description": "忽略检查的标签 - 插件没有及时更新导致新增的原生标签可能报错,可以通过这个配置忽略"
-      },
-      "annil.ignoreAttrs": {
-        "type": "array",
-        "items": {
-          "type": "string"
+        "annil.ignoreTags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "忽略检查的标签"
         },
-        "default": [],
-        "description": "忽略检查的属性 - 插件没有及时更新导致原生标签新增的属性可能报错,可以通过这个配置忽略"
+        "annil.allowUnknownAttributes": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "允许Wxml标签中书写非对应子组件中定义的属性"
+        }
       }
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "annil.createComponent",
+          "group": "navigation",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "annil.createPage",
+          "group": "navigation",
+          "when": "explorerResourceIsFolder"
+        }
+      ]
     }
   },
   "scripts": {
-    "clean": "rm -rf ./out",
+    "prepare": "husky",
+    "clean": "rm -rf ./out && find ./src ./test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
+    "compile": "rollup -c",
     "vscode:prepublish": " npm run clean && npm run compile",
     "publish": "vsce publish",
-    "compile": "rollup -c",
     "fmt": "dprint fmt",
-    "watch": "npm run clean && start /b tsc -w -p ./tsconfig-src.json && start /b tsc -w -p ./tsconfig-test.json ",
-    "type": "tsc -watch --noEmit",
-    "lint": "eslint src --fix && npm run fmt"
+    "lint": "eslint . --max-warnings 0",
+    "dev": "npm run clean &&  tsc -w -p ./tsconfig-src.json & tsc -w -p ./test/tsconfig.json ",
+    "check": "tsc -p tsconfig.json  &&  eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
   },
-  "files": [
-    "LICENSE",
-    "CHANGELOG.md",
-    "README.md",
-    "src",
-    "tsconfig.json"
-  ],
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",
@@ -81,14 +131,15 @@
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
-    "annil": "^1.7.4",
+    "@vscode/test-cli": "^0.0.10",
+    "annil": "^1.12.0-alpha.4",
     "eslint": "^8.56.0",
-    "hry-types": "^0.18.1",
+    "hry-types": "^0.19.2",
+    "husky": "^9.1.7",
     "mobx": "^6.13.1",
     "rollup-plugin-typescript2": "^0.36.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3",
-    "vscode-test": "^1.6.1"
+    "typescript": "^5.7.3"
   },
   "dependencies": {
     "@babel/parser": "^7.23.6",

@@ -1,9 +1,0 @@
-
-<subA aaa />
-
-<view>
-
-	<subB  bbb= >
-
-	<subC ccc="{{xxx}}" />
-</view>

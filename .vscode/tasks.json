@@ -4,16 +4,16 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "watch",
-      "problemMatcher": "$tsc-watch",
-      "isBackground": true,
+      "type": "npm", // 任务类型，这里是 npm 脚本
+      "script": "dev", // 要执行的 npm 脚本，这里是 "dev"
+      "problemMatcher": "$tsc-watch", // 问题匹配器，用于捕获 TypeScript 编译错误
+      "isBackground": true, // 指定任务是否在后台运行
       "presentation": {
-        "reveal": "never"
+        "reveal": "always" // 指定任务输出是否在终端中显示，never 表示不显示，always 表示总是显示，silent 表示只有在任务出错时显示
       },
       "group": {
-        "kind": "build",
-        "isDefault": true
+        "kind": "build", // 任务组类型，这里是 "build"
+        "isDefault": true // 指定这是默认的构建任务 false默认不执行
       }
     }
   ]

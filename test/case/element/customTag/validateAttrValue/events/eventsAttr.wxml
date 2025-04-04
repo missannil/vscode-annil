@@ -1,0 +1,6 @@
+<!-- subA(自闭合)标签 会被检测 -->
+
+<subA
+	bind:eventA=" subA_eventA "
+	catch:eventA="{{subA_eventA_catch}}"
+/>

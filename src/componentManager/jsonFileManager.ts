@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import type { JsonUri } from "./uriHelper";
-type SubComponentTag = string;
-type SubComponentPath = string;
-type UsingComponents = Record<SubComponentTag, SubComponentPath>;
+type CustomComponentTag = string;
+type CustomComponentPath = string;
+type UsingComponents = Record<CustomComponentTag, CustomComponentPath>;
 type JsonConfig = {
   component?: true;
   usingComponents?: UsingComponents;

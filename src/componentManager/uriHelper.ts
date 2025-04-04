@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { assertNonNullable } from "../utils/assertNonNullable";
 
 // 小程序组件必要的三个文件扩展名
 type ComponentFileExtensions = ".wxml" | ".json" | ".ts";
@@ -29,12 +28,27 @@ class UriHelper {
   public isWxmlFile(componentUri: ComponentUri): componentUri is WxmlUri {
     return componentUri.fsPath.endsWith(".wxml");
   }
+  // 判断一个uri是文件还是文件夹
+  public fileOrDir(uri: vscode.Uri): "file" | "dir" {
+    // file uri test/xxxx/xxx.js, dir uri test/xxxx
+    const arr = uri.fsPath.split("/");
+    const last = arr[arr.length - 1];
+    if (last.includes(".")) {
+      return "file";
+    }
+
+    return "dir";
+  }
   public getJsonFsPath(jsonUri: JsonUri): JsonFsPath {
     return jsonUri.fsPath as JsonFsPath;
   }
   public getWxmlFsPath(wxmlUri: WxmlUri): WxmlFsPath {
     return wxmlUri.fsPath as WxmlFsPath;
   }
+  public isComponentUri(uri: vscode.Uri, extensions: ".json"): uri is JsonUri;
+  public isComponentUri(uri: vscode.Uri, extensions: ".ts"): uri is TsUri;
+  public isComponentUri(uri: vscode.Uri, extensions: ".wxml"): uri is WxmlUri;
+  public isComponentUri(uri: vscode.Uri): uri is ComponentUri;
   public isComponentUri(uri: vscode.Uri): uri is ComponentUri {
     const uriExtname = path.extname(uri.fsPath);
     if (uriExtname === ".ts") {
@@ -77,6 +91,9 @@ class UriHelper {
 
     return false;
   }
+  public getComponentName(dirPath: string): string {
+    return dirPath.split("/").pop() as string;
+  }
   /**
    * 获取源Uri的兄弟文件的Uri
    * @param sourceUri 源Uri
@@ -103,14 +120,9 @@ class UriHelper {
       return siblingUri as JsonUri;
     }
   }
+  // 获取组件文件的文件夹路径
   public getComponentDirPath(uri: ComponentUri): ComponentDirPath {
-    const arr = uri.path.split("/");
-    const lastName = assertNonNullable(arr.pop());
-    if (lastName.includes(".")) {
-      return arr.join("/") as ComponentDirPath;
-    } else {
-      return uri.path as ComponentDirPath;
-    }
+    return path.dirname(uri.fsPath) as ComponentDirPath;
   }
 }
 

@@ -1,0 +1,14 @@
+<!-- subA(自闭合)标签 会被检测 -->
+
+<subA
+	_id="{ id }}"
+	numA="{subA_numA}}"
+	userList="{subA_userList}"
+/>
+
+<!-- annil disable line backup -->
+<subA
+	_id="{ id }}"
+	numA="{subA_numA}}"
+	userList="{subA_userList}"
+/>

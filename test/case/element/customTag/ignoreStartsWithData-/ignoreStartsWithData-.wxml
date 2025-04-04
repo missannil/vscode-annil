@@ -1,0 +1,9 @@
+
+<!-- data-开头的属性忽略检查 -->
+<subA
+	data-id="subA"
+	compId="{{subA}}"
+	_rootData="{{rootData}}"
+	ignoreAttr="{{subA_ignoreAttr}}"
+	bind:eventA="subA_eventA"
+/>

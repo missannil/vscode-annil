@@ -1,0 +1,214 @@
+<!-- 1 wx:for的值 允许以上层item定义的变量起始的.或[]表达式,或root中数组类型的变量 -->
+<!-- 1.0 wxfor的值可以为rootComponent中 类型为数组的computed属性 -->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.1 wxfor的值可以为rootComponent中 类型为数组的store属性 -->
+<block
+	wx:for="{{storeList}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.2 wxfor的值可以为rootComponent中 类型为数组的data属性 -->
+<block
+	wx:for="{{arrRoot}}"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{listRoot}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.3 wxfor的值可以为rootComponent中 类型为数组的properties属性 -->
+<block
+	wx:for="{{propArr}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.4 wx:for的值 上层item定义的变量起始的.或[]表达式, -->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+>
+	<block
+		wx:for="{{item.xxx}}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+	<block
+		wx:for="{{item[0].xxx}}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+	<block
+		wx:for="{{item[0].xxx['ddd']}}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+	<!-- 1.5 非根组件数组类型或wx:for-item变量 -->
+	<block
+		wx:for="{{ noArr }}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+</block>
+<!-- 1.5 非wx:for-item变量 -->
+<block
+	wx:for="{{obj.arr}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.6 语法报错-->
+<block
+	wx:for="{{数组类型变量名}"
+	wx:key="*this"
+></block>
+<!-- 2 wx:key 的值可以为*this -->
+<block
+	wx:for="{{propList}}"
+	wx:key="*this"
+></block>
+<!-- 2.1 wxkey 合法变量 -->
+<block
+	wx:for="{{propList}}"
+	wx:key="ddd"
+></block>
+
+<!-- 3 wx:for-item wx:for-index 无效变量 -->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+>
+	<block
+		wx:for="{{item.xxx}}"
+		wx:for-item="1item"
+		wx:for-index="a a a"
+		wx:key="123"
+	></block>
+</block>
+<!-- 3.1 wx:for-item wx:for-index 与上层相同变量 -->
+<block
+	wx:for="{{computedList}}"
+	wx:for-item="itemA"
+	wx:key="*this"
+>
+	<block 
+		wx:for="{{itemA.xxx}}"
+		wx:for-item="itemA"
+		wx:key="ddd"
+	></block>
+</block>
+
+<!-- annil disable start --> 
+<!-- 1 wx:for的值 允许以上层item定义的变量起始的.或[]表达式,或root中数组类型的变量 -->
+<!-- 1.0 wxfor的值可以为rootComponent中 类型为数组的computed属性 -->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.1 wxfor的值可以为rootComponent中 类型为数组的store属性 -->
+<block
+	wx:for="{{storeList}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.2 wxfor的值可以为rootComponent中 类型为数组的data属性 -->
+<block
+	wx:for="{{arrRoot}}"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{listRoot}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.3 wxfor的值可以为rootComponent中 类型为数组的properties属性 -->
+<block
+	wx:for="{{propArr}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.4 wx:for的值 上层item定义的变量起始的.或[]表达式, -->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+>
+	<block
+		wx:for="{{item.xxx}}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+	<block
+		wx:for="{{item[0].xxx}}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+	<block
+		wx:for="{{item[0].xxx['ddd']}}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+	<!-- 1.5 非根组件数组类型或wx:for-item变量 -->
+	<block
+		wx:for="{{ noArr }}"
+		wx:key="*this"
+		wx:for-index="yyy"
+		wx:for-item="xxx"
+	></block>
+</block>
+<!-- 1.5 非wx:for-item变量 -->
+<block
+	wx:for="{{obj.arr}}"
+	wx:key="*this"
+></block>
+
+<!-- 1.6 语法报错-->
+<block
+	wx:for="{{语法错误}"
+	wx:key="*this"
+></block>
+<!-- 2 wx:key 的值可以为*this -->
+<block
+	wx:for="{{propList}}"
+	wx:key="*this"
+></block>
+<!-- 2.1 wxkey 合法变量 -->
+<block
+	wx:for="{{propList}}"
+	wx:key="ddd"
+></block>
+
+<!-- 3 wx:for-item wx:for-index 无效变量 -->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+>
+	<block
+		wx:for="{{item.xxx}}"
+		wx:for-item="1item"
+		wx:for-index="a a a"
+		wx:key="123"
+	></block>
+</block>
+<!-- 3.1 wx:for-item wx:for-index 与上层相同变量 -->
+<block
+	wx:for="{{computedList}}"
+	wx:for-item="itemA"
+	wx:key="*this"
+>
+	<block
+		wx:for="{{itemA.xxx}}"
+		wx:for-item="itemA"
+		wx:key="ddd"
+	></block>
+</block>

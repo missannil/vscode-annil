@@ -1,0 +1,8 @@
+<!-- subA(自闭合)标签 会被检测 -->
+<view
+	class="h-100 w-20"
+	bindonTap="errCustomTa"
+	bind:onTap="onCustomTap"
+	bindcatch="errEven"
+	bind:catch="onCustomCatchTap"
+></view>

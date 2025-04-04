@@ -1,0 +1,11 @@
+<!-- subA(自闭合)标签 会被检测 -->
+
+<subA />
+
+<view>
+	<subB></subB>
+</view>
+
+<image />
+
+<xxx />

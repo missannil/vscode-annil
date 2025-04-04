@@ -1,0 +1,53 @@
+<!-- 同级wxforblock的item和index是可以重复的,预定是不予上层重复-->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+	wx:for-index="index0"
+	wx:for-item="item0"
+>
+	<block
+		wx:for-index="index1"
+		wx:for-item="item1"
+		wx:for="{{storeList}}"
+		wx:key="*this"
+	></block>
+	<block
+		wx:for-index="index1"
+		wx:for-item="item1"
+		wx:for="{{storeList}}"
+		wx:key="*this"
+	></block>
+</block>
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+	wx:for-index="index0"
+	wx:for-item="item0"
+></block>
+<!-- annil disable line backup  case-->
+<!-- 同级wxforblock的item和index是可以重复的,预定是不予上层重复-->
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+	wx:for-index="index0"
+	wx:for-item="item0"
+>
+	<block
+		wx:for-index="index1"
+		wx:for-item="item1"
+		wx:for="{{storeList}}"
+		wx:key="*this"
+	></block>
+	<block
+		wx:for-index="index1"
+		wx:for-item="item1"
+		wx:for="{{storeList}}"
+		wx:key="*this"
+	></block>
+</block>
+<block
+	wx:for="{{computedList}}"
+	wx:key="*this"
+	wx:for-index="index0"
+	wx:for-item="item0"
+></block>

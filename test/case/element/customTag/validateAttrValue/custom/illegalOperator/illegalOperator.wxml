@@ -1,0 +1,29 @@
+<!-- 
+ // 算术运算符
+export const arithmeticOperators = ["+", "-", "*", "/", "%", "**"] as const;
+
+// 比较运算符
+export const comparisonOperators = [">", "<", ">=", "<=", "==", "===", "!=", "!=="] as const;
+
+// 逻辑运算符
+export const logicalOperators = ["&&", "||", "!"] as const;
+-->
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<!-- 非法运算符 只允许上面的三种运算符出现 -->
+	<subA numA="{{ a = b }}" />
+</block>
+
+<!-- annil disable line backup -->
+
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<!-- 非法运算符 只允许上面的三种运算符出现 -->
+	<subA numA="{{ a | b }}" />
+</block>

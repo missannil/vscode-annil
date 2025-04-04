@@ -1,0 +1,9 @@
+<!-- annil disable repeatTag -->
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<!-- 未发现{{}}语法 -->
+	<subA numA="index_{ index }}" />
+</block>

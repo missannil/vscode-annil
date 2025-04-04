@@ -1,0 +1,19 @@
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<!-- 非自定义组件或wx:for产生的变量 -->
+	<subA numA="{{ aaaa }}" />
+</block>
+
+<!-- annil disable line backup -->
+
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<!-- 非自定义组件或wx:for产生的变量 -->
+	<subA numA="{{ aaaa }}" />
+</block>

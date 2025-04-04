@@ -1,0 +1,17 @@
+<!-- 文本元素的 大胡子 语法内的变量 不符合rootComopnent中的变量 报错 -->
+<block
+	wx:key="xxx"
+	wx:for="{{list}}"
+	wx:for-item="item"
+>
+	<text>
+		errorValue {{ $um > $num === www === item ? 123 : _dfkk }}
+		{{ @aaa 123 > === ? fff : index + str}}
+	</text>
+</block>
+<!-- annil disable line -->
+	<text>
+		errorValue {{ $um > $num === www === item ? 123 : _dfkk }}
+		{{ @aaa 123 > === ? fff : index + str}}
+	</text>
+ 

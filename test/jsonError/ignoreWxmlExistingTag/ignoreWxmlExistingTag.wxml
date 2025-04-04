@@ -1,4 +1,0 @@
-<subC bool="{{subC_bool}}"></subC>
-<subD str="{{subD_str}}"></subD>
-<!-- json文件导入divider不会报错,因为wxml中使用了这个组件 -->
-<divider classes="flex-1"></divider>

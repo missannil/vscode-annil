@@ -1,0 +1,5 @@
+<!-- subA(自闭合)标签 会被检测 -->
+<view
+	class="h-100 w-20 {{adaa}} {{aaa}}"
+	style="width:{{width}}; height:{{height}}"
+></view>

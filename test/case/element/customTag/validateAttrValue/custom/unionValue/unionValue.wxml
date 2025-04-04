@@ -1,0 +1,28 @@
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<subA numA="{{ user.type === 'SingleGoods' ? num : num1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ userList[0] === 1 ? num2 : num3 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ userList.xxx[0].index > index  ? num : num2 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ userList[0].index > num2  ? num2 : num }}" />
+</block>
+
+<!-- annil disable line backup -->
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<subA numA="{{ user.type === 'SingleGoods' ? num : num1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ userList[0] === 1 ? num2 : num3 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ userList.xxx[0].index > num  ? num : num2 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ userList[0].index > num  ? num2 : num }}" />
+</block>

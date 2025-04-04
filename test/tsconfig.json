@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022"
+    ],
+    "removeComments": true,
+    "module": "CommonJS",
+    // "outDir": "../testOut", // 指定输出文件的目录
+    // "rootDir": "./", // 指定输入文件的根目录
+    // "noEmit": true,
+    // "sourceMap": true,
+    "skipDefaultLibCheck": true,
+    // "declaration": true,
+    "esModuleInterop": true, // 默认false. 兼容非ES模块引用的写法(如 import fs from 'fs').
+    // "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "exactOptionalPropertyTypes": true, // 带有?标志的属性类型不再包含undefined类型
+    "strict": true, /* enable all strict type-checking options */
+    "baseUrl": "./", // 添加这行，设置基准目录为项目根目录,会引起自动补全路径导入引入路径时的提示不以相对路径开始 比如src/xxx.ts
+    "paths": {
+      "~/*": [
+        "mockComponents/*"
+      ] // 将`~/`设置为`src/test`目录的别名
+    },
+    "types": [
+      "hry-types",
+      "node",
+      "miniprogram-api-typings",
+      "mobx",
+      "annil"
+    ]
+  },
+  "include": [
+    "../out/**/*.ts",
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "../out/**/*.ts",
+    "node_modules"
+  ]
+}

@@ -1,12 +1,13 @@
 {
   "incremental": true,
-  "typescript": {},
   "newLineKind": "system",
   "json": {},
   "markdown": {},
   "includes": [
     "**/*.{ts,json,md}"
   ],
+  "typescript": {
+  },
   "excludes": [
     "**/node_modules",
     "CHANGELOG.md",

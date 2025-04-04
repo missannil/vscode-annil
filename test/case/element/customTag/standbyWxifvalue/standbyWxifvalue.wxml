@@ -1,0 +1,9 @@
+
+<!-- 正常5 可以含有之前wx:for-item的值和以其开头的表达式 -->
+<block wx:for="{{list}}">
+	<block wx:if="{{ item > index ? 123 : index   }}">
+		<!-- annil disable line -->
+		<subA />
+	</block>
+</block>
+ 

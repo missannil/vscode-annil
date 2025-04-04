@@ -1,2 +1,0 @@
-<block wx:for="{{aaa}"></block>
-<block wx:for="{ddd} "></block>

@@ -1,9 +1,14 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "out"
+    "outDir": "./out", // 指定输出文件的目录
+    "rootDir": "./src" // 指定输入文件的根目录
   },
   "include": [
     "src/**/*.ts"
-  ]
+  ],
+  "exclude": [
+    "node_modules",
+    "out"
+  ] // 排除的文件
 }

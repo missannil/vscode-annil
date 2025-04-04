@@ -1,0 +1,47 @@
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<subA numA="{{ aaa[0] > 1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ aaa['ddd'] > 1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ aaa[ddd] > 1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ aaa[1ddd] > num }}" />
+	<block
+		wx:for-index="ddd"
+		wx:for="{{userList}}"
+		wx:for-item="user1"
+		wx:key="*this"
+	>
+		<!-- annil disable repeatTag -->
+		<subA numA="{{ ddd.type === 'singleCategory' }}" />
+	</block>
+</block>
+
+<!-- annil disable line backup -->
+
+<block
+	wx:for="{{userList}}"
+	wx:for-item="user"
+	wx:key="*this"
+>
+	<subA numA="{{ aaa[0] > 1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ aaa['ddd'] > 1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ aaa[ddd] > 1 }}" />
+	<!-- annil disable repeatTag -->
+	<subA numA="{{ aaa[1ddd] > num }}" />
+	<block
+		wx:for-index="ddd"
+		wx:for="{{userList}}"
+		wx:for-item="user1"
+		wx:key="*this"
+	>
+		<!-- annil disable repeatTag -->
+		<subA numA="{{ ddd.type === 'singleCategory' }}" />
+	</block>
+</block>

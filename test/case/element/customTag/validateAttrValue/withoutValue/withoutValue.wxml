@@ -1,0 +1,12 @@
+<!-- 无值和空值 -->
+<subA
+	numA
+	userList
+	bind:onTap
+/>
+<!-- annil disable line -->
+<subA
+	numA
+	userList
+	bind:onTap
+/>

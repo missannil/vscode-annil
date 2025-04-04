@@ -1,4 +1,0 @@
-<block  wx:forA ></block>
-<block  wx:forB=></block>
-<block  wx:forC=""></block>
-<block  wx:forD=''></block>

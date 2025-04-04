@@ -1,23 +1,26 @@
-import * as vscode from "vscode";
 import { componentManager } from "./componentManager";
 import { configuration } from "./configuration";
-import { diagnosticFixProvider } from "./diagnosticFixProvider";
-import { diagnosticManager } from "./diagnosticManager";
+import { diagnosticCollection } from "./diagnosticCollection";
+import { codeActionsProviderManager } from "./diagnosticFixProvider";
+
+import { rightClickManager } from "./rightClickManager";
+
+// 导入初始化函数而不是整个模块
+import { type vscode } from "./exportVscode";
 import { goToDefinition } from "./goToDefinition";
-// import { runTest } from "./runTest";
+import { initSnippet } from "./snippets";
 
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
   configuration.init(context);
-  diagnosticManager.init(context);
+  diagnosticCollection.init(context);
   componentManager.init();
-  diagnosticFixProvider.init(context);
-  diagnosticFixProvider.registerCommandOfFixAll(context);
-  goToDefinition.init(context);
-
-  console.log("annil 拓展已激活");
-  // void runTest();
+  codeActionsProviderManager.init(context);
+  goToDefinition(context);
+  rightClickManager(context);
+  initSnippet();
+  // import(path.resolve(__dirname, "../test/start.js"));
 }
 
 export function deactivate(): void {}

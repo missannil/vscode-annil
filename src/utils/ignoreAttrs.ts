@@ -7,4 +7,3 @@
 // export const ignoreAttrs: string[] = [...defualtIgnoreAttrs, ...userIgnoreAttrs];
 
 // export const ignoreTags: string[] = vscode.workspace.getConfiguration("annil").get("ignoreTags") || [];
-

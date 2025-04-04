@@ -1,0 +1,9 @@
+<!-- true 或 false 合法 -->
+<block wx:if="{{ false }}"></block>
+<block wx:elif="{{ true }}"></block>
+<!-- mustache值为空串 或 包含非法字符或包含中文 报错  const illegalChar = ["{", "}", "|", "&", "=", ",", ";"];-->
+<block wx:if="{{   }}"></block>
+
+<block wx:elif="{{ false ,}}"></block>
+
+<block wx:elif="{{ false  >  123 = ? 1 :0 }}"></block>

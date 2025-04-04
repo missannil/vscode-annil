@@ -1,0 +1,14 @@
+<!-- subA(自闭合)标签 会被检测 -->
+
+<subA
+	_id="{{ddd}}"
+	numA="{{ddd}}"
+	userList="{{ddd}}"
+/>
+<!-- annil disable line backup -->
+
+<subA
+	_id="{{ddd}}"
+	numA="{{ddd}}"
+	userList="{{ddd}}"
+/>

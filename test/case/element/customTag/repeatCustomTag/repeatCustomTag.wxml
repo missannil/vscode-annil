@@ -1,0 +1,10 @@
+<subA />
+
+<view>
+	<!-- annil disable repeatTag -->
+	<subA />
+</view>
+<view>
+	<!-- 重复的自定义组件 -->
+	<subA />
+</view>
