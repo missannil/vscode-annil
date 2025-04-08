@@ -1,6 +1,6 @@
-import { SubComponent } from "annil";
+import { ChunkComponent } from "annil";
 
-export const chunk = SubComponent<{}>()({
+export const chunk = ChunkComponent<{}>()({
   data: {
     outSideChunk: 0,
   },

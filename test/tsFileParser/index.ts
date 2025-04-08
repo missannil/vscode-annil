@@ -41,6 +41,7 @@ export async function tsFileParserTest(): Promise<void> {
   if (isDeepEqual(currentTsFileInfo, expectedTsFileInfo)) {
     console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
   } else {
+    console.log("hry 1", currentTsFileInfo, expectedTsFileInfo);
     Object.keys(currentTsFileInfo).forEach((key) => {
       const currentVal = currentTsFileInfo[key as keyof typeof currentTsFileInfo];
       const expectedVal = expectedTsFileInfo[key as keyof typeof expectedTsFileInfo];

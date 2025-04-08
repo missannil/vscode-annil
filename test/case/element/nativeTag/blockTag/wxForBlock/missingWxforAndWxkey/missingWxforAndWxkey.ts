@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { RootComponent } from "annil";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

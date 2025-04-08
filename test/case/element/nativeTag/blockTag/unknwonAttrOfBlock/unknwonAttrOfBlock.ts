@@ -1,13 +1,11 @@
-// @ts-nocheck
-
-// const subA = SubComponent()({
+// const subA = CustomComponent()({
 //   data: {},
 // });
 
-// const subB = SubComponent()({
+// const subB = CustomComponent()({
 //   data: {},
 // });
 
-// const subC = SubComponent()({
+// const subC = CustomComponent()({
 //   data: {},
 // });

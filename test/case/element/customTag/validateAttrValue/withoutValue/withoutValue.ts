@@ -1,9 +1,8 @@
-// @ts-nocheck
-import { DefineComponent, RootComponent, SubComponent } from "annil";
+import { CustomComponent, DefineComponent, RootComponent } from "annil";
 import type { $SubA } from "~/subA";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const subA = SubComponent<Root, $SubA>()({
+const subA = CustomComponent<Root, $SubA>()({
   data: {
     subA_numA: 123,
     subA_userList: [],

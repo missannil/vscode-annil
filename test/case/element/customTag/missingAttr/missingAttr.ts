@@ -1,10 +1,9 @@
-// @ts-nocheck
-import { SubComponent } from "annil";
+import { CustomComponent } from "annil";
 
 import type { $SubA } from "../../mockComponents/subA";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const subA = SubComponent<Root, $SubA>()({
+const subA = CustomComponent<Root, $SubA>()({
   inherit: {
     subA_custom: "wxml",
     subA__rootData: "rootData",

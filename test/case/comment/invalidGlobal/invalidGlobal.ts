@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DefineComponent, RootComponent } from "annil";
 // import type { $SubA } from "~/subA";
 // import type { $SubB } from "~/subB";
 
-// const subA = SubComponent<Root, $SubA>()({
+// const subA = CustomComponent<Root, $SubA>()({
 //   data: {
 //     subA__id: "subA",
 //     subA_numA: 0,
@@ -11,7 +10,7 @@ import { DefineComponent, RootComponent } from "annil";
 //   },
 // });
 
-// const subB = SubComponent<Root, $SubB>()({
+// const subB = CustomComponent<Root, $SubB>()({
 //   data: {
 //     subB_num: 0,
 //   },

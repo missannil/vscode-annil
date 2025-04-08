@@ -1,15 +1,11 @@
-// @ts-nocheck
-import { SubComponent } from "annil";
+import { CustomComponent, DefineComponent } from "annil";
+import type { $SubA } from "~/subA";
 
-import type { $SubA } from "../../mockComponents/subA";
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const subA = SubComponent<Root, $SubA>()({
+const subA = CustomComponent<{ data: { rootData: string } }, $SubA>()({
   inherit: {
-    subA__rootData: "rootData",
+    subA__id: "rootData",
   },
   data: {
-    subA_ignoreAttr: "Self",
     subA_isReady: false, // isReady不作为传递属性，不会被认为是缺失的属性
   },
   events: {

@@ -1,4 +1,11 @@
-import { CreateComponentType, DefineComponent, type DetailedType, RootComponent, SubComponent } from "annil";
+import {
+  ChunkComponent,
+  CreateComponentType,
+  CustomComponent,
+  DefineComponent,
+  type DetailedType,
+  RootComponent,
+} from "annil";
 
 import type { $SubB } from "~/subB";
 import { chunk3 } from "./chunk3";
@@ -8,21 +15,19 @@ type UserA = {
   age: number;
 };
 
-const subB = SubComponent<Root, $SubB>()({
+const subB = CustomComponent<Root, $SubB>()({
   data: {
     subB_num: 123,
   },
 });
-// @ts-ignore
-const chunk2 = SubComponent<Root, "chunk2">()({
+
+const chunk2 = ChunkComponent<Root, "chunk2">()({
   data: {
-    // @ts-ignore
     chunk2_bool: true,
   },
 });
 
-// @ts-ignore
-const chunk1 = SubComponent<Root>()({
+const chunk1 = ChunkComponent<Root>()({
   data: {
     ddd_src: "string",
     ddd_arr: [1, 2, 3],
@@ -39,7 +44,7 @@ type $SubE = CreateComponentType<"subE", {
     num: number;
   };
 }>;
-const subE = SubComponent<Root, $SubE>()({
+const subE = CustomComponent<Root, $SubE>()({
   data: {
     subE_num: 123,
   },

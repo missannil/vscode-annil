@@ -1,33 +1,33 @@
-import { DefineComponent, RootComponent, SubComponent } from "annil";
+import { CustomComponent, DefineComponent, RootComponent } from "annil";
 // 故意 二种引入类型的方式
 import type { CreateComponentType } from "annil";
 import { type $SubA } from "~/subA";
 import type { $SubB } from "~/subB";
 import { type $SubC } from "../../../mockComponents/subC";
 import type { $SubD } from "../../../mockComponents/subD";
-const subA = SubComponent<Root, $SubA>()({
+const subA = CustomComponent<Root, $SubA>()({
   data: {
     subA__id: "id",
     subA_numA: 123,
     subA_userList: [],
   },
 });
-const subB = SubComponent<Root, $SubB>()({
+const subB = CustomComponent<Root, $SubB>()({
   data: {
     subB_num: 123,
   },
 });
-const subBA = SubComponent<Root, $SubB, "a">()({
+const subBA = CustomComponent<Root, $SubB, "a">()({
   data: {
     subBA_num: 123,
   },
 });
-const subC = SubComponent<Root, $SubC>()({
+const subC = CustomComponent<Root, $SubC>()({
   data: {
     subC_bool: true,
   },
 });
-const subD = SubComponent<Root, $SubD>()({
+const subD = CustomComponent<Root, $SubD>()({
   data: {
     subD_str: "string",
   },
@@ -39,7 +39,7 @@ type $SubE = CreateComponentType<"subE", {
     num: number;
   };
 }>;
-const subE = SubComponent<Root, $SubE>()({
+const subE = CustomComponent<Root, $SubE>()({
   data: {
     subE_num: 123,
   },

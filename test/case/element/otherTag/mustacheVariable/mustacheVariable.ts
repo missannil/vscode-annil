@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// @ts-nocheck
 
 const root = RootComponent()({
   customEvents: {

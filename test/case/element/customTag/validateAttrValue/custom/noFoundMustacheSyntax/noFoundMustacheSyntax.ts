@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DefineComponent, RootComponent, SubComponent } from "annil";
+import { CustomComponent, DefineComponent, RootComponent } from "annil";
 import type { $SubA, User } from "../../../../../../mockComponents/subA";
 
-const subA = SubComponent<Root, $SubA>()({
+const subA = CustomComponent<Root, $SubA>()({
   inherit: {
     subA_numA: "wxml",
   },

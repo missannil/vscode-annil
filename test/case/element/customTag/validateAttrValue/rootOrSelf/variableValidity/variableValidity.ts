@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// @ts-nocheck
-import { RootComponent, SubComponent } from "annil";
+
+import { CustomComponent, RootComponent } from "annil";
 import type { $SubA } from "~/subA";
 
-const subA = SubComponent<Root, $SubA>()({
+const subA = CustomComponent<Root, $SubA>()({
   inherit: {
     subA__id: "id",
   },

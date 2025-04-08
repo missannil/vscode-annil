@@ -6,7 +6,7 @@ import { codeActionsProviderManager } from "./diagnosticFixProvider";
 import { rightClickManager } from "./rightClickManager";
 
 // 导入初始化函数而不是整个模块
-import { type vscode } from "./exportVscode";
+import { path, type vscode } from "./exportVscode";
 import { goToDefinition } from "./goToDefinition";
 import { initSnippet } from "./snippets";
 
@@ -20,7 +20,7 @@ export async function activate(
   goToDefinition(context);
   rightClickManager(context);
   initSnippet();
-  // import(path.resolve(__dirname, "../test/start.js"));
+  import(path.resolve(__dirname, "../test/start.js"));
 }
 
 export function deactivate(): void {}

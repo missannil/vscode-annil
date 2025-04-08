@@ -1,16 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// @ts-nocheck
+import { ChunkComponent, DefineComponent, RootComponent } from "annil";
 
-const chunk = SubComponent<Root>()({
+const chunk = ChunkComponent<Root>()({
   data: {
     num: 1,
   },
 });
-const chunk1 = SubComponent<Root, "chunk1">()({
+const chunk1 = ChunkComponent<Root, "chunk1">()({
   data: {
     chunk1_num: 1,
   },
 });
+type Root = typeof rootComponent;
 const rootComponent = RootComponent()({
   properties: {
     list: Array,

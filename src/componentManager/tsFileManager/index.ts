@@ -11,10 +11,11 @@ import path from "path";
 import { assertNonNullable } from "../../utils/assertNonNullable";
 import { componentManager } from "..";
 import { parseImportedInfo } from "./generateImportedSubCompInfo";
+import { getChunkComponentInfo } from "./getChunkComponentInfo";
 import { getExternalComponentFilePaths } from "./getExternalComponentFilePath";
 import { getImportTypeInfo } from "./getImportTypeInfo";
 import { getRootComponentInfo } from "./getRootComponentInfo";
-import { getSubComponentInfo } from "./getSubComponentInfo";
+import { getCustomComponentInfo } from "./getSubComponentInfo";
 import { getSubComponentNames } from "./getSubComponentNames";
 import { getSubFileInfo } from "./getSubFileInfo";
 
@@ -52,14 +53,14 @@ class TsFile {
       },
       importedSubCompInfo: {},
     };
-
+    // console.log("hry 全部子组件", subComponentNames);
     // 组件名和组件类型名的映射关系表 例如 const h_iamge = SubComponent<root,$Image,"xx"> 映射后为 {h_image: $Image}
     const customComponentMap: CustomComponentMap = {};
     const importTypeInfo: ImportTypeInfo = {};
 
     // 获取外部导入的组件名和路径
     const externalComponentFilePaths = getExternalComponentFilePaths(tsFileAST, subComponentNames);
-
+    // console.log("hry 外部依赖文件路径", externalComponentFilePaths);
     // 处理外部组件信息
     for (const subComponentName in externalComponentFilePaths) {
       const subComponentPath = externalComponentFilePaths[subComponentName];
@@ -74,17 +75,22 @@ class TsFile {
         // 关联文件的URI
         relatedUri,
       );
+      // console.log("hry 外部文件依赖信息", subComponentInfo, subComponentName);
       if (subComponentInfo) {
         if (subComponentInfo.componentInfo) {
           if (subComponentInfo.componentInfo.type === "chunk") {
             tsFileInfo.chunkComopnentInfos[subComponentName] = subComponentInfo.componentInfo.info;
+            // console.log("hry 把外部的chunk信息加入到最终的信息中", tsFileInfo.chunkComopnentInfos);
           } else if (subComponentInfo.componentInfo.type === "custom") {
             customComponentMap[subComponentName] = subComponentInfo.componentInfo.componentTypeName;
             tsFileInfo.customComponentInfos[subComponentName] = subComponentInfo.componentInfo.info;
+            // console.log("hry 把外部的custom信息加入到最终的信息中并把import信息保留在map中", tsFileInfo.customComponentInfos[subComponentName], customComponentMap[subComponentName]);
           }
         }
         Object.assign(importTypeInfo, subComponentInfo.importTypeInfo);
+        // console.log("hry 把外部文件的导入信息加入到临时文件中", importTypeInfo);
       }
+      // console.log("hry 获取下一个外部路径信息",);
     }
 
     // 遍历AST解析组件信息
@@ -97,26 +103,35 @@ class TsFile {
       // 从当前文件声明的变量中获取组件信息
       /* eslint-disable @typescript-eslint/no-explicit-any */
       VariableDeclarator(variableDeclarator: any) {
-        const subComponentInfo = getSubComponentInfo(variableDeclarator, subComponentNames);
-        if (subComponentInfo) {
+        const customComponentInfo = getCustomComponentInfo(variableDeclarator, subComponentNames);
+        if (customComponentInfo) {
           const variableName = variableDeclarator.node.id.name;
-          if (subComponentInfo.type === "chunk") {
-            tsFileInfo.chunkComopnentInfos[variableName] = subComponentInfo.info;
-          } else if (subComponentInfo.type === "custom") {
-            customComponentMap[variableName] = subComponentInfo.componentTypeName;
-            tsFileInfo.customComponentInfos[variableName] = subComponentInfo.info;
-          }
+          customComponentMap[variableName] = variableDeclarator.node.init.callee?.typeParameters?.params[1]?.typeName
+            ?.name;
+          tsFileInfo.customComponentInfos[variableName] = customComponentInfo;
+          // console.log("hry 得到本地的自定义组件信息", customComponentInfo, variableDeclarator.node.init.callee?.typeParameters?.params[1]?.typeName?.name);
+
+          return;
+        }
+        const chunkComponentInfo = getChunkComponentInfo(variableDeclarator, subComponentNames);
+        if (chunkComponentInfo) {
+          const variableName = variableDeclarator.node.id.name;
+          tsFileInfo.chunkComopnentInfos[variableName] = chunkComponentInfo;
+          // console.log("hry 得到本地的chunk组件信息", chunkComponentInfo, variableName);
         }
 
         const rootComponentInfo = getRootComponentInfo(variableDeclarator);
         if (rootComponentInfo) {
           tsFileInfo.rootComponentInfo = rootComponentInfo;
+          // console.log("hry 得到本地的root组件信息", chunkComponentInfo, rootComponentInfo);
         }
       },
     });
 
     // 解析导入的子组件信息
     tsFileInfo.importedSubCompInfo = parseImportedInfo(customComponentMap, importTypeInfo, tsUri);
+    // console.log("hry 过滤后的import信息", tsFileInfo.importedSubCompInfo);
+    // console.log("hry 最终的信息", tsFileInfo);
 
     return tsFileInfo;
   }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { type CreateComponentType, DefineComponent, RootComponent, SubComponent } from "annil";
+import { type CreateComponentType, CustomComponent, DefineComponent, RootComponent } from "annil";
 type $Demo = CreateComponentType<"demo", {
   properties: {
     bool: boolean;
@@ -8,7 +8,7 @@ type $Demo = CreateComponentType<"demo", {
     adataBool?: boolean;
   };
 }>;
-const demo = SubComponent<Root, $Demo>()({
+const demo = CustomComponent<Root, $Demo>()({
   store: {
     demo_storeBool: (): boolean => true,
   },

@@ -1,4 +1,4 @@
-import { RootComponent, SubComponent } from "annil";
+import { CustomComponent, RootComponent } from "annil";
 
 type SubA = {
   properties: {
@@ -12,7 +12,7 @@ type SubA = {
   };
 };
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const subA = SubComponent<Root, SubA>()({
+const subA = CustomComponent<Root, SubA>()({
   inherit: {
     // subA_inheritUnion: ["xxx", "yyy"],
   },

@@ -22,8 +22,12 @@
     "languages": [
       {
         "id": "wxml",
-        "extensions": [".wxml"],
-        "aliases": ["WXML"]
+        "extensions": [
+          ".wxml"
+        ],
+        "aliases": [
+          "WXML"
+        ]
       }
     ],
     "commands": [
@@ -132,7 +136,7 @@
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vscode/test-cli": "^0.0.10",
-    "annil": "^1.12.0-alpha.4",
+    "annil": "^1.12.0-alpha.5",
     "eslint": "^8.56.0",
     "hry-types": "^0.19.2",
     "husky": "^9.1.7",

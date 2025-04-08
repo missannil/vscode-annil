@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// @ts-nocheck
+import { ChunkComponent, DefineComponent } from "annil";
 
-const chunk = SubComponent<Root>()({
+const chunk = ChunkComponent<{}>()({
   data: {
     num: 123,
   },
@@ -9,6 +8,5 @@ const chunk = SubComponent<Root>()({
 
 DefineComponent({
   name: "test",
-  // @ts-ignore
   subComponents: [chunk],
 });

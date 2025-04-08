@@ -1,4 +1,4 @@
-import { SubComponent } from "annil";
+import { CustomComponent, DefineComponent } from "annil";
 
 type SubA = {
   properties: {
@@ -8,10 +8,15 @@ type SubA = {
     // subA_onTap: string;
   };
 };
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const subA = SubComponent<object, SubA>()({
+
+const subA = CustomComponent<object, SubA>()({
   data: {
     subA_numAA: 1,
     // subA_userList: [{ _id: "1", name: "1" }],
   },
+});
+
+DefineComponent({
+  name: "test",
+  subComponents: [subA],
 });

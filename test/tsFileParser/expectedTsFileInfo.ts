@@ -1,4 +1,4 @@
-import { type TsFileInfo } from "../../out/componentManager/tsFileManager/types";
+import type { TsFileInfo } from "../../out/componentManager/tsFileManager/types";
 
 export const expectedTsFileInfo: TsFileInfo = {
   customComponentInfos: {
