@@ -4,7 +4,7 @@ import { replaceDocumentText } from "./tools/replaceDocumentText";
 import { tsFileParserTest } from "./tsFileParser";
 const suiteQueue: (() => Promise<void>)[] = [];
 
-const totalCount = 41;
+const totalCount = 42;
 let itemCount = 0;
 
 export function suite(name: string, fn: () => Promise<void>): void {

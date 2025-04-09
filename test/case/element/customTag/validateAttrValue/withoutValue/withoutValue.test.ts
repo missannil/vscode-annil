@@ -12,6 +12,7 @@ suite("withoutValue", async () => {
     withoutValue,
     withoutValue,
     withoutValue,
+    withoutValue,
   ]);
   await fixAll(wxmlUri);
   await assertErrorMessages(wxmlUri, []);

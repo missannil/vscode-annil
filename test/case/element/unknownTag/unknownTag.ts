@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { DefineComponent } from "annil";
+import { CustomComponent, DefineComponent } from "annil";
+import type { $SubB } from "~/subB";
 import type { $SubA } from "../../../mockComponents/subA";
 
-const subA = CustomComponent<Root, $SubA>()({});
-const subB = CustomComponent<Root, $SubB>()({});
+const subB = CustomComponent<{}, $SubB>()({});
 
 DefineComponent({
   name: "test",
-  // @ts-ignore
-  subComponents: [subA, subB],
+  // subComponents: [subB],
 });

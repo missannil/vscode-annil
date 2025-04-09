@@ -1,16 +1,12 @@
 import type { Element } from "domhandler";
 
 import { DiagnosticErrorType } from "../../../../../diagnosticFixProvider/errorType";
+import { isEventAttr } from "../../../../../utils/isEventAttr";
 import { checkChildNodes } from "../../../../checkChildNodes";
 import type { CheckContext } from "../../../../CheckContext";
 import { checkPendingConditionValue } from "../../../checkPendingConditionValue";
 import { validateMustacheValue } from "../../checkChunkTag/validateMustacheValue";
 import { validateEventsAttr } from "./validateEventsAttr";
-
-function isEventsAttr(rawAttrName: string): boolean {
-  return rawAttrName.startsWith("bind") || rawAttrName.startsWith("catch") || rawAttrName.startsWith("capture-bind")
-    || rawAttrName.startsWith("capture-catch");
-}
 
 /**
  * 一些原生标签的检测,主要检测
@@ -35,7 +31,7 @@ export function checkOtherTag(
   for (const rawAttrName of rawAttrNames) {
     const rawAttrValue = element.attribs[rawAttrName];
     if (checkContext.isIgnoreAttr(rawAttrName)) continue;
-    if (isEventsAttr(rawAttrName)) {
+    if (isEventAttr(rawAttrName)) {
       validateEventsAttr(
         rawAttrName,
         rawAttrValue,

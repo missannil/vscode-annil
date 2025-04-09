@@ -3,18 +3,16 @@ import { DiagnosticErrorType } from "../../../../../out/diagnosticFixProvider/er
 import { suite } from "../../../../start";
 import { assertErrorMessages } from "../../../../tools/assertErrorMessages";
 import { fixAll } from "../../../../tools/fixDiagnostic";
-
-suite("missingAttr", async () => {
-  const wxmlUri = vscode.Uri.file(__dirname + "/missingAttr.wxml");
-
-  const missingAttr = DiagnosticErrorType.missingAttr;
+suite("eventValue", async () => {
+  const wxmlUri = vscode.Uri.file(__dirname + "/eventValue.wxml");
+  const invalidEvent = DiagnosticErrorType.invalidEvent;
   await assertErrorMessages(wxmlUri, [
-    missingAttr,
-    missingAttr,
-    missingAttr,
-    missingAttr,
+    invalidEvent,
+    invalidEvent,
   ]);
-
   await fixAll(wxmlUri);
-  await assertErrorMessages(wxmlUri, [DiagnosticErrorType.invalidExpression, DiagnosticErrorType.invalidExpression]);
+  await assertErrorMessages(wxmlUri, [
+    invalidEvent,
+    invalidEvent,
+  ], "修复后验证");
 });

@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { DefineComponent, RootComponent } from "annil";
 
-const root = RootComponent()({
+const rootComponent = RootComponent()({
   customEvents: {
     onCustomTap: String,
   },
@@ -12,4 +12,9 @@ const root = RootComponent()({
       return 100;
     },
   },
+});
+
+DefineComponent({
+  name: "test",
+  rootComponent,
 });

@@ -1,0 +1,15 @@
+<!-- chunk中事件值检测 -->
+<block
+	wx:for="{{list}}"
+	wx:key="*this"
+	wx:for-item="user"
+>
+	<view
+		id="chunk1"
+		bind:tap="chunk1_tap"
+		catch:ddd="root_jjj"
+		catch:eee="root_customEvents"
+	>
+		<!-- annil disable start backup -->
+	</view>
+</block>

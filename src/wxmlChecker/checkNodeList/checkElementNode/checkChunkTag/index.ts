@@ -2,10 +2,12 @@ import type { Element } from "domhandler";
 
 import { DiagnosticErrorType } from "../../../../diagnosticFixProvider/errorType";
 import { assertNonNullable } from "../../../../utils/assertNonNullable";
+import { isEventAttr } from "../../../../utils/isEventAttr";
 import { checkChildNodes } from "../../../checkChildNodes";
 import type { CheckContext } from "../../../CheckContext";
 import { checkPendingConditionValue } from "../../checkPendingConditionValue";
 import { validateRepeatSubComponentTag } from "../checkCustomTag/validateRepeatSubComponentTag";
+import { validateEventsAttr } from "../checkNativeTag/checkOtherTag/validateEventsAttr";
 import { validateMustacheValue } from "./validateMustacheValue";
 
 export function checkChunkTag(
@@ -14,7 +16,7 @@ export function checkChunkTag(
   checkContext: CheckContext,
 ): void {
   const chunkTagMark = checkContext.getChunkTagMark(elementNode);
-  const { tsFileInfo, wxForInfos } = checkContext;
+  const { tsFileInfo, wxForInfos, textlines, diagnosticList } = checkContext;
   checkContext.saveChunkTagMark(chunkTagMark);
   // 检测之前block标签中的条件属性的值
   checkPendingConditionValue(
@@ -34,6 +36,17 @@ export function checkChunkTag(
     const rawAttrValue = elementNode.attribs[rawAttrName];
     // 包含`data-`开头的属性或是未知的属性(有诊断)
     if (checkContext.isIgnoreAttr(rawAttrName)) continue;
+    if (isEventAttr(rawAttrName)) {
+      validateEventsAttr(
+        rawAttrName,
+        rawAttrValue,
+        tsFileInfo.chunkComopnentInfos[chunkTagMark]?.events || [],
+        textlines,
+        startLine,
+        diagnosticList,
+      );
+      continue;
+    }
     validateMustacheValue(
       rawAttrValue,
       startLine,

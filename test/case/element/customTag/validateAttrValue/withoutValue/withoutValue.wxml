@@ -1,5 +1,6 @@
 <!-- 无值和空值 -->
 <subA
+	_id
 	numA
 	userList
 	bind:onTap

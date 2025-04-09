@@ -34,7 +34,6 @@ const chunk1 = ChunkComponent<Root>()({
     _xxx: 123,
   },
   events: {
-    // @ts-ignore
     ddd_aaa: String,
   },
 });

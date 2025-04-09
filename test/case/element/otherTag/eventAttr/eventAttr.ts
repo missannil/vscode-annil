@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-const root = RootComponent()({
+import { DefineComponent, RootComponent } from "annil";
+
+const rootComponent = RootComponent()({
   customEvents: {
     onCustomTap: String,
     errCustomTap: String,
@@ -10,4 +12,9 @@ const root = RootComponent()({
     onCustomCatchTap: String,
     errEvent: String,
   },
+});
+
+DefineComponent({
+  name: "test",
+  rootComponent,
 });

@@ -1,12 +1,10 @@
 <view class>
 	<subA
-		_id="{{  条件表达式0 ? aaa : bbb}}"
-		numA="{{自定义}}"
+		_id="{{  dataBool ? aaa : bbb}}"
+		numA="{{dataBool}}"
 		userList="{{subA_userList}}"
 	></subA>
 	<subB num="{{subB_num}}"></subB>
-	<subC></subC>
-	<subD></subD>
 	<subE num="{{subE_num}}"></subE>
 	<chunk3 data-ddd=" ddd_{{ffdf}}">
 		<view>rootDataTest</view>

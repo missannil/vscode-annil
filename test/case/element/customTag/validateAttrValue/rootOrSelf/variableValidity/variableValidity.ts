@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { CustomComponent, RootComponent } from "annil";
+import { CustomComponent, DefineComponent, RootComponent } from "annil";
 import type { $SubA } from "~/subA";
 
 const subA = CustomComponent<Root, $SubA>()({
@@ -21,5 +21,6 @@ const rootComponent = RootComponent()({
   },
 });
 DefineComponent({
+  name: "test",
   subComponents: [subA],
 });
