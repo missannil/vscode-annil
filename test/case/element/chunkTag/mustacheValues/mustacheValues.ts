@@ -1,28 +1,40 @@
 import { ChunkComponent, DefineComponent, RootComponent } from "annil";
-
-const chunk = ChunkComponent<Root>()({
+const chunkA = ChunkComponent<Root, "chunkA">()({
   data: {
-    num: 1,
+    chunkA_num: 123,
+    chunkA_str: "str",
   },
 });
-const chunk1 = ChunkComponent<Root, "chunk1">()({
+const chunkB = ChunkComponent<Root, "chunkB">()({
   data: {
-    chunk1_num: 1,
+    chunkB_num: 123,
+    chunkB_str: "str",
+  },
+});
+const chunkC = ChunkComponent<Root, "chunkC">()({
+  data: {
+    chunkC_num: 123,
+    chunkC_str: "str",
   },
 });
 type Root = typeof rootComponent;
 const rootComponent = RootComponent()({
-  properties: {
-    list: Array,
+  customEvents: {
+    onCustomTap: String,
   },
   data: {
-    bool: true,
-    str: "string",
-    obj: {},
+    aaa: "aaa",
+    list: [1, 2, 3],
+  },
+  computed: {
+    rootData() {
+      return 100;
+    },
   },
 });
 
 DefineComponent({
   name: "test",
-  subComponents: [chunk, chunk1],
+  rootComponent,
+  subComponents: [chunkA, chunkB, chunkC],
 });

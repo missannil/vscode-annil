@@ -1,40 +1,21 @@
-<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据 -->
-<view
-	id="chunk"
-	style="color:{{xxx}}"
-	class="ddd {{bool[0]}}"
-></view>
-
-<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据和wxfor产生的变量 -->
+<!-- chunk中使用的mustache变量 可以使用自身、上层chunk和 rootComponent中的变量 -->
 <block
 	wx:for="{{list}}"
-	wx:key="*this"
-	wx:for-item="user"
+	wx:key="keys"
 >
+	<!-- ✅ -->
 	<view
-		id="chunk1"
-		style="color:{{xxx}};text-align:{{user}}"
-		class="{{bool.xxx }}"
-	></view>
-</block>
-
-<!-- annil disable start backup -->
-<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据 -->
-<view
-	id="chunk"
-	style="color:{{xxx}}"
-	class="ddd {{bool[0]}}"
-></view>
-
-<!-- chunk中使用的mustache变量 只能来自对应的chunk中定义的数据和wxfor产生的变量 -->
-<block
-	wx:for="{{list}}"
-	wx:key="*this"
-	wx:for-item="user"
->
+		id="chunkA"
+		style="width:{{chunkA_num}}; height:{{chunkA_str}}  {{rootData > item}}"
+	>
+		<view
+			id="chunkB"
+			class="h-100 w-20 {{chunkA_str}} {{chunkB_str}} {{rootData > item}}"
+		></view>
+	</view>
+	<!-- ❎  -->
 	<view
-		id="chunk1"
-		style="color:{{xxx}};text-align:{{user}}"
-		class="{{bool.xxx }}"
+		id="chunkC"
+		style="width:{{chunkA_num}}; height:{{chunkB_str}} "
 	></view>
 </block>

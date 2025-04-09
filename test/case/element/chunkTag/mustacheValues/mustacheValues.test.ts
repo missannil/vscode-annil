@@ -5,23 +5,15 @@ import { assertErrorMessages } from "../../../../tools/assertErrorMessages";
 import { fixAll } from "../../../../tools/fixDiagnostic";
 suite("mustacheValues", async () => {
   const wxmlUri = vscode.Uri.file(__dirname + "/mustacheValues.wxml");
-  const duplicateId = DiagnosticErrorType.duplicateId;
-  const nonSubComponentOrWxforVariable = DiagnosticErrorType.nonSubComponentOrWxforVariable;
+
+  const invalidValue = DiagnosticErrorType.invalidValue;
   await assertErrorMessages(wxmlUri, [
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    duplicateId,
-    duplicateId,
+    invalidValue,
+    invalidValue,
   ]);
   await fixAll(wxmlUri);
   await assertErrorMessages(wxmlUri, [
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    duplicateId,
-    duplicateId,
+    invalidValue,
+    invalidValue,
   ], "修复后验证");
 });

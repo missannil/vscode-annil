@@ -56,10 +56,24 @@ export class CheckContext extends CommentManager {
   public popChunkTagMarks(): void {
     this.#outerChunkTagMarks.pop();
   }
+  // 获取所有的chunk组件的变量
   public getOuterChunkTagVariables(): string[] {
     return this.#outerChunkTagMarks.flatMap((id) =>
       assertNonNullable(this.tsFileInfo.chunkComopnentInfos[id]).dataList
     );
+  }
+  // 获取外层有效事件(如果外层有chunk组件，则获取外层chunk组件的events,否则获取root组件的events 都允许使用root组件的customEvents)
+  public getOuterEvents(): string[] {
+    const lastChunkTagMark = this.#outerChunkTagMarks[this.#outerChunkTagMarks.length - 1];
+    const customEvents = this.tsFileInfo.rootComponentInfo.customEvents;
+
+    if (lastChunkTagMark === undefined) {
+      return this.tsFileInfo.rootComponentInfo.events.concat(customEvents);
+    } else {
+      return assertNonNullable(this.tsFileInfo.chunkComopnentInfos[lastChunkTagMark]).events.concat(
+        customEvents,
+      );
+    }
   }
   // 之前的条件节点属性名
   #preConditionAttrName: PreConditionAttrName = null;

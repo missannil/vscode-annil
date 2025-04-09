@@ -1,6 +1,4 @@
 {
   "component": true,
-  "usingComponents": {
-    "subA": "../subA/subA"
-  }
+  "usingComponents": {}
 }

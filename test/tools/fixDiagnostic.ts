@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { componentManager } from "../../out/componentManager";
-import type { JsonFsPath, WxmlFsPath } from "../../out/componentManager/uriHelper";
+import type { JsonFsPath, WxmlFsPath } from "../../src/componentManager/uriHelper";
 import { getDiagnosticList } from "./getDiagnosticList";
 import { sleep } from "./sleep";
 

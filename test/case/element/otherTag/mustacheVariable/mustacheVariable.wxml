@@ -1,5 +1,15 @@
-<!-- subA(自闭合)标签 会被检测 -->
-<view
-	class="h-100 w-20 {{adaa}} {{aaa}}"
-	style="width:{{width}}; height:{{height}}"
-></view>
+<!-- 非子组件标签可以使用外层所有chunk的数据和根组件的数据和wxFor的变量 -->
+
+<block
+	wx:for="{{list}}"
+	wx:key="keys"
+>
+	<view id="chunkA">
+		<view id="chunkB">
+			<!-- ✅ 非子组件标签 -->
+			<view class="h-100 w-20 {{chunkA_str}} {{chunkB_str}} {{rootData > item === index}}"></view>
+			<!-- ❎ -->
+			<view class="h-100 w-20 {{errorValue}}"></view>
+		</view>
+	</view>
+</block>

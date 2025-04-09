@@ -6,5 +6,5 @@ suite("eventAttr", async () => {
   const wxmlUri = vscode.Uri.file(__dirname + "/eventAttr.wxml");
 
   const invalidEvent = DiagnosticErrorType.invalidEvent;
-  await assertErrorMessages(wxmlUri, [invalidEvent, invalidEvent]);
+  await assertErrorMessages(wxmlUri, [invalidEvent, invalidEvent, invalidEvent]);
 });

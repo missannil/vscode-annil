@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import type { DiagnosticMessage } from "../../out/diagnosticFixProvider/errorType";
+import type { DiagnosticMessage } from "../../src/diagnosticFixProvider/errorType";
 import { getDiagnosticList } from "./getDiagnosticList";
 
 export function assertStrictEquality(actual: unknown[], expected: unknown[], decs: string = ""): void {

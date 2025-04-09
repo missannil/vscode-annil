@@ -54,8 +54,9 @@ export function checkChunkTag(
       checkContext.getOuterChunkTagVariables().concat(
         wxForInfos.itemNames,
         wxForInfos.indexNames,
+        tsFileInfo.rootComponentInfo.dataList,
       ),
-      DiagnosticErrorType.nonSubComponentOrWxforVariable,
+      DiagnosticErrorType.invalidValue,
       rawAttrName,
     );
   }

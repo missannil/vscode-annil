@@ -1,20 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-import { DefineComponent, RootComponent } from "annil";
-
+import { ChunkComponent, DefineComponent, RootComponent } from "annil";
+const chunk = ChunkComponent<Root, "chunk">()({
+  events: {
+    chunk_eventA() {
+      void 0;
+    },
+  },
+});
+type Root = typeof rootComponent;
 const rootComponent = RootComponent()({
   customEvents: {
-    onCustomTap: String,
-    errCustomTap: String,
+    rootCustomEvent: String,
   },
-
   events: {
-    onCustomCatchTap: String,
-    errEvent: String,
+    rootEvent: String,
   },
 });
 
 DefineComponent({
   name: "test",
   rootComponent,
+  subComponents: [chunk],
 });

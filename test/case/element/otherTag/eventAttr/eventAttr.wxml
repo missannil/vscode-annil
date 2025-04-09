@@ -1,8 +1,20 @@
-<!-- subA(自闭合)标签 会被检测 -->
+<!-- 外层是chunk组件 只能使用chunk组件中的事件 -->
+<view id="chunk">
+	<!-- ✅ -->
+	<view>
+		<view bind:onTap="chunk_eventA"></view>
+	</view>
+	<!-- ❎ -->
+	<view bind:onTap="chunk_eventxxx"></view>
+</view>
+<!-- 外层没有chunk,可以使用rootComponent中的events和customEvents -->
+<!-- ✅ -->
 <view
-	class="h-100 w-20"
-	bindonTap="errCustomTa"
-	bind:onTap="onCustomTap"
-	bindcatch="errEven"
-	bind:catch="onCustomCatchTap"
+	bind:onTap="rootCustomEvent"
+	bind:catch="rootEvent"
+></view>
+<!-- ❎ -->
+<view
+	bind:onTap="rootCustomEventxxx"
+	bind:catch="rootEventxxx"
 ></view>

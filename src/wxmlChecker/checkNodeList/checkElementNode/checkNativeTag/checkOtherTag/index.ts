@@ -31,11 +31,12 @@ export function checkOtherTag(
   for (const rawAttrName of rawAttrNames) {
     const rawAttrValue = element.attribs[rawAttrName];
     if (checkContext.isIgnoreAttr(rawAttrName)) continue;
+
     if (isEventAttr(rawAttrName)) {
       validateEventsAttr(
         rawAttrName,
         rawAttrValue,
-        tsFileInfo.rootComponentInfo.events.concat(tsFileInfo.rootComponentInfo.customEvents),
+        checkContext.getOuterEvents(),
         textlines,
         startLine,
         diagnosticList,
@@ -47,8 +48,12 @@ export function checkOtherTag(
       rawAttrValue,
       startLine,
       checkContext,
-      tsFileInfo.rootComponentInfo.dataList.concat(wxForInfos.itemNames).concat(wxForInfos.indexNames),
-      DiagnosticErrorType.nonRootComponentDataOrWxforVariable,
+      checkContext.getOuterChunkTagVariables().concat(
+        wxForInfos.itemNames,
+        wxForInfos.indexNames,
+        tsFileInfo.rootComponentInfo.dataList,
+      ),
+      DiagnosticErrorType.invalidValue,
       rawAttrName,
     );
   }

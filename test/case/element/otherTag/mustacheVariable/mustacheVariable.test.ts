@@ -6,8 +6,8 @@ import { fixAll } from "../../../../tools/fixDiagnostic";
 suite("mustacheVariable", async () => {
   const wxmlUri = vscode.Uri.file(__dirname + "/mustacheVariable.wxml");
 
-  const nonRootComponentDataOrWxforVariable = DiagnosticErrorType.nonRootComponentDataOrWxforVariable;
-  await assertErrorMessages(wxmlUri, [nonRootComponentDataOrWxforVariable, nonRootComponentDataOrWxforVariable]);
+  const invalidValue = DiagnosticErrorType.invalidValue;
+  await assertErrorMessages(wxmlUri, [invalidValue]);
   await fixAll(wxmlUri);
-  await assertErrorMessages(wxmlUri, [nonRootComponentDataOrWxforVariable, nonRootComponentDataOrWxforVariable]);
+  await assertErrorMessages(wxmlUri, [invalidValue]);
 });

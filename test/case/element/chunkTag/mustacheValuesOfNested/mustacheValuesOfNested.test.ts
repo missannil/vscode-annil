@@ -5,22 +5,18 @@ import { assertErrorMessages } from "../../../../tools/assertErrorMessages";
 import { fixAll } from "../../../../tools/fixDiagnostic";
 suite("mustacheValuesOfNested", async () => {
   const wxmlUri = vscode.Uri.file(__dirname + "/mustacheValuesOfNested.wxml");
-  const nonSubComponentOrWxforVariable = DiagnosticErrorType.nonSubComponentOrWxforVariable;
+  const invalidValue = DiagnosticErrorType.invalidValue;
   const duplicateId = DiagnosticErrorType.duplicateId;
   await assertErrorMessages(wxmlUri, [
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
+    invalidValue,
+    invalidValue,
     duplicateId,
     duplicateId,
   ]);
   await fixAll(wxmlUri);
   await assertErrorMessages(wxmlUri, [
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
-    nonSubComponentOrWxforVariable,
+    invalidValue,
+    invalidValue,
     duplicateId,
     duplicateId,
   ]);
