@@ -34,12 +34,12 @@ export async function createAnnilComponent(uri: vscode.Uri, isPage: boolean): Pr
   const newWxmlFileUri = vscode.Uri.joinPath(newDirUri, `${newFileName}.wxml`);
   const newWxssFileUri = vscode.Uri.joinPath(newDirUri, `${newFileName}.wxss`);
 
-  // 获取代码片段并处理变量
-  const variables = { name: newFileName };
-  const tsContent = processSnippet(getSnippet("typescript", isPage), variables);
-  const jsonContent = processSnippet(getSnippet("json", isPage), variables);
-  const wxmlContent = processSnippet(getSnippet("wxml", isPage), variables);
-  const wxssContent = processSnippet(getSnippet("wxss", isPage), variables);
+  // 获取代码片段并处理代码片段中的变量(替换为用户输入的名称)
+
+  const tsContent = processSnippet(getSnippet("typescript", isPage), newFileName);
+  const jsonContent = getSnippet("json", isPage);
+  const wxmlContent = getSnippet("wxml", isPage);
+  const wxssContent = getSnippet("wxss", isPage);
 
   // 写入文件内容
   await vscode.workspace.fs.writeFile(newTsFileUri, Buffer.from(tsContent));
@@ -54,30 +54,22 @@ export async function createAnnilComponent(uri: vscode.Uri, isPage: boolean): Pr
 /**
  * 处理代码片段中的变量
  * @param snippet 代码片段
- * @param variables 变量表
+ * @param fileName 文件名
  */
-export function processSnippet(snippet: string, variables: Record<string, string>): string {
+export function processSnippet(snippet: string, fileName: string): string {
   // 处理空字符串情况
   if (!snippet) {
     return ""; // 返回空字符串，不添加换行符
   }
-
-  let result = snippet;
-  // 替换用户定义的变量
-  for (const [key, value] of Object.entries(variables)) {
-    result = result.replace(new RegExp(`\\$\\{${key}\\}`, "g"), value);
+  try {
+    const componentType = fileName.charAt(0).toUpperCase() + fileName.slice(1);
+    // 把$1替换为用户输入的名称，$2替换为组件类型
+    snippet = snippet.replace(/\$1/g, fileName);
+    snippet = snippet.replace(/\$2/g, componentType);
+    console.log("hry 1", snippet);
+  } catch (error) {
+    console.error("处理代码片段时出错:", error);
   }
 
-  // 移除VSCode特殊占位符，如$0、$1等
-  result = result.replace(/\$\d+/g, "");
-
-  // 确保非空内容的文件以单个换行符结束
-  if (result.trim() && !result.endsWith("\n")) {
-    result += "\n";
-  } else if (result.trim() && result.endsWith("\n\n")) {
-    // 如果有多个换行符，只保留一个
-    result = result.replace(/\n+$/, "\n");
-  }
-
-  return result;
+  return snippet;
 }
