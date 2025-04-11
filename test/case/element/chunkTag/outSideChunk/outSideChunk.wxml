@@ -1,13 +1,4 @@
 <view
 	id="chunk"
-	compId="{{xxx}}"
 	class="ddd"
->{{outSideChunk}}</view>  
-
-<!-- annil disable line -->
-<view
-	id="chunk"
-	compId="{{xxx}}" 
-	class="ddd"
->{{num}}</view>
- 
+>{{outSideChunk}} {{num1}}</view>

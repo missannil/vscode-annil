@@ -1,7 +1,9 @@
 <!-- data-开头的属性忽略检查 -->
 <subA
+	numA="{{subA_numA}}"
+	userList="{{subA_userList}}"
 	_id="{{rootData}}"
-	data-id="subA"
+	data-id="{{sffffubA}}"
 	compId="{{subA}}"
 	bind:eventA="subA_eventA"
 />

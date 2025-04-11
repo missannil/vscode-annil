@@ -4,6 +4,18 @@ import { suite } from "../../../../start";
 import { assertErrorMessages } from "../../../../tools/assertErrorMessages";
 suite("ignoreAttr", async () => {
   const wxmlUri = vscode.Uri.file(__dirname + "/ignoreAttr.wxml");
-
-  await assertErrorMessages(wxmlUri, [DiagnosticErrorType.duplicateId]);
+  const invalidValue = DiagnosticErrorType.invalidValue;
+  await assertErrorMessages(wxmlUri, [invalidValue, invalidValue]);
 });
+
+/**
+ *
+ *
+<view
+  id="chunk"
+  data-id="{{xxx}}"
+  compId="{{xxx}}"
+  class="ddd"
+>{{num}}</view>
+
+ */

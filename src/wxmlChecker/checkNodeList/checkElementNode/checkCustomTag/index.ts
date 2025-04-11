@@ -2,8 +2,11 @@ import type { Element } from "domhandler";
 import { getVariablesFromComponentInfo } from "../../../../componentManager/tsFileManager/helper";
 import { DiagnosticErrorType } from "../../../../diagnosticFixProvider/errorType";
 import { assertNonNullable } from "../../../../utils/assertNonNullable";
+import { getMustacheValue } from "../../../../utils/getMustacheExpressions";
 import { checkChildNodes } from "../../../checkChildNodes";
 import type { CheckContext } from "../../../CheckContext";
+import { validateExpression } from "../../../validators/validateExpression";
+import { validateMustacheSyntax } from "../../../validators/validateMustachSyntax";
 import { checkPendingConditionValue } from "../../checkPendingConditionValue";
 import { validateAttrValue } from "./validateAttrValue";
 import { validateMissingAttr } from "./validateMissingAttr";
@@ -17,7 +20,7 @@ export function checkCustomTag(
 ): void {
   const tagName = elementNode.name;
   // 检测之前block标签中的条件属性的值
-  const { tsFileInfo, wxForInfos } = checkContext;
+  const { tsFileInfo, wxForInfos, textlines, diagnosticList } = checkContext;
   checkPendingConditionValue(
     getVariablesFromComponentInfo(assertNonNullable(tsFileInfo.customComponentInfos[tagName])).concat(
       wxForInfos.itemNames,
@@ -36,8 +39,25 @@ export function checkCustomTag(
   validateMissingAttr(elementNode, rawAttrNames, expectedAttrNames, componentInfo, startLine, checkContext);
   for (const rawAttrName of rawAttrNames) {
     const rawAttrValue = elementNode.attribs[rawAttrName];
-    if (checkContext.isIgnoreAttr(rawAttrName)) continue;
-
+    if (checkContext.isIgnoreAttr(rawAttrName)) {
+      validateMustacheSyntax(rawAttrName, rawAttrValue, textlines, startLine, diagnosticList)
+        && validateExpression(
+          getMustacheValue(rawAttrValue),
+          getVariablesFromComponentInfo(componentInfo).concat(
+            wxForInfos.itemNames,
+            tsFileInfo.rootComponentInfo.dataList,
+            wxForInfos.indexNames,
+          ),
+          startLine,
+          textlines,
+          diagnosticList,
+          DiagnosticErrorType.invalidValue,
+          wxForInfos.itemNames,
+          true,
+          rawAttrName,
+        );
+      continue;
+    }
     if (
       !validateUnknownAttrs(rawAttrName, rawAttrValue, expectedAttrNames, startLine, checkContext, {
         type: "custom",

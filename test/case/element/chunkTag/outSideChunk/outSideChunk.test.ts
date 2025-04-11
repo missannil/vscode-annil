@@ -4,6 +4,15 @@ import { suite } from "../../../../start";
 import { assertErrorMessages } from "../../../../tools/assertErrorMessages";
 suite("outSideChunk", async () => {
   const wxmlUri = vscode.Uri.file(__dirname + "/outSideChunk.wxml");
-
-  await assertErrorMessages(wxmlUri, [DiagnosticErrorType.duplicateId]);
+  const nonSubComponentOrWxforVariable = DiagnosticErrorType.nonSubComponentOrWxforVariable;
+  await assertErrorMessages(wxmlUri, [nonSubComponentOrWxforVariable]);
 });
+/**
+ *
+<view
+  id="chunk"
+  class="ddd"
+>{{outSideChunk}}</view>
+
+
+ */

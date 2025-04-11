@@ -2,9 +2,12 @@ import type { Element } from "domhandler";
 
 import { DiagnosticErrorType } from "../../../../diagnosticFixProvider/errorType";
 import { assertNonNullable } from "../../../../utils/assertNonNullable";
+import { getMustacheValue } from "../../../../utils/getMustacheExpressions";
 import { isEventAttr } from "../../../../utils/isEventAttr";
 import { checkChildNodes } from "../../../checkChildNodes";
 import type { CheckContext } from "../../../CheckContext";
+import { validateExpression } from "../../../validators/validateExpression";
+import { validateMustacheSyntax } from "../../../validators/validateMustachSyntax";
 import { checkPendingConditionValue } from "../../checkPendingConditionValue";
 import { validateRepeatSubComponentTag } from "../checkCustomTag/validateRepeatSubComponentTag";
 import { validateEventsAttr } from "../checkNativeTag/checkOtherTag/validateEventsAttr";
@@ -35,12 +38,30 @@ export function checkChunkTag(
   for (const rawAttrName of rawAttrNames) {
     const rawAttrValue = elementNode.attribs[rawAttrName];
     // 包含`data-`开头的属性或是未知的属性(有诊断)
-    if (checkContext.isIgnoreAttr(rawAttrName)) continue;
+    if (checkContext.isIgnoreAttr(rawAttrName)) {
+      validateMustacheSyntax(rawAttrName, rawAttrValue, textlines, startLine, diagnosticList)
+        && validateExpression(
+          getMustacheValue(rawAttrValue),
+          tsFileInfo.rootComponentInfo.dataList.concat(
+            assertNonNullable(tsFileInfo.chunkComopnentInfos[chunkTagMark]).dataList,
+            wxForInfos.itemNames,
+            wxForInfos.indexNames,
+          ),
+          startLine,
+          textlines,
+          diagnosticList,
+          DiagnosticErrorType.invalidValue,
+          wxForInfos.itemNames,
+          true,
+          rawAttrName,
+        );
+      continue;
+    }
     if (isEventAttr(rawAttrName)) {
       validateEventsAttr(
         rawAttrName,
         rawAttrValue,
-        tsFileInfo.chunkComopnentInfos[chunkTagMark]?.events || [],
+        assertNonNullable(tsFileInfo.chunkComopnentInfos[chunkTagMark]).events,
         textlines,
         startLine,
         diagnosticList,
