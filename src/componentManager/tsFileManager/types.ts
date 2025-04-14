@@ -69,9 +69,17 @@ export type SubComponentInfo = {
   type: "custom";
   componentTypeName: string; // $Image
   info: CustomComponentInfo;
+  line?: number;
+  uri?: TsUri;
 } | {
   type: "chunk";
   info: ChunkComponentInfo;
+  line?: number;
+  uri?: TsUri;
+};
+type UseCustomComponentLocation = {
+  uri: TsUri;
+  line: number;
 };
 
 export type TsFileInfo = {
@@ -79,6 +87,7 @@ export type TsFileInfo = {
   rootComponentInfo: RootComponentInfo;
   chunkComopnentInfos: ChunkComponentInfos;
   importedSubCompInfo: ImportTypeInfo;
+  useCustomComponentLocations: Record<VariableName, UseCustomComponentLocation>;
 };
 
 export type ChangedTsFileInfo = { type: "main"; text?: string } | { type: "related"; text: string; uri: TsUri };

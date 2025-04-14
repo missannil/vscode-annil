@@ -19,8 +19,9 @@ export function getSubFileInfo(
     componentInfo: null,
     importTypeInfo: {},
   };
+  const isUri = typeof uriOrText !== "string";
   let tsText: string;
-  if (typeof uriOrText === "string") {
+  if (!isUri) {
     tsText = uriOrText;
   } else {
     try {
@@ -46,6 +47,11 @@ export function getSubFileInfo(
           componentTypeName: variableDeclarator.node.init.callee?.typeParameters?.params[1]?.typeName?.name,
           info: customComponentInfo,
         };
+        // 第一次获取到组件信息时是通过uri获取的,所以这里会记录uri和行号,后续修改时传入的是text,不会进入这个分支
+        if (isUri) {
+          subFileInfo.componentInfo.uri = uriOrText;
+          subFileInfo.componentInfo.line = variableDeclarator.node.loc?.start.line;
+        }
 
         return;
       }
@@ -57,6 +63,11 @@ export function getSubFileInfo(
           type: "chunk",
           info: chunkComponentInfo,
         };
+        // 第一次获取到组件信息时是通过uri获取的,所以这里会记录uri和行号,后续修改时传入的是text,不会进入这个分支
+        if (isUri) {
+          subFileInfo.componentInfo.uri = uriOrText;
+          subFileInfo.componentInfo.line = variableDeclarator.node.loc?.start.line;
+        }
       }
     },
   });

@@ -52,6 +52,7 @@ class TsFile {
         boolTypeDatas: [],
       },
       importedSubCompInfo: {},
+      useCustomComponentLocations: {},
     };
     // console.log("hry 全部子组件", subComponentNames);
     // 组件名和组件类型名的映射关系表 例如 const h_iamge = SubComponent<root,$Image,"xx"> 映射后为 {h_image: $Image}
@@ -80,12 +81,17 @@ class TsFile {
         if (subComponentInfo.componentInfo) {
           if (subComponentInfo.componentInfo.type === "chunk") {
             tsFileInfo.chunkComopnentInfos[subComponentName] = subComponentInfo.componentInfo.info;
-            // console.log("hry 把外部的chunk信息加入到最终的信息中", tsFileInfo.chunkComopnentInfos);
           } else if (subComponentInfo.componentInfo.type === "custom") {
             customComponentMap[subComponentName] = subComponentInfo.componentInfo.componentTypeName;
             tsFileInfo.customComponentInfos[subComponentName] = subComponentInfo.componentInfo.info;
-            // console.log("hry 把外部的custom信息加入到最终的信息中并把import信息保留在map中", tsFileInfo.customComponentInfos[subComponentName], customComponentMap[subComponentName]);
           }
+          if (subComponentInfo.componentInfo.uri) {
+            tsFileInfo.useCustomComponentLocations[subComponentName] = {
+              uri: subComponentInfo.componentInfo.uri,
+              line: assertNonNullable(subComponentInfo.componentInfo.line),
+            };
+          }
+          // console.log("hry 3331", subComponentName, subComponentInfo.componentInfo.uri, subComponentInfo.componentInfo.line);
         }
         Object.assign(importTypeInfo, subComponentInfo.importTypeInfo);
         // console.log("hry 把外部文件的导入信息加入到临时文件中", importTypeInfo);
@@ -111,6 +117,12 @@ class TsFile {
           tsFileInfo.customComponentInfos[variableName] = customComponentInfo;
           // console.log("hry 得到本地的自定义组件信息", customComponentInfo, variableDeclarator.node.init.callee?.typeParameters?.params[1]?.typeName?.name);
 
+          tsFileInfo.useCustomComponentLocations[variableName] = {
+            uri: tsUri,
+            line: variableDeclarator.node.loc?.start.line,
+          };
+          // console.log("hry 当前页中使用的custom", variableName, tsUri.path, variableDeclarator.node.loc?.start.line);
+
           return;
         }
         const chunkComponentInfo = getChunkComponentInfo(variableDeclarator, subComponentNames);
@@ -118,6 +130,12 @@ class TsFile {
           const variableName = variableDeclarator.node.id.name;
           tsFileInfo.chunkComopnentInfos[variableName] = chunkComponentInfo;
           // console.log("hry 得到本地的chunk组件信息", chunkComponentInfo, variableName);
+
+          tsFileInfo.useCustomComponentLocations[variableName] = {
+            uri: tsUri,
+            line: variableDeclarator.node.loc?.start.line,
+          };
+          // console.log("hry 当前页面中使用的chunk", variableName, tsUri.path, variableDeclarator.node.loc?.start.line);
         }
 
         const rootComponentInfo = getRootComponentInfo(variableDeclarator);
