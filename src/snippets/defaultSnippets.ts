@@ -9,6 +9,7 @@ export const defaultSnippets: DefaultSnippets = {
         "{",
         "  \"component\": true,",
         "  \"usingComponents\": {}",
+        "  \"componentPlaceholder\": {}",
         "}",
         "",
       ],
@@ -19,6 +20,7 @@ export const defaultSnippets: DefaultSnippets = {
       "body": [
         "{",
         "  \"usingComponents\": {}",
+        "  \"componentPlaceholder\": {}",
         "}",
         "",
       ],

@@ -10,8 +10,7 @@
 	</text>
 </block>
 <!-- annil disable line -->
-	<text>
-		errorValue {{ $um > $num === www === item ? 123 : _dfkk }}
-		{{ @aaa 123 > === ? fff : index + str}}
-	</text>
- 
+<text>
+	errorValue {{ $um > $num === www === item ? 123 : _dfkk }}
+	{{ @aaa 123 > === ? fff : index + str}}
+</text>

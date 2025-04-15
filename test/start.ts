@@ -4,7 +4,7 @@ import { replaceDocumentText } from "./tools/replaceDocumentText";
 import { tsFileParserTest } from "./tsFileParser";
 const suiteQueue: (() => Promise<void>)[] = [];
 
-const totalCount = 42;
+const totalCount = 46;
 let itemCount = 0;
 
 export function suite(name: string, fn: () => Promise<void>): void {
@@ -45,8 +45,8 @@ export function suite(name: string, fn: () => Promise<void>): void {
 }
 
 async function suiteTest(): Promise<void> {
-  const allCases = await vscode.workspace.findFiles("case/**/comment/**/*.test.js");
-  const commentCases = await vscode.workspace.findFiles("case/**/comment/**/*.test.js");
+  const allCases = await vscode.workspace.findFiles("case/**/*.test.js");
+  const commentCases = await vscode.workspace.findFiles("case/comment/**/*.test.js");
   const customTagCases = await vscode.workspace.findFiles("case/**/customTag/**/*.test.js");
   const nativeTagCases = await vscode.workspace.findFiles("case/**/nativeTag/**/*.test.js");
   const elementTagCases = await vscode.workspace.findFiles("case/**/element/**/*.test.js");
@@ -56,10 +56,11 @@ async function suiteTest(): Promise<void> {
   const text = await vscode.workspace.findFiles("case/**/text/**/*.test.js");
   const element = await vscode.workspace.findFiles("case/**/element/**/*.test.js");
   const caseList = [
-    ...commentCases,
-    ...element,
-    ...text,
-    ...jsonError,
+    ...allCases,
+    // ...commentCases,
+    // ...element,
+    // ...text,
+    // ...jsonError,
     // ...customTagCases,
     // ...nativeTagCases,
   ];
@@ -71,12 +72,11 @@ async function suiteTest(): Promise<void> {
     //   continue;
     // }
     await import(testFileUri.fsPath);
-    if (testFileUri.fsPath.includes("withoutValueOfBlock")) {
+    if (testFileUri.fsPath.includes("missingPlaceholder")) {
       // await import(testFileUri.fsPath);
     }
   }
 }
-
 export async function runTest(): Promise<void> {
   // console.log("测试开始");
   // ts解析器测试

@@ -12,6 +12,7 @@
 import * as vscode from "vscode";
 
 import type { DiagnosticMessage } from "../../diagnosticFixProvider/errorType";
+import type { ExpectImport } from "../../jsonChecker";
 import { assertNonNullable } from "../../utils/assertNonNullable";
 import { EXTENSION_NAME } from "../../utils/constants";
 import type { PreConditionAttrName } from "../CheckContext";
@@ -26,6 +27,8 @@ declare module "vscode" {
       fixCode?: string;
       replaceCode?: string;
       conditionState?: PreConditionAttrName;
+      expectImport?: ExpectImport;
+      correctPath?: string;
     };
   }
 }

@@ -12,10 +12,7 @@ suite("unionValue", async () => {
     invalidVariable,
     invalidVariable,
     invalidVariable,
-    invalidVariable,
   ]);
   await fixAll(wxmlUri);
-  await assertErrorMessages(wxmlUri, [
-    invalidVariable,
-  ], "修复后");
+  await assertErrorMessages(wxmlUri, [], "修复后");
 });

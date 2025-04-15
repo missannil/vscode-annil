@@ -98,4 +98,12 @@ export const expectedTsFileInfo: TsFileInfo = {
       events: [],
     },
   },
+  useCustomComponentLocations: {
+    chunk1: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 30 },
+    chunk2: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 24 },
+    chunk3: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/chunk3.ts", line: 4 },
+    subA: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/subA.ts", line: 5 },
+    subB: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 18 },
+    subE: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 46 },
+  },
 };

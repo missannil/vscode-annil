@@ -8,6 +8,7 @@ type UsingComponents = Record<CustomComponentTag, CustomComponentPath>;
 export type JsonConfig = {
   component?: true;
   usingComponents?: UsingComponents;
+  componentPlaceholder?: Record<CustomComponentTag, string>;
 };
 
 export async function getJsonConfig(uri: vscode.Uri): Promise<JsonConfig | undefined> {

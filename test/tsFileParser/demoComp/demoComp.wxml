@@ -6,7 +6,7 @@
 	></subA>
 	<subB num="{{subB_num}}"></subB>
 	<subE num="{{subE_num}}"></subE>
-	<chunk3 data-ddd=" ddd_{{ffdf}}">
+	<chunk3 data-ddd="{{chunk3_src}}">
 		<view>rootDataTest</view>
 	</chunk3>
 </view>

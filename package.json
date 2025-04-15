@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "engines": {
     "vscode": "^1.98.2"
   },
@@ -97,6 +97,14 @@
             "type": "string"
           },
           "description": "允许Wxml标签中书写非对应子组件中定义的属性"
+        },
+        "annil.jsonConfigKeys": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "json文件中合法的配置项"
         }
       }
     },

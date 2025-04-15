@@ -6,5 +6,12 @@
     "subBA": "/mockComponents/subB",
     "subC": "../../../mockComponents/subC",
     "subD": "../../../mockComponents/subD"
+  },
+  "componentPlaceholder": {
+    "subA": "view",
+    "subB": "view",
+    "subBA": "view",
+    "subC": "view",
+    "subD": "view"
   }
 }

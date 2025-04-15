@@ -1,48 +1,32 @@
 import * as vscode from "vscode";
+import type { UsingComponents } from "../../componentManager/jsonFileManager";
 import type { JsonUri } from "../../componentManager/uriHelper";
+import { assertNonNullable } from "../../utils/assertNonNullable";
 import { DiagnosticErrorType, DiagnosticMessage } from "../errorType";
+import { generateInsertAction } from "./generateInsertAction";
+import { generateInvalidPathAction } from "./generateInvalidPathAction";
+import { generateDeleteKeyAction } from "./generateUnknownImportAction";
 
-function isUsingComponentMsg(errMsg: DiagnosticMessage): errMsg is DiagnosticErrorType.usingComponents {
-  return errMsg === DiagnosticErrorType.usingComponents;
+export function isMissingImportsMsg(errMsg: DiagnosticMessage): errMsg is DiagnosticErrorType.missingImport {
+  return errMsg === DiagnosticErrorType.missingImport;
 }
 
-function generateReplaceUsingComponentsAction(
-  jsonUri: JsonUri,
-  jsonText: string,
-  expectedUsingComponents: object,
-  codeAction?: vscode.CodeAction,
-): vscode.CodeAction {
-  // 判断jsonText是否有usingComponents
-  const config = JSON.parse(jsonText);
-  config.usingComponents = expectedUsingComponents;
-  codeAction = codeAction || new vscode.CodeAction(
-    "修复usingComponents",
-    vscode.CodeActionKind.QuickFix,
-  );
-  // 创建工作区编辑
-  codeAction.edit = codeAction.edit || new vscode.WorkspaceEdit();
+export function isUnknownImportErrMsg(errMsg: DiagnosticMessage): errMsg is DiagnosticErrorType.unknownImport {
+  return errMsg === DiagnosticErrorType.unknownImport;
+}
 
-  // 获取文档的行数
-  const textLines = jsonText.split("\n");
-  const lastLineIndex = Math.max(0, textLines.length - 1);
-  const lastLineLength = textLines[lastLineIndex].length;
+export function isInvalidPathMsg(errMsg: DiagnosticMessage): errMsg is DiagnosticErrorType.invalidPath {
+  return errMsg === DiagnosticErrorType.invalidPath;
+}
 
-  // 创建从文档开始到文档结束的范围
-  const entireDocumentRange = new vscode.Range(
-    0,
-    0, // 文档开始 (第一行第一列)
-    lastLineIndex,
-    lastLineLength, // 文档结束 (最后一行最后一列)
-  );
+export function isMissingPlaceholderMsg(errMsg: DiagnosticMessage): errMsg is DiagnosticErrorType.missingPlaceholder {
+  return errMsg === DiagnosticErrorType.missingPlaceholder;
+}
 
-  // 替换整个文档内容
-  codeAction.edit.replace(
-    jsonUri,
-    entireDocumentRange,
-    JSON.stringify(config, null, 2),
-  );
-
-  return codeAction;
+export function isUnknownPlaceholderMsg(
+  errMsg: DiagnosticMessage,
+): errMsg is DiagnosticErrorType.unknownPlaceholder {
+  return errMsg === DiagnosticErrorType.unknownPlaceholder;
 }
 
 export function generateCodeActionOfJson(
@@ -54,10 +38,58 @@ export function generateCodeActionOfJson(
 ): vscode.CodeAction[] {
   const codeActionList: vscode.CodeAction[] = [];
   const errMsg = diagnostic.message as DiagnosticMessage;
-  if (isUsingComponentMsg(errMsg)) {
-    const expectedUsingComponents = JSON.parse(diagnostic.code as string);
-    codeActionList.push(generateReplaceUsingComponentsAction(jsonUri, jsonText, expectedUsingComponents, codeAction));
+  if (isMissingImportsMsg(errMsg)) {
+    const missingImportsKey = diagnostic.code as string;
+    const expectImport = assertNonNullable(diagnostic.info?.expectImport) as UsingComponents;
+    codeActionList.push(
+      generateInsertAction(
+        jsonUri,
+        jsonText,
+        [missingImportsKey, expectImport[missingImportsKey]],
+        "添加缺失的导入",
+        "usingComponents",
+        codeAction,
+      ),
+    );
+
+    return codeActionList;
   }
+  if (isUnknownImportErrMsg(errMsg)) {
+    const unknownImportKey = diagnostic.code as string;
+    codeActionList.push(generateDeleteKeyAction(jsonUri, jsonText, unknownImportKey, "usingComponents", codeAction));
+
+    return codeActionList;
+  }
+
+  if (isInvalidPathMsg(errMsg)) {
+    const invalidPath = diagnostic.code as string;
+    const correctPath = diagnostic.info?.correctPath as string;
+    codeActionList.push(generateInvalidPathAction(jsonUri, jsonText, invalidPath, correctPath, codeAction));
+
+    return codeActionList;
+  } else if (isMissingPlaceholderMsg(errMsg)) {
+    const placeholderKey = diagnostic.code as string;
+    codeActionList.push(
+      generateInsertAction(
+        jsonUri,
+        jsonText,
+        [placeholderKey, "view"],
+        "添加缺失的占位组件",
+        "componentPlaceholder",
+        codeAction,
+      ),
+    );
+
+    return codeActionList;
+  } else if (isUnknownPlaceholderMsg(errMsg)) {
+    const unknownComponentPlaceholderKey = diagnostic.code as string;
+    codeActionList.push(
+      generateDeleteKeyAction(jsonUri, jsonText, unknownComponentPlaceholderKey, "componentPlaceholder", codeAction),
+    );
+
+    return codeActionList;
+  }
+  console.warn(`无法处理的错误类型: ${errMsg}`);
 
   return codeActionList;
 }

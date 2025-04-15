@@ -4,5 +4,10 @@
     "subA": "/mockComponents/subA",
     "subB": "/mockComponents/subB",
     "subC": "/mockComponents/subC"
+  },
+  "componentPlaceholder": {
+    "subA": "view",
+    "subB": "view",
+    "subC": "view"
   }
 }

@@ -12,12 +12,12 @@ type AttrName = string;
 type ImportName = string;
 type ImportPath = string;
 
-export type ImportTypeInfo = Record<ImportName, ImportPath | undefined>;
+export type ImportComponentInfo = Record<ImportName, ImportPath | undefined>;
 
 // 组件的子文件信息
 export type SubFileInfo = {
   componentInfo: SubComponentInfo | null;
-  importTypeInfo: ImportTypeInfo;
+  importTypeInfo: ImportComponentInfo;
 };
 
 export const CUSTOM = "自定义";
@@ -78,16 +78,18 @@ export type SubComponentInfo = {
   uri?: TsUri;
 };
 type UseCustomComponentLocation = {
-  uri: TsUri;
+  tsFileFsPath: string;
   line: number;
 };
+
+export type UseCustomComponentLocations = Record<VariableName, UseCustomComponentLocation>;
 
 export type TsFileInfo = {
   customComponentInfos: CustomComponentInfos;
   rootComponentInfo: RootComponentInfo;
   chunkComopnentInfos: ChunkComponentInfos;
-  importedSubCompInfo: ImportTypeInfo;
-  useCustomComponentLocations: Record<VariableName, UseCustomComponentLocation>;
+  importedSubCompInfo: ImportComponentInfo;
+  useCustomComponentLocations: UseCustomComponentLocations;
 };
 
 export type ChangedTsFileInfo = { type: "main"; text?: string } | { type: "related"; text: string; uri: TsUri };

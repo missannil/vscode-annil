@@ -4,12 +4,14 @@ import { suite } from "../../../start";
 import { assertErrorMessages } from "../../../tools/assertErrorMessages";
 import { fixAll } from "../../../tools/fixDiagnostic";
 
-suite("usingComponents.json", async () => {
-  const jsonUri = vscode.Uri.file(__dirname + "/usingComponents.json");
+suite("invalidPath.json", async () => {
+  const jsonUri = vscode.Uri.file(__dirname + "/invalidPath.json");
 
-  const usingComponents = DiagnosticErrorType.usingComponents;
+  const invalidPath = DiagnosticErrorType.invalidPath;
   await assertErrorMessages(jsonUri, [
-    usingComponents,
+    invalidPath,
+    invalidPath,
+    invalidPath,
   ]);
   await fixAll(jsonUri);
   await assertErrorMessages(jsonUri, []);

@@ -1,7 +1,7 @@
 import type { Uri } from "vscode";
 import * as vscode from "vscode";
 import { diagnosticCollection } from "../diagnosticCollection";
-import { JsonChecker } from "../jsonChecker";
+import { jsonChecker } from "../jsonChecker";
 import { debounce } from "../utils/debounce";
 import { wxmlChecker } from "../wxmlChecker";
 import { jsonFileManager } from "./jsonFileManager";
@@ -169,8 +169,7 @@ class ComponentManager {
       wxmlCustomComponents = (await wxmlFileManager.get(wxmlUri)).componentTagNameList;
     }
     const jsonFileInfo = await jsonFileManager.get(jsonUri);
-    const checker = new JsonChecker(jsonFileInfo, wxmlCustomComponents, tsFileInfo);
-    const diagnosticList = checker.start();
+    const diagnosticList = jsonChecker(jsonFileInfo, tsFileInfo);
     // diagnosticCollection.delete(jsonUri);
     diagnosticCollection.set(jsonUri, diagnosticList);
     // 为了测试

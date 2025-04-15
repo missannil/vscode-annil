@@ -1,12 +1,7 @@
 import path = require("path");
 import * as vscode from "vscode";
 import { tsFileManager } from "../../out/componentManager/tsFileManager/index";
-import type {
-  ChunkComponentInfos,
-  CustomComponentInfos,
-  ImportTypeInfo,
-  RootComponentInfo,
-} from "../../out/componentManager/tsFileManager/types";
+import type { TsFileInfo } from "../../out/componentManager/tsFileManager/types";
 import type { TsUri } from "../../out/componentManager/uriHelper";
 import { debounce } from "../../out/utils/debounce";
 import { isDeepEqual } from "../../out/utils/isDeepEqual";
@@ -41,7 +36,6 @@ export async function tsFileParserTest(): Promise<void> {
   if (isDeepEqual(currentTsFileInfo, expectedTsFileInfo)) {
     console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
   } else {
-    console.log("hry 1", currentTsFileInfo, expectedTsFileInfo);
     Object.keys(currentTsFileInfo).forEach((key) => {
       const currentVal = currentTsFileInfo[key as keyof typeof currentTsFileInfo];
       const expectedVal = expectedTsFileInfo[key as keyof typeof expectedTsFileInfo];
@@ -58,8 +52,8 @@ export async function tsFileParserTest(): Promise<void> {
 
 // 找到不同的属性并返回
 function findDiffItem(
-  currentVal: CustomComponentInfos | RootComponentInfo | ImportTypeInfo | ChunkComponentInfos,
-  expectedVal: CustomComponentInfos | RootComponentInfo | ImportTypeInfo | ChunkComponentInfos,
+  currentVal: TsFileInfo[keyof TsFileInfo],
+  expectedVal: TsFileInfo[keyof TsFileInfo],
 ): unknown[][] {
   const diffList: unknown[][] = [];
   Object.keys(currentVal).forEach((key) => {

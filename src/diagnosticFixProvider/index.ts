@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as vscode from "vscode";
-import { jsonFileManager } from "../componentManager/jsonFileManager";
+import { jsonFileManager, type UsingComponents } from "../componentManager/jsonFileManager";
 
 import { type JsonUri, uriHelper } from "../componentManager/uriHelper";
 import { diagnosticCollection } from "../diagnosticCollection";
@@ -9,9 +9,19 @@ import { assertNonNullable } from "../utils/assertNonNullable";
 import { EXTENSION_NAME } from "../utils/constants";
 
 import { componentManager } from "../componentManager";
-import type { ImportTypeInfo } from "../componentManager/tsFileManager/types";
+import type { ImportComponentInfo } from "../componentManager/tsFileManager/types";
 import { generateCodeActionOfWxml, generateFixAllActionOfWxml } from "./codeActionGenerator";
-import { generateCodeActionOfJson, generateFixAllActionOfJson } from "./codeActionGeneratorOfJson";
+import {
+  generateFixAllActionOfJson,
+  isInvalidPathMsg,
+  isMissingImportsMsg,
+  isMissingPlaceholderMsg,
+  isUnknownImportErrMsg,
+  isUnknownPlaceholderMsg,
+} from "./codeActionGeneratorOfJson";
+import { generateInsertAction } from "./codeActionGeneratorOfJson/generateInsertAction";
+import { generateInvalidPathAction } from "./codeActionGeneratorOfJson/generateInvalidPathAction";
+import { generateDeleteKeyAction } from "./codeActionGeneratorOfJson/generateUnknownImportAction";
 import { DiagnosticErrorType, type DiagnosticMessage } from "./errorType";
 
 type EOL = "\n" | "\r\n";
@@ -32,7 +42,7 @@ class CodeActionsProviderManager {
     return "\n"; // Unix/Linux/macOS 风格的换行符
   }
 
-  private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportTypeInfo): string {
+  private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportComponentInfo): string {
     let res = `"usingComponents": {${eol}`;
     const entries = Object.entries(importedSubCompInfo);
     entries.forEach(([compName, compPath], index) => {
@@ -198,6 +208,7 @@ class CodeActionsProviderManager {
   }
   private provideCodeActionsOfJson(
     document: vscode.TextDocument,
+    range: vscode.Range,
   ): vscode.ProviderResult<vscode.CodeAction[]> {
     const jsonUri = document.uri as JsonUri;
     // 不是组件文件,不提供修复程序
@@ -207,12 +218,50 @@ class CodeActionsProviderManager {
     // 选中诊断的修复程序
     const jsonDiagnosticList = assertNonNullable(diagnosticCollection.get(jsonUri));
 
-    // codeActionList.push(...generateCodeAction(jsonUri, diagnostic));
-    jsonDiagnosticList.forEach(diagnostic => {
+    // 过滤出与当前光标位置相关的诊断
+    const relevantDiagnostics = jsonDiagnosticList.filter(diagnostic =>
+      diagnostic.range.intersection(range) !== undefined
+    );
+
+    relevantDiagnostics.forEach(diagnostic => {
       // 诊断信息的source属性是插件名,只有插件名是自己的诊断信息才提供修复程序(避免干扰其他插件)
       if (!this.isMineDiagnostic(diagnostic.source)) return;
       const jsonText = document.getText();
-      codeActionList.push(...generateCodeActionOfJson(jsonUri, jsonText, diagnostic));
+      const errMsg = diagnostic.message as DiagnosticMessage;
+      if (isMissingImportsMsg(errMsg)) {
+        const missingImportsKey = diagnostic.code as string;
+        const expectImport = assertNonNullable(diagnostic.info?.expectImport) as UsingComponents;
+        codeActionList.push(
+          generateInsertAction(
+            jsonUri,
+            jsonText,
+            [missingImportsKey, expectImport[missingImportsKey]],
+            "添加缺失的导入",
+            "usingComponents",
+          ),
+        );
+      } else if (isUnknownImportErrMsg(errMsg)) {
+        const unknownImportKey = diagnostic.code as string;
+        codeActionList.push(generateDeleteKeyAction(jsonUri, jsonText, unknownImportKey, "usingComponents"));
+      } else if (isInvalidPathMsg(errMsg)) {
+        const invalidPathKey = diagnostic.code as string;
+        const correctPath = diagnostic.info?.correctPath as string;
+        codeActionList.push(generateInvalidPathAction(jsonUri, jsonText, invalidPathKey, correctPath));
+      } else if (isMissingPlaceholderMsg(errMsg)) {
+        const placeholderKey = diagnostic.code as string;
+        codeActionList.push(
+          generateInsertAction(
+            jsonUri,
+            jsonText,
+            [placeholderKey, "view"],
+            "添加缺失的占位组件",
+            "componentPlaceholder",
+          ),
+        );
+      } else if (isUnknownPlaceholderMsg(errMsg)) {
+        const placeholderKey = diagnostic.code as string;
+        codeActionList.push(generateDeleteKeyAction(jsonUri, jsonText, placeholderKey, "componentPlaceholder"));
+      }
     });
 
     return codeActionList;
@@ -226,7 +275,7 @@ class CodeActionsProviderManager {
         provideCodeActions: (document, _range, context) => this.provideCodeActions(document, context),
       }),
       vscode.languages.registerCodeActionsProvider("json", {
-        provideCodeActions: (document) => this.provideCodeActionsOfJson(document),
+        provideCodeActions: (document, range) => this.provideCodeActionsOfJson(document, range),
       }),
     );
   }

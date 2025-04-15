@@ -18,8 +18,9 @@ export function registerProviderOfGotoUseLocation(context: vscode.ExtensionConte
       const tsFileInfo = await tsFileManager.get(uriHelper.getSiblingUri(wxmlUri, ".ts"));
       const locationInfo = tsFileInfo.useCustomComponentLocations[tagName];
 
-      const { uri: tsUri, line } = locationInfo;
+      const { tsFileFsPath, line } = locationInfo;
       const tsPosition = new vscode.Position(line - 1, 0);
+      const tsUri = vscode.Uri.file(tsFileFsPath);
 
       // 只返回位置信息，不要主动打开文档或设置光标
       return new vscode.Location(tsUri, tsPosition);

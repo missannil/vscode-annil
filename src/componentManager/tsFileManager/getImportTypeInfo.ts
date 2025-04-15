@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ImportTypeInfo } from "./types";
+import type { ImportComponentInfo } from "./types";
 
-export function getImportTypeInfo(path: any): ImportTypeInfo {
-  const importTypeInfo: ImportTypeInfo = {};
+export function getImportTypeInfo(path: any): ImportComponentInfo {
+  const importTypeInfo: ImportComponentInfo = {};
   if (path.node.importKind === "type") {
     path.node.specifiers.forEach((specifier: { local: { name: string | number } }) => {
       importTypeInfo[specifier.local.name] = path.node.source.value;

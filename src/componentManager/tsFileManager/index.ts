@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 
 // 类型导入
 import type { TsUri } from "../uriHelper";
-import type { ChangedTsFileInfo, CustomComponentMap, ImportTypeInfo, TsFileFsPath, TsFileInfo } from "./types";
+import type { ChangedTsFileInfo, CustomComponentMap, ImportComponentInfo, TsFileFsPath, TsFileInfo } from "./types";
 
 // 功能函数导入
 import path from "path";
@@ -57,7 +57,7 @@ class TsFile {
     // console.log("hry 全部子组件", subComponentNames);
     // 组件名和组件类型名的映射关系表 例如 const h_iamge = SubComponent<root,$Image,"xx"> 映射后为 {h_image: $Image}
     const customComponentMap: CustomComponentMap = {};
-    const importTypeInfo: ImportTypeInfo = {};
+    const importTypeInfo: ImportComponentInfo = {};
 
     // 获取外部导入的组件名和路径
     const externalComponentFilePaths = getExternalComponentFilePaths(tsFileAST, subComponentNames);
@@ -87,7 +87,7 @@ class TsFile {
           }
           if (subComponentInfo.componentInfo.uri) {
             tsFileInfo.useCustomComponentLocations[subComponentName] = {
-              uri: subComponentInfo.componentInfo.uri,
+              tsFileFsPath: subComponentInfo.componentInfo.uri.fsPath,
               line: assertNonNullable(subComponentInfo.componentInfo.line),
             };
           }
@@ -118,7 +118,7 @@ class TsFile {
           // console.log("hry 得到本地的自定义组件信息", customComponentInfo, variableDeclarator.node.init.callee?.typeParameters?.params[1]?.typeName?.name);
 
           tsFileInfo.useCustomComponentLocations[variableName] = {
-            uri: tsUri,
+            tsFileFsPath: tsUri.fsPath,
             line: variableDeclarator.node.loc?.start.line,
           };
           // console.log("hry 当前页中使用的custom", variableName, tsUri.path, variableDeclarator.node.loc?.start.line);
@@ -132,7 +132,7 @@ class TsFile {
           // console.log("hry 得到本地的chunk组件信息", chunkComponentInfo, variableName);
 
           tsFileInfo.useCustomComponentLocations[variableName] = {
-            uri: tsUri,
+            tsFileFsPath: tsUri.fsPath,
             line: variableDeclarator.node.loc?.start.line,
           };
           // console.log("hry 当前页面中使用的chunk", variableName, tsUri.path, variableDeclarator.node.loc?.start.line);

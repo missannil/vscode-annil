@@ -1,0 +1,19 @@
+{
+  "component": true,
+  "usingComponents": {
+    "subA": "/mockComponents/subA",
+    "subB": "/mockComponents/subB",
+    "subBA": "/mockComponents/subB",
+    "subC": "../../../mockComponents/subC",
+    "subD": "../../../mockComponents/subD",
+    "subE": "../../../mockComponents/subD"
+  },
+  "componentPlaceholder": {
+    "subA": "view",
+    "subB": "view",
+    "subBA": "view",
+    "subC": "view",
+    "subD": "view",
+    "subE": "view"
+  }
+}

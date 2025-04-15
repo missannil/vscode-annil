@@ -66,7 +66,6 @@ export function processSnippet(snippet: string, fileName: string): string {
     // 把$1替换为用户输入的名称，$2替换为组件类型
     snippet = snippet.replace(/\$1/g, fileName);
     snippet = snippet.replace(/\$2/g, componentType);
-    console.log("hry 1", snippet);
   } catch (error) {
     console.error("处理代码片段时出错:", error);
   }

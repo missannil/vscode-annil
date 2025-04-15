@@ -178,7 +178,11 @@ export type DiagnosticMessage =
   | DiagnosticErrorType.unknownImport
   | DiagnosticErrorType.errorImportPath
   | DiagnosticErrorType.usingComponents
-  | DiagnosticErrorType.unknownProperty;
+  | DiagnosticErrorType.unknownProperty
+  | DiagnosticErrorType.missingImport
+  | DiagnosticErrorType.invalidPath
+  | DiagnosticErrorType.missingPlaceholder
+  | DiagnosticErrorType.unknownPlaceholder;
 
 export enum DiagnosticErrorType {
   singleMustacheSyntaxConstraint = "只能有一个{{}}",
@@ -237,4 +241,7 @@ export enum DiagnosticErrorType {
   noStartedComment = "还没有开始注释不可结束",
   emptyBlockTag = "空的block标签",
   shouldNotHaveValue = "shouldNotHaveValue",
+  unknownPlaceholder = "未知的占位组件",
+  invalidPath = "无效的路径",
+  missingPlaceholder = "缺少占位组件",
 }

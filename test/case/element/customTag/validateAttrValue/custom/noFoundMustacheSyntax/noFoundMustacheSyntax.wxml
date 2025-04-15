@@ -5,5 +5,5 @@
 	wx:key="*this"
 >
 	<!-- 未发现{{}}语法 -->
-	<subA numA="index_{ index }}" />
+	<subA numA="{{自定}" />
 </block>

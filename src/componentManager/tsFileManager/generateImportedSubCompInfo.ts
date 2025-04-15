@@ -1,15 +1,15 @@
 import type { TsUri } from "../uriHelper";
 import { getAppJsonResolveAlias } from "./getAppJsonResolveAlias";
 import { parseAlias } from "./parseAlias";
-import type { CustomComponentMap, ImportTypeInfo } from "./types";
+import type { CustomComponentMap, ImportComponentInfo } from "./types";
 
 // * 解析导入的子组件信息,返回导入的子组件信息(真实的组件名和路径)
 export function parseImportedInfo(
   nameMap: CustomComponentMap,
-  importInfo: ImportTypeInfo,
+  importInfo: ImportComponentInfo,
   tsUri: TsUri,
-): ImportTypeInfo {
-  const importedSubCompInfo: ImportTypeInfo = {};
+): ImportComponentInfo {
+  const importedSubCompInfo: ImportComponentInfo = {};
   const resolveAlias = getAppJsonResolveAlias(tsUri);
   for (const compName in nameMap) {
     const compTypeName = nameMap[compName];

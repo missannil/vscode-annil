@@ -4,8 +4,8 @@ import { suite } from "../../../start";
 import { assertErrorMessages } from "../../../tools/assertErrorMessages";
 // import { fixAll } from "../../../tools/fixDiagnostic";
 
-suite("unknownProperty.json", async () => {
-  const jsonUri = vscode.Uri.file(__dirname + "/unknownProperty.json");
+suite("unknownKeys.json", async () => {
+  const jsonUri = vscode.Uri.file(__dirname + "/unknownKeys.json");
 
   const unknownProperty = DiagnosticErrorType.unknownProperty;
   await assertErrorMessages(jsonUri, [
