@@ -7,6 +7,8 @@ import {
   RootComponent,
 } from "annil";
 
+import { page } from "@useCommon/usePage";
+import { subC } from "otherUseComponents/useSubC";
 import type { $SubB } from "~/subB";
 import { chunk3 } from "./chunk3";
 import { subA } from "./subA";
@@ -97,8 +99,8 @@ const rootComponent = RootComponent()({
     onCustomTap: String,
   },
 });
-DefineComponent({
+const xxx = DefineComponent({
   name: "missing",
   rootComponent,
-  subComponents: [subA, subB, chunk1, chunk2, chunk3, subE],
+  subComponents: [page, subA, subB, subC, chunk1, chunk2, chunk3, subE],
 });

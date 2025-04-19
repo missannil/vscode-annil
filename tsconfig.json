@@ -21,7 +21,8 @@
       "miniprogram-api-typings",
       "mobx",
       "vscode",
-      "domhandler"
+      "domhandler",
+      "jsonc-parser"
     ]
   },
   "include": [

@@ -1,7 +1,7 @@
 {
   "component": true,
   "usingComponents": {
-    "subA": "../../../../../../mockComponents/subA"
+    "subA": "/components/subA"
   },
   "componentPlaceholder": {
     "subA": "view"

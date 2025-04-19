@@ -1,6 +1,6 @@
 import type { JsonUri } from "../../componentManager/uriHelper";
-import { vscode } from "../../exportVscode";
 import type { JsonConfig } from "../../goToDefinition/getJsonConfig";
+import { vscode } from "../../publicModule";
 
 /**
  * 查找JSON对象的结束位置
@@ -64,9 +64,9 @@ function getLineAndChar(text: string, pos: number): { line: number; char: number
  * {
    "component": true,
    "property": {
-	"aaa": "/mockComponents/subA",
-	"bbb": "/mockComponents/subB",
-	"ccc": "/mockComponents/subA"
+  "aaa": "/mockComponents/subA",
+  "bbb": "/mockComponents/subB",
+  "ccc": "/mockComponents/subA"
    }
  }
  * ```

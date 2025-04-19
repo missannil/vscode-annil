@@ -1,8 +1,8 @@
 /* eslint-disable complexity */
 
 import type { JsonUri } from "../../componentManager/uriHelper";
-import { vscode } from "../../exportVscode";
 import type { JsonConfig } from "../../goToDefinition/getJsonConfig";
+import { vscode } from "../../publicModule";
 
 type InsertKey = string;
 type InsertValue = string;

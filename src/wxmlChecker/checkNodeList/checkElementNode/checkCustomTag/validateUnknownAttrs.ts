@@ -24,9 +24,9 @@ export function validateUnknownAttrs(
     const expressions = getMustacheExpressions(rawAttrValue);
     const validVariables = (tagInfo.type === "custom"
       ? getVariablesFromComponentInfo(
-        assertNonNullable(tsFileInfo.customComponentInfos[tagInfo.name]),
+        assertNonNullable(tsFileInfo.customComponentInfos[tagInfo.name]?.configInfo),
       )
-      : assertNonNullable(tsFileInfo.chunkComopnentInfos[tagInfo.name]).dataList).concat(
+      : assertNonNullable(tsFileInfo.chunkComponentInfos[tagInfo.name]).configInfo.dataList).concat(
         wxForInfos.itemNames,
         wxForInfos.indexNames,
         tsFileInfo.rootComponentInfo.dataList,

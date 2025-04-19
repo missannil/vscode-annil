@@ -9,7 +9,7 @@ import { assertNonNullable } from "../utils/assertNonNullable";
 import { EXTENSION_NAME } from "../utils/constants";
 
 import { componentManager } from "../componentManager";
-import type { ImportComponentInfo } from "../componentManager/tsFileManager/types";
+import type { ImportedSubComponentInfo } from "../componentManager/tsFileManager/types";
 import { generateCodeActionOfWxml, generateFixAllActionOfWxml } from "./codeActionGenerator";
 import {
   generateFixAllActionOfJson,
@@ -42,7 +42,7 @@ class CodeActionsProviderManager {
     return "\n"; // Unix/Linux/macOS 风格的换行符
   }
 
-  private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportComponentInfo): string {
+  private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportedSubComponentInfo): string {
     let res = `"usingComponents": {${eol}`;
     const entries = Object.entries(importedSubCompInfo);
     entries.forEach(([compName, compPath], index) => {
@@ -293,13 +293,12 @@ class CodeActionsProviderManager {
   }
   private registerAllFixCommand(context: vscode.ExtensionContext): void {
     context.subscriptions.push(
-      vscode.commands.registerCommand("annil.fix-all", async (testUri?: vscode.Uri) => {
+      vscode.commands.registerCommand("annil.fix-all", async (currentUri?: vscode.Uri) => {
         const activeEditor = vscode.window.activeTextEditor;
-        let uri = testUri || activeEditor?.document.uri;
+        let uri = currentUri || activeEditor?.document.uri;
         if (!uri) return;
-        const relatedUri = componentManager.relatedUris[uri.fsPath];
-        if (relatedUri) {
-          uri = relatedUri;
+        if (componentManager.isRelatedPath(uri.fsPath)) {
+          uri = vscode.Uri.file(componentManager.getRelatedMainPath(uri.fsPath));
         }
         if (!uriHelper.isComponentUri(uri)) return;
         const wxmlUri = uriHelper.getSiblingUri(uri, ".wxml");

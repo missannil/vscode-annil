@@ -1,6 +1,6 @@
 import type { ComponentPlaceholder } from "../componentManager/jsonFileManager";
 import { DiagnosticErrorType } from "../diagnosticFixProvider/errorType";
-import { vscode } from "../exportVscode";
+import { vscode } from "../publicModule";
 import { EXTENSION_NAME } from "../utils/constants";
 import { findErrMsgRange } from "./findErrMsgRange";
 import { findKeyline } from "./findKeyline";

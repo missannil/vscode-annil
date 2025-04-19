@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 /**
- * 插件配置
+ * 插件配置模块
  */
 class Configuration {
   #defualtIgnoreFeilds: string[] = ["data-"];
@@ -15,7 +15,9 @@ class Configuration {
     this.#userIgnoreFeilds = vscode.workspace.getConfiguration("annil").get("ignoreFeilds") || [];
     this.#ignoreFeilds = [...this.#defualtIgnoreFeilds, ...this.#userIgnoreFeilds];
   }
-
+  private updateIgnoreTags(): void {
+    this.#ignoreTags = vscode.workspace.getConfiguration("annil").get<string[]>("ignoreTags") || [];
+  }
   private updateAllowUnknownAttributes(): void {
     try {
       const configValue = vscode.workspace.getConfiguration("annil").get<string[]>("allowUnknownAttributes");
@@ -29,29 +31,25 @@ class Configuration {
       this.#allowUnknownAttributes = [];
     }
   }
-
   public get ignoreFeilds(): string[] {
     return this.#ignoreFeilds;
   }
-
   public get allowUnknownAttributes(): string[] {
     return this.#allowUnknownAttributes;
   }
-
   public isIgnoreFeilds(attrName: string): boolean {
     return this.ignoreFeilds.includes(attrName);
   }
-
   public isAllowedAttribute(attrName: string): boolean {
     return this.#allowUnknownAttributes.includes(attrName);
   }
-
   // 注册工作区配置变化监听器，当配置变化时，更新配置
   private ondidChangeConfiguration(context: vscode.ExtensionContext): void {
     const configChangeListener = vscode.workspace.onDidChangeConfiguration(event => {
       if (event.affectsConfiguration("annil")) {
         // 处理配置变化
         this.updateIgnoreFeilds();
+        this.updateIgnoreTags();
         this.updateAllowUnknownAttributes();
       }
     });
@@ -59,15 +57,12 @@ class Configuration {
     // 将监听器添加到上下文中，以便在扩展停用时自动清理
     context.subscriptions.push(configChangeListener);
   }
-
-  public constructor() {
-  }
-
+  public constructor() {}
   public init(context: vscode.ExtensionContext): void {
     this.ondidChangeConfiguration(context);
     this.updateIgnoreFeilds();
+    this.updateIgnoreTags();
     this.updateAllowUnknownAttributes();
-    this.#ignoreTags = vscode.workspace.getConfiguration("annil").get("ignoreTags") || [];
   }
 }
 

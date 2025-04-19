@@ -1,12 +1,12 @@
-<view class>
-	<subA
-		_id="{{  dataBool ? aaa : bbb}}"
-		numA="{{dataBool}}"
-		userList="{{subA_userList}}"
-	></subA>
-	<subB num="{{subB_num}}"></subB>
-	<subE num="{{subE_num}}"></subE>
-	<chunk3 data-ddd="{{chunk3_src}}">
-		<view>rootDataTest</view>
-	</chunk3>
-</view>
+<subA
+	_id="{{  dataBool ? aaa : bbb}}"
+	numA="{{dataBool}}"
+	userList="{{subA_userList}}"
+></subA>
+<subB num="{{subB_num}}"></subB>
+<subE num="{{subE_num}}"></subE>
+<chunk3 data-ddd="{{chunk3_src}}">
+	<view>rootDataTest</view>
+</chunk3>
+<subC bool="{{subC_bool}}"></subC>
+<page style="{{page_style}}"></page>

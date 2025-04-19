@@ -15,7 +15,7 @@ export function getExternalComponentFilePaths(
       if (importKind === "value") {
         for (const specifier of path.node.specifiers) {
           if (specifier.type === "ImportSpecifier" && specifier.importKind === "value") {
-            const importedName = (specifier.imported as Identifier).name;
+            const importedName = (specifier.local as Identifier).name;
             if (subComponentNames.includes(importedName)) {
               paths[importedName] = path.node.source.value;
             }

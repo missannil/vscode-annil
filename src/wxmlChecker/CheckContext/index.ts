@@ -1,6 +1,6 @@
 import type { Element } from "domhandler";
 import * as vscode from "vscode";
-import type { TsFileInfo } from "../../componentManager/tsFileManager/types";
+import type { ComponentInfo } from "../../componentManager/tsFileManager/types";
 import { configuration } from "../../configuration";
 import { assertNonNullable } from "../../utils/assertNonNullable";
 import type { WxForVariables } from "../checkNodeList/checkElementNode/checkNativeTag/checkBlockTag/checkWxForBlock";
@@ -27,8 +27,8 @@ export class CheckContext extends CommentManager {
     return this.#textlines;
   }
   // ts文件信息
-  #tsFileInfo: TsFileInfo;
-  public get tsFileInfo(): TsFileInfo {
+  #tsFileInfo: ComponentInfo;
+  public get tsFileInfo(): ComponentInfo {
     return this.#tsFileInfo;
   }
   // 忽略的字段
@@ -59,7 +59,7 @@ export class CheckContext extends CommentManager {
   // 获取所有的chunk组件的变量
   public getOuterChunkTagVariables(): string[] {
     return this.#outerChunkTagMarks.flatMap((id) =>
-      assertNonNullable(this.tsFileInfo.chunkComopnentInfos[id]).dataList
+      assertNonNullable(this.tsFileInfo.chunkComponentInfos[id]).configInfo.dataList
     );
   }
   // 获取外层有效事件(如果外层有chunk组件，则获取外层chunk组件的events,否则获取root组件的events 都允许使用root组件的customEvents)
@@ -70,7 +70,7 @@ export class CheckContext extends CommentManager {
     if (lastChunkTagMark === undefined) {
       return this.tsFileInfo.rootComponentInfo.events.concat(customEvents);
     } else {
-      return assertNonNullable(this.tsFileInfo.chunkComopnentInfos[lastChunkTagMark]).events.concat(
+      return assertNonNullable(this.tsFileInfo.chunkComponentInfos[lastChunkTagMark]).configInfo.events.concat(
         customEvents,
       );
     }
@@ -166,12 +166,12 @@ export class CheckContext extends CommentManager {
   }
   public constructor(
     textlines: string[],
-    tsFileInfo: TsFileInfo,
+    tsFileInfo: ComponentInfo,
   ) {
     super();
     this.#textlines = textlines;
     this.#tsFileInfo = tsFileInfo;
     this.#pendingCustomTags = Object.keys(tsFileInfo.customComponentInfos);
-    this.#pendingChunkTags = Object.keys(tsFileInfo.chunkComopnentInfos);
+    this.#pendingChunkTags = Object.keys(tsFileInfo.chunkComponentInfos);
   }
 }

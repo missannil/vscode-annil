@@ -22,7 +22,7 @@ export function checkCustomTag(
   // 检测之前block标签中的条件属性的值
   const { tsFileInfo, wxForInfos, textlines, diagnosticList } = checkContext;
   checkPendingConditionValue(
-    getVariablesFromComponentInfo(assertNonNullable(tsFileInfo.customComponentInfos[tagName])).concat(
+    getVariablesFromComponentInfo(assertNonNullable(tsFileInfo.customComponentInfos[tagName]?.configInfo)).concat(
       wxForInfos.itemNames,
       tsFileInfo.rootComponentInfo.dataList,
       wxForInfos.indexNames,
@@ -33,7 +33,7 @@ export function checkCustomTag(
   // 重复自定义标签的诊断
   validateRepeatSubComponentTag(elementNode, tagName, startLine, checkContext);
   // 1. 缺失属性的诊断
-  const componentInfo = assertNonNullable(tsFileInfo.customComponentInfos[tagName]);
+  const componentInfo = assertNonNullable(tsFileInfo.customComponentInfos[tagName]?.configInfo);
   const rawAttrNames: string[] = Object.keys(elementNode.attribs);
   const expectedAttrNames = Object.keys(componentInfo);
   validateMissingAttr(elementNode, rawAttrNames, expectedAttrNames, componentInfo, startLine, checkContext);

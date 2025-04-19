@@ -23,7 +23,7 @@ export function checkChunkTag(
   checkContext.saveChunkTagMark(chunkTagMark);
   // 检测之前block标签中的条件属性的值
   checkPendingConditionValue(
-    assertNonNullable(tsFileInfo.chunkComopnentInfos[chunkTagMark]).dataList.concat(
+    assertNonNullable(tsFileInfo.chunkComponentInfos[chunkTagMark]).configInfo.dataList.concat(
       wxForInfos.itemNames,
       wxForInfos.indexNames,
       tsFileInfo.rootComponentInfo.dataList,
@@ -43,7 +43,7 @@ export function checkChunkTag(
         && validateExpression(
           getMustacheValue(rawAttrValue),
           tsFileInfo.rootComponentInfo.dataList.concat(
-            assertNonNullable(tsFileInfo.chunkComopnentInfos[chunkTagMark]).dataList,
+            assertNonNullable(tsFileInfo.chunkComponentInfos[chunkTagMark]).configInfo.dataList,
             wxForInfos.itemNames,
             wxForInfos.indexNames,
           ),
@@ -61,7 +61,7 @@ export function checkChunkTag(
       validateEventsAttr(
         rawAttrName,
         rawAttrValue,
-        assertNonNullable(tsFileInfo.chunkComopnentInfos[chunkTagMark]).events,
+        assertNonNullable(tsFileInfo.chunkComponentInfos[chunkTagMark]).configInfo.events,
         textlines,
         startLine,
         diagnosticList,

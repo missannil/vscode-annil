@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Node } from "@babel/traverse";
-import type { AttrValue, Custom, CustomComponentInfo, Events, Root, Self, Union } from "./types";
+import type { AttrValue, Custom, CustomComponentConfigInfo, Events, Root, Self, Union } from "./types";
 
 export function isArraySingleType(node: Node): boolean {
   // 例如 `{ xxx: Array}` 时(后面没有as 类型的情况 )
@@ -38,10 +38,10 @@ export function isChunkComponent(expression: any): boolean {
    * 例如:
    * ```ts
    *  {
-		type: Array // or  as DetailedType<ProductList>,
-		value: [{ name: "apple", price: 10 }, { name: "banana", price: 30}],
-	  },
-	  ```
+    type: Array // or  as DetailedType<ProductList>,
+    value: [{ name: "apple", price: 10 }, { name: "banana", price: 30}],
+    },
+    ```
    */
 export function isFullConfigOfArrayType(node: Node): boolean {
   if (node.type === "ObjectExpression") {
@@ -118,7 +118,7 @@ export function isUnionValue(attrValue: AttrValue): attrValue is Union {
 }
 
 // 获取自定义组件的所有变量
-export function getVariablesFromComponentInfo(componentInfo: CustomComponentInfo): string[] {
+export function getVariablesFromComponentInfo(componentInfo: CustomComponentConfigInfo): string[] {
   return Object.values(componentInfo).reduce<string[]>((acc, cur) => {
     acc.push(...(isUnionValue(cur) ? cur.values : isCustomValue(cur) || isEventsValue(cur) ? [] : [cur.value]));
 

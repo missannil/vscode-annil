@@ -1,43 +1,68 @@
-import type { TsFileInfo } from "../../out/componentManager/tsFileManager/types";
+import type { ComponentInfo } from "../../out/componentManager/tsFileManager/types";
 
-export const expectedTsFileInfo: TsFileInfo = {
+export const expectedComponentInfo: ComponentInfo = {
   customComponentInfos: {
     subA: {
-      _id: {
-        type: "Union",
-        values: ["aaa", "bbb"],
-      },
-      numA: {
-        type: "Custom",
-        value: "自定义",
-      },
-      userList: {
-        type: "Self",
-        value: "subA_userList",
+      line: 5,
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/subA.ts",
+      componentTypeName: "$SubA",
+      configInfo: {
+        _id: {
+          type: "Union",
+          values: ["aaa", "bbb"],
+        },
+        numA: {
+          type: "Custom",
+          value: "自定义",
+        },
+        userList: {
+          type: "Self",
+          value: "subA_userList",
+        },
       },
     },
     subB: {
-      num: {
-        type: "Self",
-        value: "subB_num",
+      line: 20,
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
+      componentTypeName: "$SubB",
+      configInfo: {
+        num: {
+          type: "Self",
+          value: "subB_num",
+        },
       },
     },
-    // subC: {
-    //   bool: {
-    //     type: "Self",
-    //     value: "subC_bool",
-    //   },
-    // },
-    // h_image: {
-    //   src: {
-    //     type: "Self",
-    //     value: "image_src",
-    //   },
-    // },
+    subC: {
+      line: 4,
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/miniprogram/otherUseComponents/useSubC.ts",
+      componentTypeName: "$SubC",
+      configInfo: {
+        bool: {
+          type: "Self",
+          value: "subC_bool",
+        },
+      },
+    },
+    page: {
+      line: 5,
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/miniprogram/useCommon/usePage.ts",
+      componentTypeName: "$Page",
+      configInfo: {
+        style: {
+          type: "Self",
+          value: "page_style",
+        },
+      },
+    },
     subE: {
-      num: {
-        type: "Self",
-        value: "subE_num",
+      line: 48,
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
+      componentTypeName: "$SubE",
+      configInfo: {
+        num: {
+          type: "Self",
+          value: "subE_num",
+        },
       },
     },
   },
@@ -75,35 +100,43 @@ export const expectedTsFileInfo: TsFileInfo = {
     customEvents: ["onCustomTap"],
   },
   importedSubCompInfo: {
-    subA: "/mockComponents/subA",
-    subB: "/mockComponents/subB",
+    page: "/components/page/page",
+    subA: "/components/subA",
+    subB: "/components/subB",
+    subC: "/otherComponents/subC",
   },
-  chunkComopnentInfos: {
+  chunkComponentInfos: {
     chunk1: {
-      dataList: ["ddd_src", "ddd_arr"],
-      boolTypeDatas: [],
-      arrTypeDatas: ["ddd_arr"],
-      events: ["ddd_aaa"],
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
+      line: 32,
+      configInfo: {
+        dataList: ["ddd_src", "ddd_arr"],
+        boolTypeDatas: [],
+        arrTypeDatas: ["ddd_arr"],
+        events: ["ddd_aaa"],
+      },
     },
     chunk2: {
-      dataList: ["chunk2_bool"],
-      boolTypeDatas: ["chunk2_bool"],
-      arrTypeDatas: [],
-      events: [],
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
+      line: 26,
+      configInfo: {
+        dataList: ["chunk2_bool"],
+        boolTypeDatas: ["chunk2_bool"],
+        arrTypeDatas: [],
+        events: [],
+        // customEvents:[],
+      },
     },
     chunk3: {
-      dataList: ["chunk3_src"],
-      boolTypeDatas: [],
-      arrTypeDatas: [],
-      events: [],
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/chunk3.ts",
+      line: 4,
+      configInfo: {
+        dataList: ["chunk3_src"],
+        boolTypeDatas: [],
+        arrTypeDatas: [],
+        events: [],
+        // customEvents:[],
+      },
     },
-  },
-  useCustomComponentLocations: {
-    chunk1: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 30 },
-    chunk2: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 24 },
-    chunk3: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/chunk3.ts", line: 4 },
-    subA: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/subA.ts", line: 5 },
-    subB: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 18 },
-    subE: { tsFileFsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts", line: 46 },
   },
 };

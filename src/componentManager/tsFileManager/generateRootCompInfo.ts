@@ -14,7 +14,7 @@ import {
 import type { RootComponentInfo } from "./types";
 const rootComponentExtractedFields = ["properties", "data", "computed", "store", "events", "customEvents"];
 
-export function generateComponentInfo(expression: any): RootComponentInfo {
+export function generateRootComponentInfo(expression: any): RootComponentInfo {
   const rootComponentInfo: RootComponentInfo = {
     arrTypeDatas: [],
     boolTypeDatas: [],

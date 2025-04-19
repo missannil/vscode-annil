@@ -16,11 +16,12 @@ export function registerProviderOfGotoUseLocation(context: vscode.ExtensionConte
       const wxmlUri = document.uri;
       if (!uriHelper.isComponentUri(wxmlUri)) return null;
       const tsFileInfo = await tsFileManager.get(uriHelper.getSiblingUri(wxmlUri, ".ts"));
-      const locationInfo = tsFileInfo.useCustomComponentLocations[tagName];
+      const locationInfo = tsFileInfo.customComponentInfos[tagName] || tsFileInfo.chunkComponentInfos[tagName];
+      if (!locationInfo) return null;
+      const { fsPath, line } = locationInfo;
 
-      const { tsFileFsPath, line } = locationInfo;
       const tsPosition = new vscode.Position(line - 1, 0);
-      const tsUri = vscode.Uri.file(tsFileFsPath);
+      const tsUri = vscode.Uri.file(fsPath);
 
       // 只返回位置信息，不要主动打开文档或设置光标
       return new vscode.Location(tsUri, tsPosition);

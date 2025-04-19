@@ -1,6 +1,6 @@
 import type { JsonUri } from "../../componentManager/uriHelper";
-import { vscode } from "../../exportVscode";
 import type { JsonConfig } from "../../goToDefinition/getJsonConfig";
+import { vscode } from "../../publicModule";
 
 /**
  * 查找JSON对象的结束位置

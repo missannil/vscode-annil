@@ -1,11 +1,15 @@
 {
   "component": true,
   "usingComponents": {
-    "subA": "/mockComponents/subA",
-    "subB": "/mockComponents/subB"
+    "subA": "/components/subA",
+    "subB": "/components/subB",
+    "page": "/components/page/page",
+    "subC": "/otherComponents/subC"
   },
   "componentPlaceholder": {
     "subA": "view",
-    "subB": "view"
+    "subB": "view",
+    "page": "view",
+    "subC": "view"
   }
 }

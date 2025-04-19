@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CustomComponent, DefineComponent, RootComponent } from "annil";
-import type { $SubA } from "../../../../mockComponents/subA";
+import type { $SubA } from "../../../../miniprogram/components/subA";
 
 const subA = CustomComponent<Root, $SubA>()({
   data: {},

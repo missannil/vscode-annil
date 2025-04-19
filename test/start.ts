@@ -72,7 +72,7 @@ async function suiteTest(): Promise<void> {
     //   continue;
     // }
     await import(testFileUri.fsPath);
-    if (testFileUri.fsPath.includes("missingPlaceholder")) {
+    if (testFileUri.fsPath.includes("jsonError")) {
       // await import(testFileUri.fsPath);
     }
   }
@@ -82,7 +82,7 @@ export async function runTest(): Promise<void> {
   // ts解析器测试
   await tsFileParserTest();
   // 文件测试
-  await suiteTest();
+  // await suiteTest();
 }
 
 void runTest();

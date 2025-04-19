@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CustomComponent, DefineComponent, RootComponent } from "annil";
+import type { $SubC } from "otherComponents/subC";
 import type { $SubA } from "~/subA";
 import type { $SubB } from "~/subB";
-import type { $SubC } from "~/subC";
 
 const subA = CustomComponent<object, $SubA>()({
   data: {},

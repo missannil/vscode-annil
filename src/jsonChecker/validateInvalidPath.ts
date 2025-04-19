@@ -1,7 +1,7 @@
 import type { UsingComponents } from "../componentManager/jsonFileManager";
-import type { ImportComponentInfo } from "../componentManager/tsFileManager/types";
+import type { ImportedSubComponentInfo } from "../componentManager/tsFileManager/types";
 import { DiagnosticErrorType } from "../diagnosticFixProvider/errorType";
-import { vscode } from "../exportVscode";
+import { vscode } from "../publicModule";
 import { EXTENSION_NAME } from "../utils/constants";
 import { findErrMsgRange } from "./findErrMsgRange";
 import { findKeyline } from "./findKeyline";
@@ -9,7 +9,7 @@ import { findKeyline } from "./findKeyline";
 // 验证usingComponents中的key的路径是否正确,与tsFileExpectImport中的key进行对比
 export function validateInvalidPath(
   usingComponents: UsingComponents,
-  importComponentInfo: ImportComponentInfo,
+  importComponentInfo: ImportedSubComponentInfo,
   validImportKeys: string[],
   textlines: string[],
 ): vscode.Diagnostic[] {

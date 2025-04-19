@@ -12,6 +12,7 @@ suite("invalidPath.json", async () => {
     invalidPath,
     invalidPath,
     invalidPath,
+    invalidPath,
   ]);
   await fixAll(jsonUri);
   await assertErrorMessages(jsonUri, []);

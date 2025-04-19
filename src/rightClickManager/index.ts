@@ -1,4 +1,4 @@
-import type { vscode } from "../exportVscode";
+import type { vscode } from "../publicModule";
 import { createComponent } from "./createComponent";
 import { createPage } from "./createPage";
 

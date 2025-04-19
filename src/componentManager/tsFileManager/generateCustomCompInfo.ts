@@ -2,12 +2,12 @@
 import { assertNonNullable } from "../../utils/assertNonNullable";
 
 import { getInheritValue } from "./getInheritValue";
-import type { CustomComponentInfo, Events } from "./types";
+import type { CustomComponentConfigInfo, Events } from "./types";
 const customComponentExtractedFields = ["inherit", "data", "computed", "store", "events"];
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types,
-export function generateCustomCompInfo(expression: any): CustomComponentInfo {
-  const customCompAttrs: CustomComponentInfo = {};
+export function generateCustomCompConfigInfo(expression: any): CustomComponentConfigInfo {
+  const customCompAttrs: CustomComponentConfigInfo = {};
   // 因为就一个参数,所以直接取第一个 arguments[0]即可,properties为配置对象的第一层配置字段 inherit data store computed watch methods evnets lifetimes等
   expression.arguments[0].properties.forEach(
     // firstLevelField 为 inherit data store computed evnets methods watch等字段

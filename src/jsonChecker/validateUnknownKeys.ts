@@ -1,6 +1,6 @@
 import { DiagnosticErrorType } from "../diagnosticFixProvider/errorType";
-import { vscode } from "../exportVscode";
 import type { JsonConfig } from "../goToDefinition/getJsonConfig";
+import { vscode } from "../publicModule";
 import { findErrMsgRange } from "./findErrMsgRange";
 
 function getLegalConfigKeys(): string[] {

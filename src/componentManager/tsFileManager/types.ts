@@ -12,12 +12,12 @@ type AttrName = string;
 type ImportName = string;
 type ImportPath = string;
 
-export type ImportComponentInfo = Record<ImportName, ImportPath | undefined>;
+export type ImportedSubComponentInfo = Record<ImportName, ImportPath>;
 
 // 组件的子文件信息
 export type SubFileInfo = {
   componentInfo: SubComponentInfo | null;
-  importTypeInfo: ImportComponentInfo;
+  importTypeInfo: ImportedSubComponentInfo;
 };
 
 export const CUSTOM = "自定义";
@@ -40,17 +40,34 @@ export type Self = { type: "Self"; value: string };
 
 export type AttrValue = Inherit | Events | Self;
 
-export type CustomComponentInfo = Record<AttrName, AttrValue>;
+export type CustomComponentInfo = {
+  line: number;
+  fsPath: string;
+  componentTypeName: string;
+  configInfo: CustomComponentConfigInfo;
+};
+
+export type CustomComponentInfoWithoutFsPath = Omit<CustomComponentInfo, "fsPath">;
+
+export type CustomComponentConfigInfo = Record<AttrName, AttrValue>;
 type SubCompName = string;
 
 export type CustomComponentInfos = Record<SubCompName, CustomComponentInfo | undefined>;
 
-export type ChunkComponentInfo = {
+type ChunkComponentConfigInfo = {
   arrTypeDatas: string[];
   boolTypeDatas: string[];
   dataList: string[];
   events: string[];
 };
+
+export type ChunkComponentInfo = {
+  line: number;
+  fsPath: string;
+  configInfo: ChunkComponentConfigInfo;
+};
+
+export type ChunkComponentInfoWithoutFsPath = Omit<ChunkComponentInfo, "fsPath">;
 
 export type ChunkComponentInfos = Record<SubCompName, ChunkComponentInfo | undefined>;
 
@@ -77,19 +94,16 @@ export type SubComponentInfo = {
   line?: number;
   uri?: TsUri;
 };
-type UseCustomComponentLocation = {
-  tsFileFsPath: string;
-  line: number;
-};
 
-export type UseCustomComponentLocations = Record<VariableName, UseCustomComponentLocation>;
-
-export type TsFileInfo = {
+export type ComponentInfo = {
   customComponentInfos: CustomComponentInfos;
   rootComponentInfo: RootComponentInfo;
-  chunkComopnentInfos: ChunkComponentInfos;
-  importedSubCompInfo: ImportComponentInfo;
-  useCustomComponentLocations: UseCustomComponentLocations;
+  chunkComponentInfos: ChunkComponentInfos;
+  // 记录组件导入的子组件信息 为了验证组件json文件的合法性，例如 {"h_image":"./$Image,"button":"@components/$button"}
+  importedSubCompInfo: ImportedSubComponentInfo;
 };
 
-export type ChangedTsFileInfo = { type: "main"; text?: string } | { type: "related"; text: string; uri: TsUri };
+type FilePath = string;
+type FileText = string;
+
+export type FileInfo = [FilePath, FileText];

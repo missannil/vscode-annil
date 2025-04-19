@@ -1,23 +1,9 @@
-import { parse } from "@babel/parser";
-import traverse from "@babel/traverse";
 import * as vscode from "vscode";
-
-// 类型导入
 import type { TsUri } from "../uriHelper";
-import type { ChangedTsFileInfo, CustomComponentMap, ImportComponentInfo, TsFileFsPath, TsFileInfo } from "./types";
-
-// 功能函数导入
-import path from "path";
-import { assertNonNullable } from "../../utils/assertNonNullable";
-import { componentManager } from "..";
-import { parseImportedInfo } from "./generateImportedSubCompInfo";
-import { getChunkComponentInfo } from "./getChunkComponentInfo";
-import { getExternalComponentFilePaths } from "./getExternalComponentFilePath";
-import { getImportTypeInfo } from "./getImportTypeInfo";
-import { getRootComponentInfo } from "./getRootComponentInfo";
-import { getCustomComponentInfo } from "./getSubComponentInfo";
-import { getSubComponentNames } from "./getSubComponentNames";
-import { getSubFileInfo } from "./getSubFileInfo";
+import { getSubComponentInfos } from "./getExternalSubComponentInfos";
+import { mergeComponentInfos } from "./mergeComponentInfos";
+import { traverseAst } from "./traverseAst";
+import type { ComponentInfo, FileInfo, TsFileFsPath } from "./types";
 
 /**
  * TS文件解析管理类
@@ -26,132 +12,24 @@ class TsFile {
   /**
    * 缓存已解析的文件信息
    */
-  private infoCache: Record<TsFileFsPath, TsFileInfo | undefined> = {};
+  private infoCache: Record<TsFileFsPath, ComponentInfo | undefined> = {};
 
   /**
-   * 解析TS文件内容
-   * @param tsText TS文件文本内容
+   * 获取组件信息
+   * @param fileInfo 已知的文件信息
    * @param tsUri 文件URI
-   * @returns 解析后的TS文件信息
+   * @returns ComponentInfo
    */
-  public tsFileParser(tsUri: TsUri, tsText: string): TsFileInfo {
-    // 解析TS代码为AST
-    const tsFileAST = parse(tsText, { sourceType: "module", plugins: ["typescript"] });
+  public generateComponentInfo(tsUri: TsUri, fileInfo: FileInfo): ComponentInfo {
+    const mainPath = tsUri.fsPath;
 
-    // 获取所有的子组件名(从DefineComponent的subComopnents中获取)
-    const subComponentNames = getSubComponentNames(tsFileAST);
-    // 初始化返回的文件信息结构
-    const tsFileInfo: TsFileInfo = {
-      chunkComopnentInfos: {},
-      customComponentInfos: {},
-      rootComponentInfo: {
-        dataList: [],
-        events: [],
-        customEvents: [],
-        arrTypeDatas: [],
-        boolTypeDatas: [],
-      },
-      importedSubCompInfo: {},
-      useCustomComponentLocations: {},
-    };
-    // console.log("hry 全部子组件", subComponentNames);
-    // 组件名和组件类型名的映射关系表 例如 const h_iamge = SubComponent<root,$Image,"xx"> 映射后为 {h_image: $Image}
-    const customComponentMap: CustomComponentMap = {};
-    const importTypeInfo: ImportComponentInfo = {};
+    // 获取主文件的信息
+    const mainComponentInfo = traverseAst(mainPath, fileInfo);
+    const { importedVariables, subComponentNames } = mainComponentInfo;
+    // 获取子组件的信息
+    const subComponentInfos = getSubComponentInfos(mainPath, subComponentNames, importedVariables, fileInfo);
 
-    // 获取外部导入的组件名和路径
-    const externalComponentFilePaths = getExternalComponentFilePaths(tsFileAST, subComponentNames);
-    // console.log("hry 外部依赖文件路径", externalComponentFilePaths);
-    // 处理外部组件信息
-    for (const subComponentName in externalComponentFilePaths) {
-      const subComponentPath = externalComponentFilePaths[subComponentName];
-      const relatedUri = vscode.Uri.joinPath(tsUri, "..", subComponentPath + ".ts") as TsUri;
-
-      // 作为关联的文件加入到组件管理器中,以便在变化时可以触发更新
-      if (!componentManager.isRelatedUri(relatedUri)) {
-        componentManager.setRelatedUris(relatedUri.fsPath, tsUri);
-      }
-      const subComponentInfo = getSubFileInfo(
-        subComponentName,
-        // 关联文件的URI
-        relatedUri,
-      );
-      // console.log("hry 外部文件依赖信息", subComponentInfo, subComponentName);
-      if (subComponentInfo) {
-        if (subComponentInfo.componentInfo) {
-          if (subComponentInfo.componentInfo.type === "chunk") {
-            tsFileInfo.chunkComopnentInfos[subComponentName] = subComponentInfo.componentInfo.info;
-          } else if (subComponentInfo.componentInfo.type === "custom") {
-            customComponentMap[subComponentName] = subComponentInfo.componentInfo.componentTypeName;
-            tsFileInfo.customComponentInfos[subComponentName] = subComponentInfo.componentInfo.info;
-          }
-          if (subComponentInfo.componentInfo.uri) {
-            tsFileInfo.useCustomComponentLocations[subComponentName] = {
-              tsFileFsPath: subComponentInfo.componentInfo.uri.fsPath,
-              line: assertNonNullable(subComponentInfo.componentInfo.line),
-            };
-          }
-          // console.log("hry 3331", subComponentName, subComponentInfo.componentInfo.uri, subComponentInfo.componentInfo.line);
-        }
-        Object.assign(importTypeInfo, subComponentInfo.importTypeInfo);
-        // console.log("hry 把外部文件的导入信息加入到临时文件中", importTypeInfo);
-      }
-      // console.log("hry 获取下一个外部路径信息",);
-    }
-
-    // 遍历AST解析组件信息
-    traverse(tsFileAST, {
-      // 从导入的文件中获取组件信息
-      ImportDeclaration(path) {
-        Object.assign(importTypeInfo, getImportTypeInfo(path));
-      },
-
-      // 从当前文件声明的变量中获取组件信息
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      VariableDeclarator(variableDeclarator: any) {
-        const customComponentInfo = getCustomComponentInfo(variableDeclarator, subComponentNames);
-        if (customComponentInfo) {
-          const variableName = variableDeclarator.node.id.name;
-          customComponentMap[variableName] = variableDeclarator.node.init.callee?.typeParameters?.params[1]?.typeName
-            ?.name;
-          tsFileInfo.customComponentInfos[variableName] = customComponentInfo;
-          // console.log("hry 得到本地的自定义组件信息", customComponentInfo, variableDeclarator.node.init.callee?.typeParameters?.params[1]?.typeName?.name);
-
-          tsFileInfo.useCustomComponentLocations[variableName] = {
-            tsFileFsPath: tsUri.fsPath,
-            line: variableDeclarator.node.loc?.start.line,
-          };
-          // console.log("hry 当前页中使用的custom", variableName, tsUri.path, variableDeclarator.node.loc?.start.line);
-
-          return;
-        }
-        const chunkComponentInfo = getChunkComponentInfo(variableDeclarator, subComponentNames);
-        if (chunkComponentInfo) {
-          const variableName = variableDeclarator.node.id.name;
-          tsFileInfo.chunkComopnentInfos[variableName] = chunkComponentInfo;
-          // console.log("hry 得到本地的chunk组件信息", chunkComponentInfo, variableName);
-
-          tsFileInfo.useCustomComponentLocations[variableName] = {
-            tsFileFsPath: tsUri.fsPath,
-            line: variableDeclarator.node.loc?.start.line,
-          };
-          // console.log("hry 当前页面中使用的chunk", variableName, tsUri.path, variableDeclarator.node.loc?.start.line);
-        }
-
-        const rootComponentInfo = getRootComponentInfo(variableDeclarator);
-        if (rootComponentInfo) {
-          tsFileInfo.rootComponentInfo = rootComponentInfo;
-          // console.log("hry 得到本地的root组件信息", chunkComponentInfo, rootComponentInfo);
-        }
-      },
-    });
-
-    // 解析导入的子组件信息
-    tsFileInfo.importedSubCompInfo = parseImportedInfo(customComponentMap, importTypeInfo, tsUri);
-    // console.log("hry 过滤后的import信息", tsFileInfo.importedSubCompInfo);
-    // console.log("hry 最终的信息", tsFileInfo);
-
-    return tsFileInfo;
+    return mergeComponentInfos(mainPath, mainComponentInfo, subComponentInfos);
   }
 
   /**
@@ -159,12 +37,13 @@ class TsFile {
    * @param tsUri 文件URI
    * @returns 文件信息
    */
-  public async get(tsUri: TsUri): Promise<TsFileInfo> {
+  public async get(tsUri: TsUri): Promise<ComponentInfo> {
     const fsPath = tsUri.fsPath;
+
     const tsFileInfo = this.infoCache[fsPath];
 
     if (!tsFileInfo) {
-      return await this.update(tsUri, { type: "main" });
+      return await this.update(tsUri);
     } else {
       return tsFileInfo;
     }
@@ -176,28 +55,13 @@ class TsFile {
    * @param text 可选的文件内容，如不提供则从文件系统读取
    * @returns 更新后的文件信息
    */
-  public async update(tsUri: TsUri, changedInfo: ChangedTsFileInfo): Promise<TsFileInfo> {
-    if (changedInfo.type === "related") {
-      const fileName = path.parse(changedInfo.uri.fsPath).name;
-      const componentInfo = assertNonNullable(getSubFileInfo(fileName, changedInfo.text)?.componentInfo);
-      const tsFileInfo = assertNonNullable(this.infoCache[tsUri.fsPath]);
-      if (componentInfo.type === "chunk") {
-        tsFileInfo.chunkComopnentInfos[fileName] = componentInfo.info;
-      } else if (componentInfo.type === "custom") {
-        tsFileInfo.customComponentInfos[fileName] = componentInfo.info;
-      }
-
-      return tsFileInfo;
-    }
-
+  public async update(tsUri: TsUri, fileInfo?: FileInfo): Promise<ComponentInfo> {
     const fsPath = tsUri.fsPath;
-    let mainText: string;
-    if (changedInfo.text === undefined) {
-      mainText = (await vscode.workspace.openTextDocument(fsPath)).getText();
-    } else {
-      mainText = changedInfo.text;
+    if (fileInfo === undefined) {
+      fileInfo = [fsPath, (await vscode.workspace.openTextDocument(fsPath)).getText()];
     }
-    const tsFileInfo = this.tsFileParser(tsUri, mainText);
+
+    const tsFileInfo = this.generateComponentInfo(tsUri, fileInfo);
 
     this.infoCache[fsPath] = tsFileInfo;
 
@@ -207,3 +71,9 @@ class TsFile {
 
 // 导出单例
 export const tsFileManager = new TsFile();
+
+/**
+ * 设计思想和实现目标
+ * 实现: 获取组件信息
+ * 1. customComponentInfos 来自于当前文件的变量声明中使用CustomComponent函数的部分 作为比较、验证wxml文件中相同标签名的组件所使用到的变量数据
+ */

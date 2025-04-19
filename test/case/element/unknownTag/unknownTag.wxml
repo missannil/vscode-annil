@@ -1,6 +1,6 @@
 <!-- subA(自闭合)标签 会被检测 -->
 
-
+<subC />
 <view>
 	<subB></subB>
 </view>

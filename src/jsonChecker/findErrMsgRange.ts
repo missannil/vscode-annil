@@ -1,4 +1,4 @@
-import { vscode } from "../exportVscode";
+import { vscode } from "../publicModule";
 
 export function findErrMsgRange(key: string, textlines: string[], startLine = 0): vscode.Range {
   const line = textlines.slice(startLine).findIndex((item) => item.includes(key)) + startLine;

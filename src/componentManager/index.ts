@@ -1,4 +1,3 @@
-import type { Uri } from "vscode";
 import * as vscode from "vscode";
 import { diagnosticCollection } from "../diagnosticCollection";
 import { jsonChecker } from "../jsonChecker";
@@ -6,7 +5,7 @@ import { debounce } from "../utils/debounce";
 import { wxmlChecker } from "../wxmlChecker";
 import { jsonFileManager } from "./jsonFileManager";
 import { tsFileManager } from "./tsFileManager";
-import type { TsFileInfo } from "./tsFileManager/types";
+import type { ComponentInfo } from "./tsFileManager/types";
 import {
   type ComponentDirPath,
   type ComponentUri,
@@ -23,17 +22,34 @@ type CallBackDict = Record<
   JsonFsPath | WxmlFsPath,
   ((diagnosticList: readonly vscode.Diagnostic[]) => void) | undefined
 >;
-
+type MainPath = string;
+type RelatedPath = string;
+type RelatedFiles = Record<MainPath, RelatedPath[]>;
 class ComponentManager {
-  #relatedUris: Record<string, TsUri> = {};
-  public get relatedUris(): Record<string, TsUri | undefined> {
-    return this.#relatedUris;
+  #relatedFiles: RelatedFiles = {};
+  public getRelatedMainPath(relatedPath: RelatedPath): MainPath {
+    return Object.keys(this.#relatedFiles).find((mainPath) => {
+      return this.#relatedFiles[mainPath].includes(relatedPath);
+    }) as MainPath;
   }
-  public setRelatedUris(fsPath: string, tsUri: TsUri): void {
-    this.#relatedUris[fsPath] = tsUri;
+  public regesiterRelateFile(fsPath: string, mainPath: MainPath): void {
+    (this.#relatedFiles[mainPath] ||= []).push(fsPath);
   }
-  public isRelatedUri(uri: Uri): boolean {
-    return uri.fsPath in this.#relatedUris;
+  public isRelatedPath(fsPath: string): boolean {
+    return Object.values(this.#relatedFiles).some((relatedPaths) => relatedPaths.includes(fsPath));
+  }
+  // 当文件被删除时,要删除关联的文件
+  public removeRelatedFile(fsPath: RelatedPath): void {
+    Object.values(this.#relatedFiles).some((relatedPaths) => {
+      const index = relatedPaths.indexOf(fsPath);
+      if (index !== -1) {
+        relatedPaths.splice(index, 1);
+
+        return true;
+      }
+
+      return false;
+    });
   }
   // 记录当前正在检测的组件的目录路径(要求一个组件文件夹下只能有一组(`.js`、`.wxml`、`.json`)组件文件,即不可讲多个组件写在同一文件夹下)
   #checkingQueue: ComponentDirPath[] = [];
@@ -100,6 +116,7 @@ class ComponentManager {
           jsonUri = vscode.Uri.joinPath(uri, `${componentName}.json`) as JsonUri;
           wxmlUri = vscode.Uri.joinPath(uri, `${componentName}.wxml`) as WxmlUri;
         }
+        this.removeRelatedFile(uri.fsPath);
         diagnosticCollection.removeChecked(dirPath);
         diagnosticCollection.delete(jsonUri);
         diagnosticCollection.delete(wxmlUri);
@@ -113,20 +130,15 @@ class ComponentManager {
       const textDocument = event.document;
       const uri = textDocument.uri;
       // 如果没有内容变化,则不处理(比如只是保存文件,但是文件内容没有变化)或者不是组件文件,也不处理
-      if (event.contentChanges.length === 0 || !uriHelper.isComponentUri(uri) && !this.isRelatedUri(uri)) {
+      if (event.contentChanges.length === 0 || !uriHelper.isComponentUri(uri) && !this.isRelatedPath(uri.fsPath)) {
         return;
       }
-      // 如果是相关文件,则更新相关文件(.ts)的内容
-      if (this.isRelatedUri(uri)) {
-        const tsUri = this.#relatedUris[uri.fsPath];
-        const relatedUri = uri as TsUri;
-        await tsFileManager.update(tsUri, {
-          type: "related",
-          uri: relatedUri,
-          text: textDocument.getText(),
-        });
 
-        debounceCheckComopnentHandler.call(this, tsUri, false);
+      // 如果是相关文件,则更新相关文件(.ts)的内容
+      if (this.isRelatedPath(uri.fsPath)) {
+        const relatedUri = vscode.Uri.file(this.getRelatedMainPath(uri.fsPath)) as TsUri;
+        await tsFileManager.update(relatedUri, [uri.fsPath, textDocument.getText()]);
+        debounceCheckComopnentHandler.call(this, relatedUri, false);
       } else if (uriHelper.isComponentUri(uri)) {
         const changedText = textDocument.getText();
         if (uriHelper.isWxmlFile(uri)) {
@@ -134,14 +146,14 @@ class ComponentManager {
         } else if (uriHelper.isJsonFile(uri)) {
           await jsonFileManager.update(uri, changedText);
         } else if (uriHelper.isTsFile(uri)) {
-          await tsFileManager.update(uri, { type: "main", text: changedText });
+          await tsFileManager.update(uri, [uri.fsPath, textDocument.getText()]);
         }
         debounceCheckComopnentHandler.call(this, uri, false);
       }
     });
   }
   // 检测wxml文件,如果有回调函数,则执行回调函数(为了测试)
-  async #checkWxmlFile(wxmlUri: WxmlUri, tsFileInfo?: TsFileInfo): Promise<void> {
+  async #checkWxmlFile(wxmlUri: WxmlUri, tsFileInfo?: ComponentInfo): Promise<void> {
     if (!tsFileInfo) {
       tsFileInfo = await tsFileManager.get(uriHelper.getSiblingUri(wxmlUri, ".ts"));
     }
@@ -158,7 +170,7 @@ class ComponentManager {
   // 检测json文件,如果有回调函数,则执行回调函数(为了测试)
   async #checkJsonFile(
     jsonUri: JsonUri,
-    tsFileInfo?: TsFileInfo,
+    tsFileInfo?: ComponentInfo,
     wxmlCustomComponents?: string[],
   ): Promise<void> {
     if (!tsFileInfo) {

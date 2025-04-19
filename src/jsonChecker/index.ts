@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import type { JsonFileInfo } from "../componentManager/jsonFileManager";
 
-import type { TsFileInfo } from "../componentManager/tsFileManager/types";
+import type { ComponentInfo } from "../componentManager/tsFileManager/types";
 import { checkPlaceholder } from "./checkPlaceholder";
 import { validateInvalidPath } from "./validateInvalidPath";
 import { validateMissingImports } from "./validateMissingImports";
@@ -61,13 +61,13 @@ export type JsonCheckContext = {
   textlines: string[];
   legalConfigKeys: string[];
   jsonFileInfo: JsonFileInfo;
-  tsFileInfo: TsFileInfo;
+  tsFileInfo: ComponentInfo;
   diagnosticList: vscode.Diagnostic[];
 };
 
 export function jsonChecker(
   jsonFileInfo: JsonFileInfo,
-  tsFileInfo: TsFileInfo,
+  tsFileInfo: ComponentInfo,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
   const config = jsonFileInfo.config;

@@ -1,7 +1,7 @@
 import path = require("path");
 import * as vscode from "vscode";
 import { tsFileManager } from "../../out/componentManager/tsFileManager/index";
-import type { TsFileInfo } from "../../out/componentManager/tsFileManager/types";
+import type { ComponentInfo } from "../../out/componentManager/tsFileManager/types";
 import type { TsUri } from "../../out/componentManager/uriHelper";
 import { debounce } from "../../out/utils/debounce";
 import { isDeepEqual } from "../../out/utils/isDeepEqual";
@@ -32,7 +32,7 @@ export async function tsFileParserTest(): Promise<void> {
   const textDocument = await vscode.workspace.openTextDocument(demoCompFsPath);
   // 获取生成的TsFileInfo
   const currentTsFileInfo = await tsFileManager.get(textDocument.uri as TsUri);
-  const expectedTsFileInfo = (await import("./expectedTsFileInfo.js")).expectedTsFileInfo;
+  const expectedTsFileInfo = (await import("./expectedTsFileInfo.js")).expectedComponentInfo;
   if (isDeepEqual(currentTsFileInfo, expectedTsFileInfo)) {
     console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
   } else {
@@ -52,8 +52,8 @@ export async function tsFileParserTest(): Promise<void> {
 
 // 找到不同的属性并返回
 function findDiffItem(
-  currentVal: TsFileInfo[keyof TsFileInfo],
-  expectedVal: TsFileInfo[keyof TsFileInfo],
+  currentVal: ComponentInfo[keyof ComponentInfo],
+  expectedVal: ComponentInfo[keyof ComponentInfo],
 ): unknown[][] {
   const diffList: unknown[][] = [];
   Object.keys(currentVal).forEach((key) => {

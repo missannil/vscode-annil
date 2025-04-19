@@ -3,8 +3,8 @@ import { CustomComponent, DefineComponent, RootComponent } from "annil";
 import type { CreateComponentType } from "annil";
 import { type $SubA } from "~/subA";
 import type { $SubB } from "~/subB";
-import { type $SubC } from "../../../mockComponents/subC";
-import type { $SubD } from "../../../mockComponents/subD";
+import type { $SubD } from "../../../miniprogram/components/subD";
+import { type $SubC } from "../../../miniprogram/otherComponents/subC";
 const subA = CustomComponent<Root, $SubA>()({
   data: {
     subA__id: "id",
