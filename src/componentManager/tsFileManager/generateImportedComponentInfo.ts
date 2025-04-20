@@ -17,7 +17,10 @@ export function generateSubImportedComponentPaths(
     // 有可能自定义组件的类型不是外部导入的,当前文件建立的,那么typePath就是undefined
     if (typePath === undefined) return;
     if (isRelativePath(subComponentPath) && isRelativePath(typePath)) {
-      importedSubCompInfo[customComonentName] = "./" + path.join(path.dirname(subComponentPath), typePath);
+      const compositionPath = path.join(path.dirname(subComponentPath), typePath);
+      importedSubCompInfo[customComonentName] = isRelativePath(compositionPath)
+        ? compositionPath
+        : "./" + compositionPath;
 
       return;
     }

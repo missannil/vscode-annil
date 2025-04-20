@@ -14,6 +14,7 @@ import { chunk3 } from "./chunk3";
 import type { $SubD } from "./components/subD/subD";
 import { subF } from "./components/useSubF";
 import { subA } from "./subA";
+import { subD } from "./useSubD";
 
 type UserA = {
   name: string;
@@ -42,7 +43,7 @@ const chunk1 = ChunkComponent<Root>()({
     ddd_aaa: String,
   },
 });
-const subD = CustomComponent<Root, $SubD>()({});
+
 // 定义私有的子组件类型
 type $SubE = CreateComponentType<"subE", {
   properties: {
