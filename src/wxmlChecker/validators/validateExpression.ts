@@ -7,6 +7,7 @@ import { isMemberVariableExpression } from "../tools/isMemberVariableExpression"
 import { isLikeOperationExpression } from "../tools/isValidOperationExpression";
 import { regexpHelper } from "../tools/regexpHelper";
 
+import { configuration } from "../../configuration";
 import { isVariableExpression } from "../tools/isVariableExpression";
 import { generateInvalidExpression } from "./generateInvalidExpression";
 import { memberVariableExpressionHandler } from "./memberVariableExpressionHandler";
@@ -38,6 +39,8 @@ export function validateExpression(
   variableValidity: boolean,
   attrName?: string,
 ): boolean {
+  validVariables.push(...configuration.validDatas);
+
   return handlers([
     (): boolean => !isIgnoreExpression(expression),
     (): boolean => validateHasIllegalChar(expression, startLine, textlines, diagnosticList, attrName),
@@ -102,6 +105,7 @@ export function validateExpression(
       },
     ],
     (): boolean => {
+      console.log("hry 2", expression);
       generateInvalidExpression(startLine, textlines, expression, diagnosticList, attrName);
 
       return false;

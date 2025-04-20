@@ -7,6 +7,13 @@ class Configuration {
   #userIgnoreFeilds!: string[];
   #ignoreFeilds!: string[];
   #ignoreTags!: string[];
+  #validDatas!: string[];
+  public get validDatas(): string[] {
+    return this.#validDatas;
+  }
+  public updateValidDatas(): void {
+    this.#validDatas = vscode.workspace.getConfiguration("annil").get("validDatas") || [];
+  }
   public get ignoreTags(): string[] {
     return this.#ignoreTags;
   }
@@ -51,6 +58,7 @@ class Configuration {
         this.updateIgnoreFeilds();
         this.updateIgnoreTags();
         this.updateAllowUnknownAttributes();
+        this.updateValidDatas();
       }
     });
 
@@ -63,6 +71,7 @@ class Configuration {
     this.updateIgnoreFeilds();
     this.updateIgnoreTags();
     this.updateAllowUnknownAttributes();
+    this.updateValidDatas();
   }
 }
 

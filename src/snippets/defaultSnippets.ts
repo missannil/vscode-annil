@@ -79,18 +79,18 @@ export const defaultSnippets: DefaultSnippets = {
     "annil-component-default": {
       "prefix": "annil-wxml-default",
       "body": [
-        "<view class=\"${name}\">",
-        "  ",
-        "</view>",
+        "<block wx:if=\"{{attached}}\">",
+        " ",
+        "</block>",
       ],
       "description": "Annil comp default snippet",
     },
     "annil-page-default": {
       "prefix": "annil-page-default",
       "body": [
-        "<view class=\"${name}\">",
-        "  ",
-        "</view>",
+        "<block wx:if=\"{{attached}}\">",
+        " ",
+        "</block>",
       ],
       "description": "Annil page default snippet",
     },

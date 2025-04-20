@@ -105,6 +105,14 @@
             "type": "string"
           },
           "description": "json文件中合法的配置项"
+        },
+        "annil.validDatas": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "wxml检测时允许的数值"
         }
       }
     },

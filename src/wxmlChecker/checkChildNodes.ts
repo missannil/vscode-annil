@@ -17,6 +17,8 @@ export function checkChildNodes(
     wxForVariables && checkContext.popWxForInfos();
   } else {
     const { tsFileInfo, wxForInfos } = checkContext;
+    // 获取工作区json配置中validDatas字段的值
+
     checkPendingConditionValue(
       tsFileInfo.rootComponentInfo.dataList.concat(wxForInfos.itemNames).concat(wxForInfos.indexNames).concat([
         "true",
