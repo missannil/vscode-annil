@@ -1,4 +1,4 @@
-import type { ImportedSubComponentInfo } from "../componentManager/tsFileManager/types";
+import type { ImportedSubComponentPaths } from "../componentManager/tsFileManager/types";
 import { DiagnosticErrorType } from "../diagnosticFixProvider/errorType";
 import { vscode } from "../publicModule";
 import { EXTENSION_NAME } from "../utils/constants";
@@ -8,7 +8,7 @@ import { findKeyline } from "./findKeyline";
 // 生成未知导入的诊断并返回正确导入的keys
 export function validateUnknownImports(
   usingComponentsKeys: string[],
-  importComponentInfo: ImportedSubComponentInfo,
+  importComponentInfo: ImportedSubComponentPaths,
   textlines: string[],
 ): {
   diagnosticList: vscode.Diagnostic[];

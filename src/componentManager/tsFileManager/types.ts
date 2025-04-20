@@ -12,12 +12,12 @@ type AttrName = string;
 type ImportName = string;
 type ImportPath = string;
 
-export type ImportedSubComponentInfo = Record<ImportName, ImportPath>;
+export type ImportedSubComponentPaths = Record<ImportName, ImportPath>;
 
 // 组件的子文件信息
 export type SubFileInfo = {
   componentInfo: SubComponentInfo | null;
-  importTypeInfo: ImportedSubComponentInfo;
+  importTypeInfo: ImportedSubComponentPaths;
 };
 
 export const CUSTOM = "自定义";
@@ -100,7 +100,7 @@ export type ComponentInfo = {
   rootComponentInfo: RootComponentInfo;
   chunkComponentInfos: ChunkComponentInfos;
   // 记录组件导入的子组件信息 为了验证组件json文件的合法性，例如 {"h_image":"./$Image,"button":"@components/$button"}
-  importedSubCompInfo: ImportedSubComponentInfo;
+  importedSubCompInfo: ImportedSubComponentPaths;
 };
 
 type FilePath = string;

@@ -1,7 +1,8 @@
-import { generateImportedComponentInfo } from "./generateImportedComponentInfo";
+import { generateSubImportedComponentPaths } from "./generateImportedComponentInfo";
+import { generateMainImportedComponentPath } from "./generateMainImportedComponentPath";
 import type { SubComponentInfos } from "./getExternalSubComponentInfos";
 import type { TraverseAstResult } from "./traverseAst";
-import type { ComponentInfo, ImportedSubComponentInfo } from "./types";
+import type { ComponentInfo, ImportedSubComponentPaths } from "./types";
 
 export function mergeComponentInfos(
   mainFspath: string,
@@ -10,7 +11,7 @@ export function mergeComponentInfos(
 ): ComponentInfo {
   const { rootComponentInfo, customComponentInfos, chunkComponentInfos, importedTypes } = mainComponentInfo;
   // 子组件导入信息,这里搜集主文件中的导入信息
-  const importedSubCompInfo: ImportedSubComponentInfo = generateImportedComponentInfo(
+  const importedSubComponentPaths: ImportedSubComponentPaths = generateMainImportedComponentPath(
     mainFspath,
     importedTypes,
     customComponentInfos,
@@ -26,14 +27,15 @@ export function mergeComponentInfos(
     Object.assign(customComponentInfos, subCustomComponentInfos);
     Object.assign(chunkComponentInfos, subChunkComponentInfos);
     // 这里搜集子文件中的导入信息
-    const subComponentImportedInfo = generateImportedComponentInfo(
+    const subComponentImportedPaths = generateSubImportedComponentPaths(
+      mainFspath,
       subComponentPath,
       subImportedTypes,
       subCustomComponentInfos,
     );
-    const subComponentImportedPath = subComponentImportedInfo[subComponentName] as string | undefined;
+    const subComponentImportedPath = subComponentImportedPaths[subComponentName] as string | undefined;
     if (subComponentImportedPath !== undefined) {
-      importedSubCompInfo[subComponentName] = subComponentImportedPath;
+      importedSubComponentPaths[subComponentName] = subComponentImportedPath;
     }
   });
 
@@ -41,6 +43,6 @@ export function mergeComponentInfos(
     rootComponentInfo,
     customComponentInfos,
     chunkComponentInfos,
-    importedSubCompInfo,
+    importedSubCompInfo: importedSubComponentPaths,
   };
 }

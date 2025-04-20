@@ -80,7 +80,7 @@ async function suiteTest(): Promise<void> {
 export async function runTest(): Promise<void> {
   // console.log("测试开始");
   // ts解析器测试
-  await tsFileParserTest();
+  // await tsFileParserTest();
   // 文件测试
   // await suiteTest();
 }

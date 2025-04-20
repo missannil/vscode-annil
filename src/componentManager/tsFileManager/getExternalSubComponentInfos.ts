@@ -1,6 +1,9 @@
+import path from "path";
+import { miniprogramConfig } from "../../miniprogramConfig";
 import { componentManager } from "..";
 import { getExternalSubComponentPaths } from "./getExternalSubComponentPaths";
 import type { ImportedVariables } from "./getImportValueInfo";
+import { isRelativePath, resolveAliasPathsPath } from "./resolveImportUri";
 import { traverseAst, type TraverseAstResult } from "./traverseAst";
 import type { FileInfo } from "./types";
 
@@ -25,16 +28,20 @@ export function getSubComponentInfos(
   importedVariables: ImportedVariables,
   fileInfo: FileInfo,
 ): SubComponentInfos {
-  const subComponentPaths = getExternalSubComponentPaths(mainPath, subComponentNames, importedVariables);
+  const subComponentPaths = getExternalSubComponentPaths(subComponentNames, importedVariables);
   const subComponentInfos: SubComponentInfos = {};
   Object.entries(subComponentPaths).forEach(([subComponentName, subComponentPath]) => {
-    registerRelatedFile(mainPath, subComponentPath);
-    const { importedTypes, customComponentInfos, chunkComponentInfos } = traverseAst(subComponentPath, fileInfo);
+    const absolutePath = isRelativePath(subComponentPath)
+      ? path.resolve(path.dirname(mainPath), subComponentPath + ".ts")
+      : resolveAliasPathsPath(miniprogramConfig.getTsConfigInfo(mainPath), subComponentPath);
+    registerRelatedFile(mainPath, absolutePath);
+    const { importedTypes, customComponentInfos, chunkComponentInfos } = traverseAst(absolutePath, fileInfo);
     subComponentInfos[subComponentName] = {
       chunkComponentInfos,
       customComponentInfos,
       importedTypes,
-      subComponentPath,
+      // 保留相对路径
+      subComponentPath: isRelativePath(subComponentPath) ? subComponentPath : absolutePath,
     };
   });
 

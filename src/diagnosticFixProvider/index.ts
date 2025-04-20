@@ -9,7 +9,7 @@ import { assertNonNullable } from "../utils/assertNonNullable";
 import { EXTENSION_NAME } from "../utils/constants";
 
 import { componentManager } from "../componentManager";
-import type { ImportedSubComponentInfo } from "../componentManager/tsFileManager/types";
+import type { ImportedSubComponentPaths } from "../componentManager/tsFileManager/types";
 import { generateCodeActionOfWxml, generateFixAllActionOfWxml } from "./codeActionGenerator";
 import {
   generateFixAllActionOfJson,
@@ -42,7 +42,7 @@ class CodeActionsProviderManager {
     return "\n"; // Unix/Linux/macOS 风格的换行符
   }
 
-  private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportedSubComponentInfo): string {
+  private getReplaceContent(eol: EOL, indent: string, importedSubCompInfo: ImportedSubComponentPaths): string {
     let res = `"usingComponents": {${eol}`;
     const entries = Object.entries(importedSubCompInfo);
     entries.forEach(([compName, compPath], index) => {

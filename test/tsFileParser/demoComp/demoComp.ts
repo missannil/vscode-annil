@@ -11,7 +11,10 @@ import { page } from "@useCommon/usePage";
 import { subC } from "otherUseComponents/useSubC";
 import type { $SubB } from "~/subB";
 import { chunk3 } from "./chunk3";
+import type { $SubD } from "./components/subD/subD";
+import { subF } from "./components/useSubF";
 import { subA } from "./subA";
+
 type UserA = {
   name: string;
   age: number;
@@ -39,6 +42,7 @@ const chunk1 = ChunkComponent<Root>()({
     ddd_aaa: String,
   },
 });
+const subD = CustomComponent<Root, $SubD>()({});
 // 定义私有的子组件类型
 type $SubE = CreateComponentType<"subE", {
   properties: {
@@ -102,5 +106,5 @@ const rootComponent = RootComponent()({
 const xxx = DefineComponent({
   name: "missing",
   rootComponent,
-  subComponents: [page, subA, subB, subC, chunk1, chunk2, chunk3, subE],
+  subComponents: [page, subA, subB, subC, subD, subE, subF, chunk1, chunk2, chunk3],
 });

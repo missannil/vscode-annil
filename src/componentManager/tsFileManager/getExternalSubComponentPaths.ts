@@ -1,6 +1,4 @@
-import { miniprogramConfig } from "../../miniprogramConfig";
 import type { ImportedVariables } from "./getImportValueInfo";
-import { resolveImportPath } from "./resolveImportUri";
 type SubComponentName = string;
 type SubComponentPath = string;
 
@@ -15,15 +13,13 @@ export type ExternalSubComponentPaths = Record<SubComponentName, SubComponentPat
  * @returns
  */
 export function getExternalSubComponentPaths(
-  currentPath: string,
   subComponentNames: string[],
   importedVariables: ImportedVariables,
 ): ExternalSubComponentPaths {
-  const tsConfigInfo = miniprogramConfig.getTsConfigInfo(currentPath);
   const externalSubComponentInfos: ExternalSubComponentPaths = {};
   for (const [importedName, importedPath] of Object.entries(importedVariables)) {
     if (subComponentNames.includes(importedName)) {
-      externalSubComponentInfos[importedName] = resolveImportPath(currentPath, tsConfigInfo, importedPath);
+      externalSubComponentInfos[importedName] = importedPath;
     }
   }
 

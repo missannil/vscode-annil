@@ -3,7 +3,7 @@ import * as path from "path";
 import type { TsAliasPaths, TsConfigInfo } from "../../miniprogramConfig";
 
 // 判断是否为相对路径
-function isRelativePath(importPath: string): boolean {
+export function isRelativePath(importPath: string): boolean {
   return importPath.startsWith("./") || importPath.startsWith("../");
 }
 
@@ -22,10 +22,7 @@ function isAliasPath(firstPath: string, tsAliasPaths: TsAliasPaths): boolean {
  * @param importPath 导入语句中的路径（如 "./xxx", "components/xxx", "@alias/xxx"）
  * @returns 导入文件的 URI
  */
-export function resolveImportPath(currentPath: string, tsConfigInfo: TsConfigInfo, importPath: string): string {
-  if (isRelativePath(importPath)) {
-    return path.resolve(path.dirname(currentPath), importPath) + ".ts";
-  }
+export function resolveAliasPathsPath(tsConfigInfo: TsConfigInfo, importPath: string): string {
   const baseUrl = tsConfigInfo.config.compilerOptions?.baseUrl;
   if (tsConfigInfo === null || baseUrl === undefined) {
     throw new Error(`未找到 tsconfig.json 或 baseUrl 配置`);

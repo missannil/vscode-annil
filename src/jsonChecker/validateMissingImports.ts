@@ -1,4 +1,4 @@
-import type { ImportedSubComponentInfo } from "../componentManager/tsFileManager/types";
+import type { ImportedSubComponentPaths } from "../componentManager/tsFileManager/types";
 import { DiagnosticErrorType } from "../diagnosticFixProvider/errorType";
 import { vscode } from "../publicModule";
 import { EXTENSION_NAME } from "../utils/constants";
@@ -13,7 +13,7 @@ import { findErrMsgRange } from "./findErrMsgRange";
  */
 export function validateMissingImports(
   usingComponentsKeys: string[],
-  importComponentInfo: ImportedSubComponentInfo,
+  importComponentInfo: ImportedSubComponentPaths,
   textlines: string[],
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];

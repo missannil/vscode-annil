@@ -22,13 +22,13 @@ class TsFile {
    */
   public generateComponentInfo(tsUri: TsUri, fileInfo: FileInfo): ComponentInfo {
     const mainPath = tsUri.fsPath;
-
     // 获取主文件的信息
     const mainComponentInfo = traverseAst(mainPath, fileInfo);
     const { importedVariables, subComponentNames } = mainComponentInfo;
     // 获取子组件的信息
     const subComponentInfos = getSubComponentInfos(mainPath, subComponentNames, importedVariables, fileInfo);
 
+    // 合并主文件和子组件的信息
     return mergeComponentInfos(mainPath, mainComponentInfo, subComponentInfos);
   }
 

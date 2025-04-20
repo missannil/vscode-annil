@@ -4,12 +4,16 @@
     "subA": "/components/subA",
     "subB": "/components/subB",
     "page": "/components/page/page",
-    "subC": "/otherComponents/subC"
+    "subC": "/otherComponents/subC",
+    "subD": "./components/subD/subD",
+    "subF": "./components/subF/subF"
   },
   "componentPlaceholder": {
     "subA": "view",
     "subB": "view",
     "page": "view",
-    "subC": "view"
+    "subC": "view",
+    "subD": "view",
+    "subF": "view"
   }
 }

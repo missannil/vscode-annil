@@ -24,9 +24,9 @@ export type TraverseAstResult = {
 
 // ast中导入值的变量名和路径 例如: import { a } from "./path/to" 变量名是a, 路径是"./path/to"
 
-export function traverseAst(currentPath: string, existingFileInfo: FileInfo): TraverseAstResult {
+export function traverseAst(absolutePath: string, existingFileInfo: FileInfo): TraverseAstResult {
   // 如果传入的文件路径和当前路径相同,则直接使用传入的文件内容,否则自己读取文件内容
-  const tsText = existingFileInfo[0] === currentPath ? existingFileInfo[1] : fs.readFileSync(currentPath, "utf-8");
+  const tsText = existingFileInfo[0] === absolutePath ? existingFileInfo[1] : fs.readFileSync(absolutePath, "utf-8");
   const tsAST = parse(tsText, { sourceType: "module", plugins: ["typescript"] });
   const subComponentNames: string[] = [];
   const importedVariables: ImportedVariables = {};
@@ -77,7 +77,7 @@ export function traverseAst(currentPath: string, existingFileInfo: FileInfo): Tr
         customComponentInfos[variableName] = {
           line: variableDeclarator.node.loc?.start.line,
           componentTypeName: typeName,
-          fsPath: currentPath,
+          fsPath: absolutePath,
           configInfo: customComponentConfigInfo,
         };
 
@@ -89,7 +89,7 @@ export function traverseAst(currentPath: string, existingFileInfo: FileInfo): Tr
         Reflect.deleteProperty(chunkComponentInfo, "customEvents");
         const variableName = variableDeclarator.node.id.name;
         chunkComponentInfos[variableName] = {
-          fsPath: currentPath,
+          fsPath: absolutePath,
           line: variableDeclarator.node.loc?.start.line,
           configInfo: chunkComponentInfo,
         };
