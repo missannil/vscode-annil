@@ -61,7 +61,9 @@ export function checkChunkTag(
       validateEventsAttr(
         rawAttrName,
         rawAttrValue,
-        assertNonNullable(tsFileInfo.chunkComponentInfos[chunkTagMark]).configInfo.events,
+        assertNonNullable(tsFileInfo.chunkComponentInfos[chunkTagMark]).configInfo.events.concat(
+          tsFileInfo.rootComponentInfo.customEvents,
+        ),
         textlines,
         startLine,
         diagnosticList,
