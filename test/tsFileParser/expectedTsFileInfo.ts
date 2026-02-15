@@ -22,7 +22,7 @@ export const expectedComponentInfo: ComponentInfo = {
       },
     },
     subB: {
-      line: 20,
+      line: 23,
       fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
       componentTypeName: "$SubB",
       configInfo: {
@@ -44,7 +44,7 @@ export const expectedComponentInfo: ComponentInfo = {
       },
     },
     page: {
-      line: 5,
+      line: 4,
       fsPath: "/Users/xxxx/Desktop/vscode-annil/test/miniprogram/useCommon/usePage.ts",
       componentTypeName: "$Page",
       configInfo: {
@@ -55,7 +55,7 @@ export const expectedComponentInfo: ComponentInfo = {
       },
     },
     subE: {
-      line: 48,
+      line: 52,
       fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
       componentTypeName: "$SubE",
       configInfo: {
@@ -64,6 +64,18 @@ export const expectedComponentInfo: ComponentInfo = {
           value: "subE_num",
         },
       },
+    },
+    subD: {
+      componentTypeName: "$SubD",
+      configInfo: {},
+      line: 4,
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/useSubD.ts",
+    },
+    subF: {
+      componentTypeName: "$SubF",
+      configInfo: {},
+      line: 4,
+      fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/components/useSubF.ts",
     },
   },
   rootComponentInfo: {
@@ -104,11 +116,13 @@ export const expectedComponentInfo: ComponentInfo = {
     subA: "/components/subA",
     subB: "/components/subB",
     subC: "/otherComponents/subC",
+    subD: "./components/subD/subD",
+    subF: "./components/subF/subF",
   },
   chunkComponentInfos: {
     chunk1: {
       fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
-      line: 32,
+      line: 35,
       configInfo: {
         dataList: ["ddd_src", "ddd_arr"],
         boolTypeDatas: [],
@@ -118,7 +132,7 @@ export const expectedComponentInfo: ComponentInfo = {
     },
     chunk2: {
       fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/demoComp.ts",
-      line: 26,
+      line: 29,
       configInfo: {
         dataList: ["chunk2_bool"],
         boolTypeDatas: ["chunk2_bool"],

@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { getDocumentText } from "./tools/getDocumentText";
 import { replaceDocumentText } from "./tools/replaceDocumentText";
-import { tsFileParserTest } from "./tsFileParser";
 const suiteQueue: (() => Promise<void>)[] = [];
 
 const totalCount = 46;
@@ -45,44 +44,32 @@ export function suite(name: string, fn: () => Promise<void>): void {
 }
 
 async function suiteTest(): Promise<void> {
-  const allCases = await vscode.workspace.findFiles("case/**/*.test.js");
   const commentCases = await vscode.workspace.findFiles("case/comment/**/*.test.js");
-  const customTagCases = await vscode.workspace.findFiles("case/**/customTag/**/*.test.js");
-  const nativeTagCases = await vscode.workspace.findFiles("case/**/nativeTag/**/*.test.js");
-  const elementTagCases = await vscode.workspace.findFiles("case/**/element/**/*.test.js");
-  const wxForBlock = await vscode.workspace.findFiles("case/**/wxForBlock/**/*.test.js");
-  const conditionalBlock = await vscode.workspace.findFiles("case/**/conditionalBlock/**/*.test.js");
-  const jsonError = await vscode.workspace.findFiles("case/**/jsonError/**/*.test.js");
-  const text = await vscode.workspace.findFiles("case/**/text/**/*.test.js");
-  const element = await vscode.workspace.findFiles("case/**/element/**/*.test.js");
+  const customTagCases = await vscode.workspace.findFiles("case/element/customTag/**/*.test.js");
+  const nativeTagCases = await vscode.workspace.findFiles("case/element/nativeTag/**/*.test.js");
+  const jsonError = await vscode.workspace.findFiles("case/jsonError/**/*.test.js");
+  const text = await vscode.workspace.findFiles("case/text/**/*.test.js");
+  const element = await vscode.workspace.findFiles("case/element/**/*.test.js");
   const caseList = [
-    ...allCases,
-    // ...commentCases,
-    // ...element,
-    // ...text,
-    // ...jsonError,
-    // ...customTagCases,
-    // ...nativeTagCases,
+    ...commentCases,
+    ...customTagCases,
+    ...nativeTagCases,
+    ...jsonError,
+    ...text,
+    ...element,
   ];
-  const ignore: string[] = [];
   for (const testFileUri of caseList) {
-    // -8是为了去掉.test.js
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    // if (ignore.includes(testFileUri.fsPath.split("/").pop()!.slice(0, -8))) {
-    //   continue;
-    // }
+    // 导入测试文件(执行测试)
     await import(testFileUri.fsPath);
-    if (testFileUri.fsPath.includes("jsonError")) {
-      // await import(testFileUri.fsPath);
-    }
+
   }
 }
 export async function runTest(): Promise<void> {
-  // console.log("测试开始");
+  console.log("测试开始");
   // ts解析器测试
   // await tsFileParserTest();
   // 文件测试
-  // await suiteTest();
+  await suiteTest();
 }
 
 void runTest();

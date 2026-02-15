@@ -1,7 +1,7 @@
 {
   "component": true,
   "usingComponents": {
-    "subA": "/components/subA"
+    "subA": "../../../../../../miniprogram/components/subA"
   },
   "componentPlaceholder": {
     "subA": "view"

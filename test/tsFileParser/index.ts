@@ -23,7 +23,7 @@ vscode.workspace.onDidChangeTextDocument(
 );
 
 export async function tsFileParserTest(): Promise<void> {
-  // console.log("tsFileParser测试开始");
+  console.log("tsFileParser测试开始");
   // @ts-expect-error 由于缓存机制,在修改expected.js时,需要修改两次才能让第一次的修改生效。
   delete require.cache[expectedFsPath];
   // 打开文件
@@ -33,21 +33,21 @@ export async function tsFileParserTest(): Promise<void> {
   // 获取生成的TsFileInfo
   const currentTsFileInfo = await tsFileManager.get(textDocument.uri as TsUri);
   const expectedTsFileInfo = (await import("./expectedTsFileInfo.js")).expectedComponentInfo;
-  if (isDeepEqual(currentTsFileInfo, expectedTsFileInfo)) {
-    console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
-  } else {
-    Object.keys(currentTsFileInfo).forEach((key) => {
-      const currentVal = currentTsFileInfo[key as keyof typeof currentTsFileInfo];
-      const expectedVal = expectedTsFileInfo[key as keyof typeof expectedTsFileInfo];
-      if (!isDeepEqual(currentVal, expectedVal)) {
-        console.error(
-          "测试失败",
-          key,
-          findDiffItem(currentVal, expectedVal),
-        );
-      }
-    });
-  }
+  // if (isDeepEqual(currentTsFileInfo, expectedTsFileInfo)) {
+  //   console.log("\x1b[32m%s\x1b[0m", "测试通过:tsFileParser");
+  // } else {
+  Object.keys(currentTsFileInfo).forEach((key) => {
+    const currentVal = currentTsFileInfo[key as keyof typeof currentTsFileInfo];
+    const expectedVal = expectedTsFileInfo[key as keyof typeof expectedTsFileInfo];
+    if (!isDeepEqual(currentVal, expectedVal)) {
+      console.error(
+        "测试失败",
+        key,
+        findDiffItem(currentVal, expectedVal),
+      );
+    }
+  });
+  // }
 }
 
 // 找到不同的属性并返回

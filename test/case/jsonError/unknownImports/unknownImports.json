@@ -4,8 +4,8 @@
     "subA": "/components/subA",
     "subB": "/components/subB",
     "subBA": "/components/subB",
-    "subC": "/otherComponents/subC",
-    "subD": "/components/subD",
+    "subC": "../../../miniprogram/otherComponents/subC",
+    "subD": "../../../miniprogram/components/subD/subD",
     "subE": "../../../mockComponents/subD"
   },
   "componentPlaceholder": {

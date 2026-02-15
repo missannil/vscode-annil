@@ -5,7 +5,7 @@
     "subB": "/componednts/subB",
     "subBA": "/componentsd/subB",
     "subC": "/components/subC",
-    "subD": "/components/subD"
+    "subD": "/components/subD/subD"
   },
   "componentPlaceholder": {
     "subA": "view",

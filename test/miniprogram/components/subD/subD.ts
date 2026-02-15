@@ -4,6 +4,9 @@ import { DefineComponent, RootComponent, typeEqual } from "annil";
 // const custom = CustomComponent<Root, CompType>()({})
 // type Root = typeof rootComponent;
 const rootComponent = RootComponent()({
+  properties: {
+    str: String,
+  },
   customEvents: {},
 });
 const subD = DefineComponent({
@@ -11,5 +14,9 @@ const subD = DefineComponent({
   rootComponent,
   subComponents: [],
 });
-export type $SubD = {}
+export type $SubD = {
+  properties: {
+    subD_str: string;
+  };
+}
 typeEqual<$SubD, typeof subD>();

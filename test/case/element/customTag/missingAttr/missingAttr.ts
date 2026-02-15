@@ -1,6 +1,7 @@
 import { CustomComponent, DefineComponent } from "annil";
-import type { Root } from "tsFileParser/demoComp/demoComp";
+
 import type { $SubA } from "~/subA";
+import type { Root } from "../../../../tsFileParser/demoComp/demoComp";
 const subA = CustomComponent<Root, $SubA>()({
   inherit: {
     subA__id: "wxml",
@@ -11,7 +12,7 @@ const subA = CustomComponent<Root, $SubA>()({
     subA_isReady: false, // isReady不作为传递属性，不会被认为是缺失的属性
   },
   events: {
-    subA_eventA() {},
+    subA_eventA() { },
   },
 });
 DefineComponent({

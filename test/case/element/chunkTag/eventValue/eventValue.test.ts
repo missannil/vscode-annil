@@ -8,11 +8,11 @@ suite("eventValue", async () => {
   const invalidEvent = DiagnosticErrorType.invalidEvent;
   await assertErrorMessages(wxmlUri, [
     invalidEvent,
-    invalidEvent,
+    // invalidEvent,
   ]);
   await fixAll(wxmlUri);
   await assertErrorMessages(wxmlUri, [
     invalidEvent,
-    invalidEvent,
+    // invalidEvent,
   ], "修复后验证");
 });

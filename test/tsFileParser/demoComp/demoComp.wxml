@@ -13,4 +13,5 @@
 	<page style="{{page_style}}"></page>
 	<subD />
 	<subF></subF>
+	<view catch:tap="onTap">事件测试</view>
 </block>

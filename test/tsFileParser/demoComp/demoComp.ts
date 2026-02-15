@@ -11,7 +11,6 @@ import { page } from "@useCommon/usePage";
 import { subC } from "otherUseComponents/useSubC";
 import type { $SubB } from "~/subB";
 import { chunk3 } from "./chunk3";
-import type { $SubD } from "./components/subD/subD";
 import { subF } from "./components/useSubF";
 import { subA } from "./subA";
 import { subD } from "./useSubD";
@@ -20,7 +19,7 @@ type UserA = {
   name: string;
   age: number;
 };
-
+ 
 const subB = CustomComponent<Root, $SubB>()({
   data: {
     subB_num: 123,

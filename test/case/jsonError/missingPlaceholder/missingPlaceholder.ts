@@ -3,8 +3,10 @@ import { CustomComponent, DefineComponent, RootComponent } from "annil";
 import type { CreateComponentType } from "annil";
 import { type $SubA } from "~/subA";
 import type { $SubB } from "~/subB";
-import type { $SubD } from "../../../miniprogram/components/subD";
+
+import type { $SubD } from "~/subD/subD";
 import { type $SubC } from "../../../miniprogram/otherComponents/subC";
+
 const subA = CustomComponent<Root, $SubA>()({
   data: {
     subA__id: "id",
@@ -30,7 +32,7 @@ const subC = CustomComponent<Root, $SubC>()({
 const subD = CustomComponent<Root, $SubD>()({
   data: {
     subD_str: "string",
-  },
+  }
 });
 
 // 定义私有的子组件类型
