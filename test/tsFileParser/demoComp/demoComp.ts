@@ -19,7 +19,7 @@ type UserA = {
   name: string;
   age: number;
 };
- 
+
 const subB = CustomComponent<Root, $SubB>()({
   data: {
     subB_num: 123,

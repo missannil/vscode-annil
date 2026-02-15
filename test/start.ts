@@ -61,7 +61,6 @@ async function suiteTest(): Promise<void> {
   for (const testFileUri of caseList) {
     // 导入测试文件(执行测试)
     await import(testFileUri.fsPath);
-
   }
 }
 export async function runTest(): Promise<void> {

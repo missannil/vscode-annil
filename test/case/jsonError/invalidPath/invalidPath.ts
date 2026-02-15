@@ -4,8 +4,8 @@ import type { CreateComponentType } from "annil";
 import { type $SubA } from "~/subA";
 import type { $SubB } from "~/subB";
 
-import { type $SubC } from "../../../miniprogram/otherComponents/subC";
 import type { $SubD } from "~/subD/subD";
+import { type $SubC } from "../../../miniprogram/otherComponents/subC";
 
 const subA = CustomComponent<Root, $SubA>()({
   data: {

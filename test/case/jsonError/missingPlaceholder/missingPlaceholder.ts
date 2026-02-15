@@ -32,7 +32,7 @@ const subC = CustomComponent<Root, $SubC>()({
 const subD = CustomComponent<Root, $SubD>()({
   data: {
     subD_str: "string",
-  }
+  },
 });
 
 // 定义私有的子组件类型
