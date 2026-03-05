@@ -7,7 +7,7 @@ export function isMustacheSyntaxMsg(errMsg: DiagnosticMessage): errMsg is Diagno
 }
 
 export function isMissingAttrMsg(errMsg: DiagnosticMessage): errMsg is DiagnosticErrorType.missingAttr {
-  return errMsg === DiagnosticErrorType.missingAttr;
+  return errMsg.split(":")[0] === DiagnosticErrorType.missingAttr;
 }
 
 export function isMissingWxkeyMsg(errMsg: DiagnosticMessage): errMsg is DiagnosticErrorType.missingWxkey {

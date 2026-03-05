@@ -3,7 +3,7 @@ import type { $SubA } from "~/subA";
 
 const subA = CustomComponent<{ data: { rootData: string } }, $SubA>()({
   inherit: {
-    subA__id: "rootData",
+    subA_cid: "rootData",
   },
   data: {
     subA_numA: 123,

@@ -6,5 +6,5 @@ suite("duplicateId", async () => {
   const wxmlUri = vscode.Uri.file(__dirname + "/duplicateId.wxml");
 
   const duplicateId = DiagnosticErrorType.duplicateId;
-  await assertErrorMessages(wxmlUri, [duplicateId, duplicateId, duplicateId]);
+  await assertErrorMessages(wxmlUri, [duplicateId, duplicateId, duplicateId, duplicateId]);
 });

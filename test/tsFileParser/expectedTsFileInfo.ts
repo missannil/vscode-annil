@@ -7,7 +7,7 @@ export const expectedComponentInfo: ComponentInfo = {
       fsPath: "/Users/xxxx/Desktop/vscode-annil/test/tsFileParser/demoComp/subA.ts",
       componentTypeName: "$SubA",
       configInfo: {
-        _id: {
+        cid: {
           type: "Union",
           values: ["aaa", "bbb"],
         },

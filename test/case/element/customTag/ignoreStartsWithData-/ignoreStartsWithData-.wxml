@@ -2,7 +2,7 @@
 <subA
 	numA="{{subA_numA}}"
 	userList="{{subA_userList}}"
-	_id="{{rootData}}"
+	cid="{{rootData}}"
 	data-id="{{sffffubA}}"
 	compId="{{subA}}"
 	bind:eventA="subA_eventA"

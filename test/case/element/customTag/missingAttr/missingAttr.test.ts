@@ -9,12 +9,12 @@ suite("missingAttr", async () => {
 
   const missingAttr = DiagnosticErrorType.missingAttr;
   await assertErrorMessages(wxmlUri, [
-    missingAttr,
-    missingAttr,
-    missingAttr,
-    missingAttr,
+    missingAttr + ":numA" as DiagnosticErrorType.missingAttr,
+    missingAttr + ":cid" as DiagnosticErrorType.missingAttr,
+    missingAttr + ":userList" as DiagnosticErrorType.missingAttr,
+    missingAttr + ":bind:eventA" as DiagnosticErrorType.missingAttr,
   ]);
 
   await fixAll(wxmlUri);
-  await assertErrorMessages(wxmlUri, [DiagnosticErrorType.invalidExpression, DiagnosticErrorType.invalidExpression]);
+  await assertErrorMessages(wxmlUri, [DiagnosticErrorType.invalidExpression]);
 });

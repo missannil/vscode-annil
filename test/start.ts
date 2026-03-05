@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
+import { miniTest } from "./miniTest/index";
 import { getDocumentText } from "./tools/getDocumentText";
 import { replaceDocumentText } from "./tools/replaceDocumentText";
+import { tsFileParserTest } from "./tsFileParser/index";
 const suiteQueue: (() => Promise<void>)[] = [];
 
 const totalCount = 46;
@@ -65,9 +67,11 @@ async function suiteTest(): Promise<void> {
 }
 export async function runTest(): Promise<void> {
   console.log("测试开始");
+  // minitest生成组件测试
+  await miniTest();
   // ts解析器测试
-  // await tsFileParserTest();
-  // 文件测试
+  await tsFileParserTest();
+  //  文件测试
   await suiteTest();
 }
 

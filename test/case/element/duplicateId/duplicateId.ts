@@ -1,13 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { RootComponent } from "annil";
-
-// const subA = CustomComponent<Root, $SubA>()({
-//   data: {},
-// });
-
-// const subB = CustomComponent<Root, $SubB>()({
-//   data: {},
-// });
+import { DefineComponent, RootComponent } from "annil";
 
 type Root = typeof rootComponent;
-const rootComponent = RootComponent()({});
+const rootComponent = RootComponent()({
+  properties: {
+    cid: {
+      type: String,
+      value: "root",
+    },
+  },
+  data: {
+    xxx: "xxx",
+    fff: "fff",
+    list: [1, 2, 3],
+  },
+});
+
+DefineComponent({
+  name: "duplicateId",
+  rootComponent,
+  subComponents: [],
+});

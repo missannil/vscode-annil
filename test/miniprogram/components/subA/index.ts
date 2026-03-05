@@ -1,14 +1,20 @@
 import { DefineComponent, type DetailedType, RootComponent } from "annil";
 
 export type User = {
-  _id: string;
+  cid?: string;
   name: string;
   age?: number;
 };
 const rootComponent = RootComponent()({
   properties: {
-    _id: String,
-    numA: Number,
+    cid: {
+      type: String,
+      value: "subA",
+    },
+    numA: {
+      type: Number,
+      value: 0,
+    },
     userList: Array as DetailedType<User[]>,
   },
   customEvents: {

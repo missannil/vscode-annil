@@ -49,8 +49,12 @@ export function generateCodeActionOfWxml(
   }
 
   if (isMissingAttrMsg(errMsg)) {
+    const fixCode = assertNonNullable(diagnostic.info.fixCode);
+    // 重修复信息中提出缺失的属性名。 例如诊断信息是"缺失属性:customA"，修复信息是' customA="{{customA}}"', 那么就从修复信息中提取出customA来作为提示信息展示给用户。
+    const missingName = fixCode.split("=")[0].trim();
+
     return [
-      editInsert(wxmlUri, diagnostic, errMsg.split(":")[1], assertNonNullable(diagnostic.info.fixCode), codeAction),
+      editInsert(wxmlUri, diagnostic, missingName, fixCode, codeAction),
     ];
   }
   if (isMissingWxkeyMsg(errMsg)) {

@@ -1,6 +1,6 @@
 <block wx:if="{{attached}}">
 	<subA
-		_id="{{  dataBool ? aaa : bbb}}"
+		cid="{{  1 ? aaa : bbb}}"
 		numA="{{dataBool}}"
 		userList="{{subA_userList}}"
 	></subA>
@@ -10,8 +10,14 @@
 		<view>rootDataTest</view>
 	</chunk3>
 	<subC bool="{{subC_bool}}"></subC>
-	<page style="{{page_style}}"></page>
+	<page
+		id="xdxx"
+		style="{{page_style}}"
+	></page>
 	<subD />
-	<subF></subF>
-	<view catch:tap="onTap">事件测试</view>
+	<subF id="xxxd"></subF>
+	<view
+		id="xxx"
+		catch:tap="onTap"
+	>事件测试</view>
 </block>

@@ -1,6 +1,6 @@
 <!--missingTag.wxml -->
 <subA
-	_id="{{subA__id}}"
+	cid="{{subA_cid}}"
 	numA="{{subA_numA}}"
 	userList="{{subA_userList}}"
 />

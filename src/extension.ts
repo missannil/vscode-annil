@@ -7,7 +7,8 @@ import { rightClickManager } from "./rightClickManager";
 
 // 导入初始化函数而不是整个模块
 import { goToDefinition } from "./goToDefinition";
-import { type vscode } from "./publicModule";
+import { miniTest } from "./miniTest/index";
+import { path, type vscode } from "./publicModule";
 import { initSnippet } from "./snippets";
 
 export async function activate(
@@ -20,7 +21,8 @@ export async function activate(
   goToDefinition(context);
   rightClickManager(context);
   initSnippet();
-  // import(path.resolve(__dirname, "../test/start.js"));
+  miniTest(context);
+  import(path.resolve(__dirname, "../test/start.js"));
 }
 
 export function deactivate(): void {}

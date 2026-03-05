@@ -53,7 +53,7 @@ export function validateMissingAttr(
   missingAttr.forEach((attrName) => {
     diagnosticList.push(generateDiagnostic(
       regexpHelper.getTagNameRegexp(element.name),
-      DiagnosticErrorType.missingAttr,
+      DiagnosticErrorType.missingAttr + ":" + attrName as DiagnosticErrorType.missingAttr,
       textlines,
       startLine,
       { fixCode: ` ${attrName}="${getCorrectValue(componentInfo[attrName])}"` },

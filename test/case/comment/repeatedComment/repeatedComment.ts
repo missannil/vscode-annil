@@ -5,7 +5,7 @@ import { DefineComponent, RootComponent } from "annil";
 
 // const subA = CustomComponent<Root, $SubA>()({
 //   data: {
-//     subA__id: "subA",
+//     subA_cid: "subA",
 //     subA_numA: 0,
 //     subA_userList: [],
 //   },

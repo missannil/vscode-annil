@@ -9,7 +9,7 @@ import { type $SubC } from "../../../miniprogram/otherComponents/subC";
 
 const subA = CustomComponent<Root, $SubA>()({
   data: {
-    subA__id: "id",
+    subA_cid: "id",
     subA_numA: 123,
     subA_userList: [],
   },

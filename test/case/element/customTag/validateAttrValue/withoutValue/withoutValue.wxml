@@ -1,6 +1,6 @@
 <!-- 无值和空值 -->
 <subA
-	_id
+	cid
 	numA
 	userList
 	bind:onTap
@@ -8,6 +8,7 @@
 
 <!-- annil disable line -->
 <subA
+	cid
 	numA
 	userList
 	bind:onTap

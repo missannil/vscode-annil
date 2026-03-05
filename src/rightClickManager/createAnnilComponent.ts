@@ -42,10 +42,10 @@ export async function createAnnilComponent(uri: vscode.Uri, isPage: boolean): Pr
   const wxssContent = getSnippet("wxss", isPage);
 
   // 写入文件内容
-  await vscode.workspace.fs.writeFile(newTsFileUri, Buffer.from(tsContent));
-  await vscode.workspace.fs.writeFile(newJsonFileUri, Buffer.from(jsonContent));
-  await vscode.workspace.fs.writeFile(newWxmlFileUri, Buffer.from(wxmlContent));
-  await vscode.workspace.fs.writeFile(newWxssFileUri, Buffer.from(wxssContent));
+  await vscode.workspace.fs.writeFile(newTsFileUri, new TextEncoder().encode(tsContent));
+  await vscode.workspace.fs.writeFile(newJsonFileUri, new TextEncoder().encode(jsonContent));
+  await vscode.workspace.fs.writeFile(newWxmlFileUri, new TextEncoder().encode(wxmlContent));
+  await vscode.workspace.fs.writeFile(newWxssFileUri, new TextEncoder().encode(wxssContent));
 
   // 打开创建的文件
   void vscode.window.showTextDocument(newTsFileUri);

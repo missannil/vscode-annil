@@ -50,6 +50,10 @@
       {
         "command": "annil.createPage",
         "title": "新建页面组件"
+      },
+      {
+        "command": "annil.generateTestFileForMiniTest",
+        "title": "生成MiniTest测试文件"
       }
     ],
     "keybindings": [
@@ -68,6 +72,12 @@
       {
         "command": "commentConsole.toggleConsoleComments",
         "key": "ctrl+q",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "annil.generateTestFileForMiniTest",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
         "when": "editorTextFocus"
       }
     ],
@@ -113,6 +123,11 @@
             "type": "string"
           },
           "description": "wxml检测时允许的数值"
+        },
+        "annil.testFilePath": {
+          "type": "string",
+          "default": "miniTest/components",
+          "description": "生成的测试文件(*.py)存放的路径，路径相对于工作区根目录"
         }
       }
     },
@@ -159,7 +174,7 @@
     "mobx": "^6.13.1",
     "rollup-plugin-typescript2": "^0.36.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@babel/parser": "^7.23.6",

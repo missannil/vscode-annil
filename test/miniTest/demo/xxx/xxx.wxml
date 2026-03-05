@@ -1,0 +1,80 @@
+<!-- 顶层block 忽略 -->
+<block wx:if="{{attached}}">
+	<!-- 原生容器组件 0 -->
+	<view
+		id="{{cid}}"
+		class="fixed-class {{dynamicClass}}"
+		src="static-image.png"
+		data-status-xxd="xxxx"
+		style="{{dynamicStyle}}"
+		bind:tap="onTap"
+	>
+		<!-- 1 没有id的元素,不生成验证信息-->
+		<view class="...">{{xxx}}</view>
+		<!--2 有id且有规定的验证属性,生成验证信息-->
+		<view
+			id="normal"
+			class="fixed-normal-class"
+			style="{{dynamicStyle}}"
+			data-index="{{index}}"
+			bind:tap="onNormalTap"
+		></view>
+		<!-- 3.循环block元素 为内部需要验证的元素分别生成列表， -->
+		<block wx:for="{{list}}">
+			<!--3.1 仅循环-->
+			<view
+				id="{{index}}_onlyLoop"
+				class="static-loop-class"
+				bind:tap="onLoopTap"
+			>{{content}}</view>
+			<!--3.2 仅循环-->
+			<view
+				id="{{index}}_xxxonlyLoop"
+				class="static-loop-class"
+				bind:tap="onLoopTap"
+			>{{content}}</view>
+			<!--4 循环下条件元素 生成列表,根据列表长度判断元素存在，根据索引判断验证各个元素信息-->
+			<block wx:if="{{attached}}">
+				<view
+					id="ddddxxx"
+					class="xxx"
+				></view>
+			</block>
+		</block>
+		<!-- 4 条件元素 -->
+		<block wx:if="{{attached}}">
+			<!--条件组件 4.1-->
+			<view
+				id="onlyCondition1"
+				class="condition-class {{conditionalClass}}"
+				bind:tap="onConditionTap"
+			>{{content}}</view>
+			<!--条件组件 4.2-->
+			<view
+				id="onlyCondition2"
+				class="condition-class {{conditionalClass}}"
+				bind:tap="onConditionTap"
+			>{{content}}</view>
+			<block wx:for="{{list}}">
+				<!-- 5.条件且循环元素 -->
+				<view
+					id="conditionAndLoop"
+					class="loop-condition-class"
+					style="{{itemStyle}}"
+					bind:tap="onConditionLoopTap"
+				>{{content}}</view>
+			</block>
+		</block>
+		<!-- 自定义组件 checkBox-->
+		<checkBox
+			catch:checkBoxOnTap="checkBox_checkBoxOnTap_catch"
+			status="{{checkBox_status}}"
+		/>
+		<!-- 自定义组件 checkBox 1-->
+		<checkBox
+			cid="checkBox1"
+			catch:checkBoxOnTap="checkBox_checkBoxOnTap_catch"
+			status="{{checkBox_status}}"
+		/>
+	</view>
+</block>

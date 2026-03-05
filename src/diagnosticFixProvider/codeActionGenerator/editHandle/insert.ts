@@ -11,7 +11,7 @@ export function editInsert(
 ): vscode.CodeAction {
   if (!codeAction) {
     codeAction = new vscode.CodeAction(
-      `添加${missingAttrName}属性`,
+      `添加属性:${missingAttrName}`,
       vscode.CodeActionKind.QuickFix,
     );
     codeAction.edit = new vscode.WorkspaceEdit();

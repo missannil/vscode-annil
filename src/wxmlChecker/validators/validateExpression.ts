@@ -105,7 +105,6 @@ export function validateExpression(
       },
     ],
     (): boolean => {
-      // console.log("hry 2", expression);
       generateInvalidExpression(startLine, textlines, expression, diagnosticList, attrName);
 
       return false;

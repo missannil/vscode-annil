@@ -1,9 +1,22 @@
+<!-- 
+无法通过disable关闭id的重复检测。id获取规则是取id属性或cid属性最后一个下划线后面的字符串。例如 {{xxx}}_bbb 取bbb为id。是为了兼容一些特殊情况，例如循环生成的元素，id需要包含索引等信息。
+1.与aaa之前的id重复
+-->
 <view id="aaa"></view>
-
+<!--1.报错 重复id  -->
+<view id="aaa"></view>
+<!-- 2. 报错 无法通过disable关闭id的重复检测 -->
 <!-- annil disable line -->
 <view id="aaa"></view>
 
-<view id="aaa"></view>
+<block
+	wx:key="xxx"
+	wx:for="{{list}}"
+>
+	<!-- 3. 报错 下划线的后面aaa重复 -->
+	<view id="{{fff}}_aaa"></view>
 
-<!-- annil disable line -->
-<subA id="aaa"></subA>
+	<view id="{{xxx}}_bbb"></view>
+	<!-- 4 报错 下划线的后面bbb重复 -->
+	<view id="{{xxx}}_bbb"></view>
+</block>
