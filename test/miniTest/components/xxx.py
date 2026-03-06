@@ -3,19 +3,19 @@ from miniTest.common import Common
 
 if TYPE_CHECKING:
     from minium import BaseElement
-from miniTest.components.checkBox import CheckBoxComponentInfo, PartialCheckBoxComponentInfo
+from miniTest.components.subA import SubAComponent, SubAComponentInfo, PartialSubAComponentInfo
 CustomComponentInfo = TypedDict(
     "CustomComponentInfo",
     {
-        "checkBox": CheckBoxComponentInfo,
-        "checkBox1": CheckBoxComponentInfo,
+        "subA1": SubAComponentInfo,
+        "subA2": SubAComponentInfo,
     },
 )
 PartialCustomComponentInfo = TypedDict(
     "PartialCustomComponentInfo",
     {
-        "checkBox": PartialCheckBoxComponentInfo,
-        "checkBox1": PartialCheckBoxComponentInfo,
+        "subA1": PartialSubAComponentInfo,
+        "subA2": PartialSubAComponentInfo,
     },
     total=False,
 )
@@ -38,8 +38,8 @@ XxxComponentInfo = TypedDict(
         "customComponents": CustomComponentInfo,
     }
 )
-XxxPartialComponentInfo = TypedDict(
-    "XxxPartialComponentInfo",
+PartialXxxComponentInfo = TypedDict(
+    "PartialXxxComponentInfo",
     {
         "xxx_class": str,
         "xxx_data-status-xxd": str,
@@ -62,7 +62,7 @@ class XxxComponent(Common):
     def __init__(self, cid: str = 'xxx') -> None:
         super().__init__()
         self.element: BaseElement = self.page.get_element(
-            f"view[id='{cid}']", max_timeout=3
+            f"view[id$='{cid}']", max_timeout=3
         )
     def getClass(self) -> str:
         return self.element.attribute("class")[0]
@@ -152,11 +152,8 @@ class XxxComponent(Common):
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
-    def getCheckBoxComponentInfo(self,cid:str) -> CheckBoxComponentInfo:
-        checkBoxElement = self.element.get_element(f"*[id$='{cid}']")
-        from miniTest.components.checkBox import CheckBoxComponent
-        CheckBoxComp = CheckBoxComponent(checkBoxElement)
-        return CheckBoxComp.getComponentInfo()
+    def getSubAComponentInfo(self,cid:str) -> SubAComponentInfo:
+        return SubAComponent(cid).getComponentInfo()
     def getComponentInfo(self) -> XxxComponentInfo:
         return {
             "xxx_class": self.getClass(),
@@ -173,7 +170,10 @@ class XxxComponent(Common):
             "conditionAndLoop_classList": self.getClassOfConditionAndLoop(),
             "conditionAndLoop_styleList": self.getStyleOfConditionAndLoop(),
             "customComponents": {
-                "checkBox": self.getCheckBoxComponentInfo(cid="checkBox"),
-                "checkBox1": self.getCheckBoxComponentInfo(cid="checkBox1"),
+                "subA1": self.getSubAComponentInfo(cid="subA1"),
+                "subA2": self.getSubAComponentInfo(cid="subA2"),
             },
         }
+    def assertComponentInfo(self, expectedInfo: PartialXxxComponentInfo) -> None:
+        actual_info = self.getComponentInfo()
+        self._assertComponentInfo(dict(actual_info), dict(expectedInfo))

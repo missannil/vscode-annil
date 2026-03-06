@@ -155,7 +155,7 @@ export function handleNativeTag(
       `${indent}def __init__(self, cid: str = '${fileName}') -> None:`,
       `${indent}${indent}super().__init__()`,
       `${indent}${indent}self.element: BaseElement = self.page.get_element(`,
-      `${indent}${indent}${indent}f"view[id='{cid}']", max_timeout=3`,
+      `${indent}${indent}${indent}f"${tagName}[id$='{cid}']", max_timeout=3`,
       `${indent}${indent})`,
     );
   } else if (isLoopElement(blockType)) {

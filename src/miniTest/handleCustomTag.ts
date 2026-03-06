@@ -1,25 +1,23 @@
-import type { BaseContent, FileName, TagInfo } from "./types";
+import type { BaseContent, TagInfo } from "./types";
 import { capitalize, indent } from "./utils";
 
 export function handleCustomTag(
-  fileName: FileName,
   tagInfo: TagInfo,
   context: BaseContent,
   customComponents: string[],
+  realCustomCompName: string,
 ): void {
-  const { element: { tagName } } = tagInfo;
-  // 1.导入自定义组件的类路径
-  if (
-    !context.importPart.includes(
-      `from miniTest.components.${tagName} import ${capitalize(tagName)}ComponentInfo, Partial${
-        capitalize(tagName)
-      }ComponentInfo`,
-    )
-  ) {
+  const hasImport = context.importPart.includes(
+    `from miniTest.components.${realCustomCompName} import ${capitalize(realCustomCompName)}Component, ${
+      capitalize(realCustomCompName)
+    }ComponentInfo, Partial${capitalize(realCustomCompName)}ComponentInfo`,
+  );
+  if (!hasImport) {
+    // 1. 加入自定义组件的组件信息类和部分组件信息类的导入语句
     context.importPart.push(
-      `from miniTest.components.${tagName} import ${capitalize(tagName)}ComponentInfo, Partial${
-        capitalize(tagName)
-      }ComponentInfo`,
+      `from miniTest.components.${realCustomCompName} import ${capitalize(realCustomCompName)}Component, ${
+        capitalize(realCustomCompName)
+      }ComponentInfo, Partial${capitalize(realCustomCompName)}ComponentInfo`,
     );
   }
   // 2. 在CustomComponentInfo中添加属性
@@ -42,30 +40,30 @@ export function handleCustomTag(
     );
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"customComponents": PartialCustomComponentInfo,`);
   }
-  // 3. 在组件信息中添加属性
-  const customCompName = tagInfo.element.attribs.cid ?? tagName;
+  // 3. 在组件信息中添加该标签的组件信息属性
+  const customCompName = tagInfo.element.tagName;
   context.customComponentInfo.splice(
     -2,
     0,
-    `${indent}${indent}"${customCompName}": ${capitalize(tagName)}ComponentInfo,`,
+    `${indent}${indent}"${customCompName}": ${capitalize(realCustomCompName)}ComponentInfo,`,
   );
   context.partialCustomComponentInfo.splice(
     -3,
     0,
-    `${indent}${indent}"${customCompName}": Partial${capitalize(tagName)}ComponentInfo,`,
+    `${indent}${indent}"${customCompName}": Partial${capitalize(realCustomCompName)}ComponentInfo,`,
   );
   // 4. 在测试类中添加获取组件信息的方法
-  if (
-    !context.testClass.includes(
-      `${indent}def get${capitalize(tagName)}ComponentInfo(self,cid:str) -> ${capitalize(tagName)}ComponentInfo:`,
-    )
-  ) {
+  const hasGetComponentInfoMethod = context.testClass.includes(
+    `${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self,cid:str) -> ${
+      capitalize(realCustomCompName)
+    }ComponentInfo:`,
+  );
+  if (!hasGetComponentInfoMethod) {
     context.testClass.push(
-      `${indent}def get${capitalize(tagName)}ComponentInfo(self,cid:str) -> ${capitalize(tagName)}ComponentInfo:`,
-      `${indent}${indent}${tagName}Element = self.element.get_element(f"*[id$='{cid}']")`,
-      `${indent}${indent}from miniTest.components.${tagName} import ${capitalize(tagName)}Component`,
-      `${indent}${indent}${capitalize(tagName)}Comp = ${capitalize(tagName)}Component(${tagName}Element)`,
-      `${indent}${indent}return ${capitalize(tagName)}Comp.getComponentInfo()`,
+      `${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self,cid:str) -> ${
+        capitalize(realCustomCompName)
+      }ComponentInfo:`,
+      `${indent}${indent}return ${capitalize(realCustomCompName)}Component(cid).getComponentInfo()`,
     );
   }
   // 5.在getComponentInfo方法中添加调用获取组件信息的方法并将结果添加到组件信息字典中
@@ -73,7 +71,7 @@ export function handleCustomTag(
     -1,
     0,
     `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
-      capitalize(tagName)
+      capitalize(realCustomCompName)
     }ComponentInfo(cid="${customCompName}"),`,
   );
 }

@@ -9,7 +9,7 @@ import type { FileName, FsPath } from "./types";
  * @param document
  * @returns 测试文件的路径，如果无法生成则返回undefined
  */
-export function getTestFilePath(fsPath: FsPath, wxmlFileName: FileName): FsPath {
+export function getTestFilePath(fsPath: FsPath, componentDirName: FileName): FsPath {
   // 1. 获取工作区根目录
   const workspaceRoot = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fsPath));
   // 2. 如果配置了测试文件路径,就以工作区根目录为基础生成绝对路径
@@ -17,7 +17,7 @@ export function getTestFilePath(fsPath: FsPath, wxmlFileName: FileName): FsPath 
     .getConfiguration()
     .get<string>("annil.testFilePath")?.trim();
 
-  const testFileName = `${wxmlFileName}.py`;
+  const testFileName = `${componentDirName}.py`;
   // 4. 测试文件的目录
   let testFileFolderPath: string;
 

@@ -13,6 +13,7 @@ const subA = CustomComponent<Root, $SubA>()({
 type Root = typeof rootComponent;
 const rootComponent = RootComponent()({});
 DefineComponent({
+  name: "test",
   // @ts-ignore
   subComponents: [subA],
 });

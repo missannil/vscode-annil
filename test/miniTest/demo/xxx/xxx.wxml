@@ -65,16 +65,9 @@
 				>{{content}}</view>
 			</block>
 		</block>
-		<!-- 自定义组件 checkBox-->
-		<checkBox
-			catch:checkBoxOnTap="checkBox_checkBoxOnTap_catch"
-			status="{{checkBox_status}}"
-		/>
-		<!-- 自定义组件 checkBox 1-->
-		<checkBox
-			cid="checkBox1"
-			catch:checkBoxOnTap="checkBox_checkBoxOnTap_catch"
-			status="{{checkBox_status}}"
-		/>
+		<!-- 自定义组件 subA1-->
+		<subA1 cid="{{ subA1_cid }}" />
+		<!-- 自定义组件 subA2-->
+		<subA2 cid="{{ subA2_cid }}" />
 	</view>
 </block>

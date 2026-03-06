@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.9.8",
+  "version": "0.10.0",
   "engines": {
     "vscode": "^1.98.2"
   },
@@ -151,6 +151,7 @@
     "clean": "rm -rf ./out && find ./src ./test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
     "compile": "rollup -c",
     "vscode:prepublish": " npm run clean && npm run compile",
+    "vsix": "vsce package",
     "publish": "vsce publish",
     "fmt": "dprint fmt",
     "lint": "eslint . --max-warnings 0",

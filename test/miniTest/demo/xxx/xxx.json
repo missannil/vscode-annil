@@ -1,5 +1,11 @@
 {
   "component": true,
-  "usingComponents": {},
-  "componentPlaceholder": {}
+  "usingComponents": {
+    "subA1": "../../../miniprogram/components/subA/index",
+    "subA2": "../../../miniprogram/components/subA/index"
+  },
+  "componentPlaceholder": {
+    "subA1": "view",
+    "subA2": "view"
+  }
 }

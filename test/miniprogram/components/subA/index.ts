@@ -15,7 +15,10 @@ const rootComponent = RootComponent()({
       type: Number,
       value: 0,
     },
-    userList: Array as DetailedType<User[]>,
+    userList: {
+      type: Array as DetailedType<User[]>,
+      value: [],
+    },
   },
   customEvents: {
     onTap: String,

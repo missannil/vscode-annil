@@ -1,3 +1,3 @@
-<view class="index">
-  
-</view>
+<block wx:if="{{attached}}">
+	<scroll-view id="{{cid}}" class="xxx"></scroll-view>
+</block>

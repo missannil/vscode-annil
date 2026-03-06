@@ -20,8 +20,8 @@ export function getBaseContent(fileName: FileName): BaseContent {
       ")",
     ],
     partialComponentInfo: [
-      `${capitalize(fileName)}PartialComponentInfo = TypedDict(`,
-      `${indent}"${capitalize(fileName)}PartialComponentInfo",`,
+      `Partial${capitalize(fileName)}ComponentInfo = TypedDict(`,
+      `${indent}"Partial${capitalize(fileName)}ComponentInfo",`,
       `${indent}{`,
       `${indent}},`,
       `${indent}total=False,`,

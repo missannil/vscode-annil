@@ -1,4 +1,4 @@
-import type * as Domhandler from "domhandler";
+import * as Domhandler from "domhandler";
 import { nativeComponents } from "./nativeComponents";
 import type { Attrib } from "./types";
 
@@ -46,7 +46,8 @@ export function hasValidationMark(attribs: Record<string, string>): boolean {
 }
 
 export function hasInnerText(element: Domhandler.Element): boolean {
-  return element.children.length === 1 && element.children[0].type === "text" && element.children[0].data.trim() !== "";
+  return element.children.length === 1 && element.children[0].type === "text"
+    && (element.children[0] as Domhandler.Text).data.trim() !== "";
 }
 const normalAttribs = ["class", "style"];
 const dataPrefix = "data-";
