@@ -1,8 +1,7 @@
-from typing import TYPE_CHECKING, TypedDict, List, Optional, Any
+from typing import TypedDict, List
 from miniTest.common import Common
+from minium import BaseElement
 
-if TYPE_CHECKING:
-    from minium import BaseElement
 from miniTest.components.subA import SubAComponent, SubAComponentInfo, PartialSubAComponentInfo
 CustomComponentInfo = TypedDict(
     "CustomComponentInfo",
@@ -61,8 +60,9 @@ PartialXxxComponentInfo = TypedDict(
 class XxxComponent(Common):
     def __init__(self, cid: str = 'xxx') -> None:
         super().__init__()
-        self.element: BaseElement = self.page.get_element(
-            f"view[id$='{cid}']", max_timeout=3
+        test_instance = Common.get_current_test_instance()
+        self.element: BaseElement = test_instance.page.get_element(
+            f"view[id$='{cid}']", max_timeout=10
         )
     def getClass(self) -> str:
         return self.element.attribute("class")[0]

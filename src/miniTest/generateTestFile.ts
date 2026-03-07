@@ -4,7 +4,6 @@ import { getTestFilePath } from "./getFilePath";
 import type { FileName, FileText, FsPath } from "./types";
 
 export async function generateTestFile(fsPath: FsPath, text: FileText): Promise<void> {
-  // const wxmlFileName: FileName = path.basename(fsPath, ".wxml") as FileName;
   const componentDirName = path.basename(path.dirname(fsPath)) as FileName;
   // 1. 生成测试文件内容
   const testFileContent = await generateTestFileContent(fsPath, componentDirName, text);

@@ -4,11 +4,10 @@ import { capitalize, indent } from "./utils";
 export function getBaseContent(fileName: FileName): BaseContent {
   return {
     importPart: [
-      "from typing import TYPE_CHECKING, TypedDict, List, Optional, Any",
+      "from typing import TypedDict, List",
       "from miniTest.common import Common",
+      "from minium import BaseElement",
       "",
-      "if TYPE_CHECKING:",
-      `${indent}from minium import BaseElement`,
     ],
     customComponentInfo: [],
     partialCustomComponentInfo: [],

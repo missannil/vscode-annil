@@ -149,13 +149,13 @@ export function handleNativeTag(
   const elementId = getElementId(element.attribs.id);
   const tagName = element.tagName;
   const validAttribs = (Object.keys(element.attribs) as Attrib[]).filter(isValidAttrib);
-  // 根元素获取方法默认在BaseContent中已经生成，非根元素需要在testClass中生成获取元素的方法，方法名为getElementOf+capitalize(元素id)，返回值为BaseElement类型，如果元素处于条件block中则返回值为BaseElement | None，如果元素处于循环block中则返回值为List[BaseElement]。
   if (isRoot) {
     context.testClass.push(
       `${indent}def __init__(self, cid: str = '${fileName}') -> None:`,
       `${indent}${indent}super().__init__()`,
-      `${indent}${indent}self.element: BaseElement = self.page.get_element(`,
-      `${indent}${indent}${indent}f"${tagName}[id$='{cid}']", max_timeout=3`,
+      `${indent}${indent}test_instance = Common.get_current_test_instance()`,
+      `${indent}${indent}self.element: BaseElement = test_instance.page.get_element(`,
+      `${indent}${indent}${indent}f"${tagName}[id$='{cid}']", max_timeout=10`,
       `${indent}${indent})`,
     );
   } else if (isLoopElement(blockType)) {
