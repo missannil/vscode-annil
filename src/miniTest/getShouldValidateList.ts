@@ -1,9 +1,16 @@
 import type { ShouldValidateListParams, TagInfo } from "./types";
-import { isBlockTag, isConditional, isCustomTag, isElement, isLoop, shouldValidateElement } from "./utils";
+import {
+  hasInnerText,
+  isBlockTag,
+  isConditional,
+  isCustomTag,
+  isElement,
+  isLoop,
+  shouldValidateElement,
+} from "./utils";
 
 export function buildShouldValidateList(params: ShouldValidateListParams): TagInfo[] {
   const { childNodes, blockType, result, isRootBlock } = params;
-
   childNodes.forEach(childNode => {
     // 1. 非元素节点不处理
     if (!isElement(childNode)) return;
@@ -45,6 +52,8 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
           isRoot: params.isRootElement,
           blockType: [...blockType],
           element: childNode,
+          // 自定义组件传入的solt内容应该是一个元素而不是文本，所以hasInnerText为false
+          hasInnerText: false,
         },
       );
 
@@ -56,6 +65,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
           isRoot: params.isRootElement,
           blockType: [...blockType],
           element: childNode,
+          hasInnerText: hasInnerText(childNode),
         },
       );
     }

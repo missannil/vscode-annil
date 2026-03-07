@@ -48,7 +48,10 @@
 				id="onlyCondition1"
 				class="condition-class {{conditionalClass}}"
 				bind:tap="onConditionTap"
-			>{{content}}</view>
+			>
+				<!-- 可以么？ -->
+				{{content}}
+			</view>
 			<!--条件组件 4.2-->
 			<view
 				id="onlyCondition2"

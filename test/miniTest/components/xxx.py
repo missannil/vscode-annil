@@ -28,12 +28,17 @@ XxxComponentInfo = TypedDict(
         "normal_style": str,
         "normal_data-index": str,
         "_onlyLoop_classList": List[str],
+        "_onlyLoop_innerTextList": List[str],
         "_xxxonlyLoop_classList": List[str],
+        "_xxxonlyLoop_innerTextList": List[str],
         "ddddxxx_classList": List[str],
         "onlyCondition1_class": str | None,
+        "onlyCondition1_innerText": str | None,
         "onlyCondition2_class": str | None,
+        "onlyCondition2_innerText": str | None,
         "conditionAndLoop_classList": List[str],
         "conditionAndLoop_styleList": List[str],
+        "conditionAndLoop_innerTextList": List[str],
         "customComponents": CustomComponentInfo,
     }
 )
@@ -47,12 +52,17 @@ PartialXxxComponentInfo = TypedDict(
         "normal_style": str,
         "normal_data-index": str,
         "_onlyLoop_classList": List[str],
+        "_onlyLoop_innerTextList": List[str],
         "_xxxonlyLoop_classList": List[str],
+        "_xxxonlyLoop_innerTextList": List[str],
         "ddddxxx_classList": List[str],
         "onlyCondition1_class": str | None,
+        "onlyCondition1_innerText": str | None,
         "onlyCondition2_class": str | None,
+        "onlyCondition2_innerText": str | None,
         "conditionAndLoop_classList": List[str],
         "conditionAndLoop_styleList": List[str],
+        "conditionAndLoop_innerTextList": List[str],
         "customComponents": PartialCustomComponentInfo,
     },
     total=False,
@@ -87,21 +97,27 @@ class XxxComponent(Common):
     def getClassOf_onlyLoop(self) -> List[str]:
         return [element.attribute("class")[0] for element in self.getElementsOf_onlyLoop()]
     def tap_onlyLoop(self,index: int, count: int = 1) -> None:
-        element = self.getElementsOf_onlyLoop()[index]
-        if element:
+        elementList = self.getElementsOf_onlyLoop()
+        if index < len(elementList):
+            element = elementList[index]
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+    def getInnerTextListOf_onlyLoop(self) -> List[str]:
+        return [element.inner_text for element in self.getElementsOf_onlyLoop()]
     def getElementsOf_xxxonlyLoop(self) -> List[BaseElement]:
         return self.element.get_elements("view[id$='_xxxonlyLoop']")
     def getClassOf_xxxonlyLoop(self) -> List[str]:
         return [element.attribute("class")[0] for element in self.getElementsOf_xxxonlyLoop()]
     def tap_xxxonlyLoop(self,index: int, count: int = 1) -> None:
-        element = self.getElementsOf_xxxonlyLoop()[index]
-        if element:
+        elementList = self.getElementsOf_xxxonlyLoop()
+        if index < len(elementList):
+            element = elementList[index]
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+    def getInnerTextListOf_xxxonlyLoop(self) -> List[str]:
+        return [element.inner_text for element in self.getElementsOf_xxxonlyLoop()]
     def getElementsOfDdddxxx(self) -> List[BaseElement]:
         return self.element.get_elements("view[id$='ddddxxx']")
     def getClassOfDdddxxx(self) -> List[str]:
@@ -123,6 +139,12 @@ class XxxComponent(Common):
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+    def getInnerTextOfOnlyCondition1(self) -> str | None:
+        element = self.getElementOfOnlyCondition1()
+        if element:
+            return element.inner_text
+        else:
+            return None
     def getElementOfOnlyCondition2(self) -> BaseElement | None:
         try:
             return self.element.get_element("view[id$='onlyCondition2']")
@@ -140,6 +162,12 @@ class XxxComponent(Common):
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+    def getInnerTextOfOnlyCondition2(self) -> str | None:
+        element = self.getElementOfOnlyCondition2()
+        if element:
+            return element.inner_text
+        else:
+            return None
     def getElementsOfConditionAndLoop(self) -> List[BaseElement]:
         return self.element.get_elements("view[id$='conditionAndLoop']")
     def getClassOfConditionAndLoop(self) -> List[str]:
@@ -147,11 +175,14 @@ class XxxComponent(Common):
     def getStyleOfConditionAndLoop(self) -> List[str]:
         return [element.attribute("style")[0] for element in self.getElementsOfConditionAndLoop()]
     def tapConditionAndLoop(self,index: int, count: int = 1) -> None:
-        element = self.getElementsOfConditionAndLoop()[index]
-        if element:
+        elementList = self.getElementsOfConditionAndLoop()
+        if index < len(elementList):
+            element = elementList[index]
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+    def getInnerTextListOfConditionAndLoop(self) -> List[str]:
+        return [element.inner_text for element in self.getElementsOfConditionAndLoop()]
     def getSubAComponentInfo(self,cid:str) -> SubAComponentInfo:
         return SubAComponent(cid).getComponentInfo()
     def getComponentInfo(self) -> XxxComponentInfo:
@@ -163,12 +194,17 @@ class XxxComponent(Common):
             "normal_style": self.getStyleOfNormal(),
             "normal_data-index": self.getDataIndexOfNormal(),
             "_onlyLoop_classList": self.getClassOf_onlyLoop(),
+            "_onlyLoop_innerTextList": self.getInnerTextListOf_onlyLoop(),
             "_xxxonlyLoop_classList": self.getClassOf_xxxonlyLoop(),
+            "_xxxonlyLoop_innerTextList": self.getInnerTextListOf_xxxonlyLoop(),
             "ddddxxx_classList": self.getClassOfDdddxxx(),
             "onlyCondition1_class": self.getClassOfOnlyCondition1(),
+            "onlyCondition1_innerText": self.getInnerTextOfOnlyCondition1(),
             "onlyCondition2_class": self.getClassOfOnlyCondition2(),
+            "onlyCondition2_innerText": self.getInnerTextOfOnlyCondition2(),
             "conditionAndLoop_classList": self.getClassOfConditionAndLoop(),
             "conditionAndLoop_styleList": self.getStyleOfConditionAndLoop(),
+            "conditionAndLoop_innerTextList": self.getInnerTextListOfConditionAndLoop(),
             "customComponents": {
                 "subA1": self.getSubAComponentInfo(cid="subA1"),
                 "subA2": self.getSubAComponentInfo(cid="subA2"),

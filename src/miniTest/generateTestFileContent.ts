@@ -7,36 +7,6 @@ import { handleNativeTag } from "./handleNativeTag";
 import type { FileName, FileText, FsPath } from "./types";
 import { capitalize, indent, isCustomTag } from "./utils";
 
-// async function getRootElementTagName(uri: vscode.Uri): Promise<string> {
-//   const compWxmlDocument = await vscode.workspace.openTextDocument(uri);
-//   const compWxmlText = compWxmlDocument.getText();
-//   const compWxmlParsed = htmlparser2.parseDocument(compWxmlText, {
-//     xmlMode: true,
-//     withStartIndices: false,
-//     withEndIndices: false,
-//   });
-//   // 获取第一个子元素类型的标签名
-//   const firstChildNode = compWxmlParsed.childNodes.find(node => node.type === "tag") as Domhandler.Element | undefined;
-//   if (!firstChildNode) {
-//     return "未知标签名";
-//   }
-//   // 如果第一个子元素不是block，那么认为当前元素的标签名就是根元素的标签名
-//   if (firstChildNode.tagName !== "block") {
-
-//     return firstChildNode.tagName;
-//   } else {
-//     // 如果根元素是block，那么获取block的第一个子元素的标签名作为根元素标签名
-//     const firstChildElement = firstChildNode.childNodes.find(node => node.type === "tag") as Domhandler.Element | undefined;
-
-//     return firstChildElement?.tagName ?? "未知标签名";
-//   }
-// }
-
-// 获取自定义组件的根元素的标签名和自定义组件名(有可能当前文件的自定义组件标签名是通过json文件配置后映射的，不是原本的自定义组件名)
-// type CustomCompName = string;
-// type RootElementTagName = string;
-// type CustomCompNameAndRootElementTageName = [CustomCompName, RootElementTagName];
-
 /**
  * 获取自定义组件的根元素的标签名和自定义组件名
  * @param wxmlFsPath 当前文件的路径
@@ -61,20 +31,7 @@ async function getCustomCompNameAndRootElementTageName(wxmlFsPath: FsPath, cusTo
     const tail = compPathParts[lenth - 1];
     const compFileName = tail === "index" ? compPathParts[lenth - 2] : tail;
 
-    // 将compFileName作为自定义组件名返回
     return compFileName;
-    // // 从当前工作区的根路径下搜索查找到 compFileName目录下的*.wxml文件路径，读取其中的根元素标签名
-    // const workspaceFolders = vscode.workspace.workspaceFolders;
-    // if (!workspaceFolders) {
-    //   return res
-    // }
-    // const workspaceRootPath = workspaceFolders[0].uri.fsPath;
-    // const pattern = new vscode.RelativePattern(workspaceRootPath, `**/${compFileName}/*.wxml`);
-    // // 从工作区中找到匹配的文件
-    // const files = await vscode.workspace.findFiles(pattern);
-    // if (files.length === 0) {
-    //   return res
-    // }
   } catch (error) {
     return "未知标签名";
   }

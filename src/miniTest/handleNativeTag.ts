@@ -114,8 +114,9 @@ function handleEventAttribForNonRootElement(
     // 由于wxFor标签的元素有多个，先获取对应索引的元素,如果存在再执行点击操作,不存在报错
     context.testClass.push(
       `${indent}def tap${capitalize(elementId)}(self,index: int, count: int = 1) -> None:`,
-      `${indent}${indent}element = self.getElementsOf${capitalize(elementId)}()[index]`,
-      `${indent}${indent}if element:`,
+      `${indent}${indent}elementList = self.getElementsOf${capitalize(elementId)}()`,
+      `${indent}${indent}if index < len(elementList):`,
+      `${indent}${indent}${indent}element = elementList[index]`,
       `${indent}${indent}${indent}self.tapElement(element, count)`,
       `${indent}${indent}else:`,
       `${indent}${indent}${indent}raise Exception("Element not found")`,
@@ -139,13 +140,86 @@ function handleEventAttribForNonRootElement(
   }
 }
 
+function appendInnerTextHandling(
+  fileName: FileName,
+  isRoot: boolean,
+  blockType: BlockType[],
+  elementId: string,
+  context: BaseContent,
+  getComopnentInfo: string[],
+): void {
+  if (isRoot) {
+    context.componentInfo.splice(-2, 0, `${indent}${indent}"${fileName}_innerText": str,`);
+    context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${fileName}_innerText": str,`);
+    context.testClass.push(
+      `${indent}def getInnerText(self) -> str:`,
+      `${indent}${indent}return self.element.inner_text`,
+    );
+    getComopnentInfo.splice(
+      -1,
+      0,
+      `${indent}${indent}${indent}"${fileName}_innerText": self.getInnerText(),`,
+    );
+
+    return;
+  }
+
+  if (isLoopElement(blockType)) {
+    context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_innerTextList": List[str],`);
+    context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_innerTextList": List[str],`);
+    context.testClass.push(
+      `${indent}def getInnerTextListOf${capitalize(elementId)}(self) -> List[str]:`,
+      `${indent}${indent}return [element.inner_text for element in self.getElementsOf${capitalize(elementId)}()]`,
+    );
+    getComopnentInfo.splice(
+      -1,
+      0,
+      `${indent}${indent}${indent}"${elementId}_innerTextList": self.getInnerTextListOf${capitalize(elementId)}(),`,
+    );
+
+    return;
+  }
+
+  if (isConditionalElement(blockType)) {
+    context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_innerText": str | None,`);
+    context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_innerText": str | None,`);
+    context.testClass.push(
+      `${indent}def getInnerTextOf${capitalize(elementId)}(self) -> str | None:`,
+      `${indent}${indent}element = self.getElementOf${capitalize(elementId)}()`,
+      `${indent}${indent}if element:`,
+      `${indent}${indent}${indent}return element.inner_text`,
+      `${indent}${indent}else:`,
+      `${indent}${indent}${indent}return None`,
+    );
+    getComopnentInfo.splice(
+      -1,
+      0,
+      `${indent}${indent}${indent}"${elementId}_innerText": self.getInnerTextOf${capitalize(elementId)}(),`,
+    );
+
+    return;
+  }
+
+  context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_innerText": str,`);
+  context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_innerText": str,`);
+  context.testClass.push(
+    `${indent}def getInnerTextOf${capitalize(elementId)}(self) -> str:`,
+    `${indent}${indent}return self.getElementOf${capitalize(elementId)}().inner_text`,
+  );
+  getComopnentInfo.splice(
+    -1,
+    0,
+    `${indent}${indent}${indent}"${elementId}_innerText": self.getInnerTextOf${capitalize(elementId)}(),`,
+  );
+}
+
 export function handleNativeTag(
   fileName: FileName,
   tagInfo: TagInfo,
   context: BaseContent,
   getComopnentInfo: string[],
 ): void {
-  const { element, blockType, isRoot } = tagInfo;
+  const { element, blockType, isRoot, hasInnerText } = tagInfo;
   const elementId = getElementId(element.attribs.id);
   const tagName = element.tagName;
   const validAttribs = (Object.keys(element.attribs) as Attrib[]).filter(isValidAttrib);
@@ -177,6 +251,7 @@ export function handleNativeTag(
       `${indent}${indent}return self.element.get_element("${tagName}[id$='${elementId}']")`,
     );
   }
+
   validAttribs.forEach((attrib) => {
     if (isNormalAttrib(attrib) || isDataAttrib(attrib)) {
       handleNormalAndDataAttrib(fileName, isRoot, blockType, elementId, attrib, context, getComopnentInfo);
@@ -184,4 +259,7 @@ export function handleNativeTag(
       handleEventAttribForNonRootElement(fileName, isRoot, blockType, elementId, attrib, context);
     }
   });
+  if (hasInnerText) {
+    appendInnerTextHandling(fileName, isRoot, blockType, elementId, context, getComopnentInfo);
+  }
 }

@@ -46,8 +46,11 @@ export function hasValidationMark(attribs: Record<string, string>): boolean {
 }
 
 export function hasInnerText(element: Domhandler.Element): boolean {
-  return element.children.length === 1 && element.children[0].type === "text"
-    && (element.children[0] as Domhandler.Text).data.trim() !== "";
+  const nonCommentChildren = element.children.filter(child => child.type !== "comment");
+  if (nonCommentChildren.length === 0) return false;
+  if (nonCommentChildren.some(child => child.type !== "text")) return false;
+
+  return nonCommentChildren.some(child => (child as Domhandler.Text).data.trim() !== "");
 }
 const normalAttribs = ["class", "style"];
 const dataPrefix = "data-";
