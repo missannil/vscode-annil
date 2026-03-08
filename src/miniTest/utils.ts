@@ -1,6 +1,6 @@
 import * as Domhandler from "domhandler";
 import { nativeComponents } from "./nativeComponents";
-import type { Attrib } from "./types";
+import type { Attrib, BlockType } from "./types";
 
 export const indent = "    ";
 
@@ -52,9 +52,9 @@ export function hasInnerText(element: Domhandler.Element): boolean {
 
   return nonCommentChildren.some(child => (child as Domhandler.Text).data.trim() !== "");
 }
-const normalAttribs = ["class", "style"];
+const normalAttribs = ["class", "style", "mode", "src", "hidden", "value", "placeholder"];
 const dataPrefix = "data-";
-const eventPrefix = ["bind:", "catch:"];
+const eventPrefix = ["bind:tap", "catch:tap"];
 
 export function isNormalAttrib(attrib: Attrib): boolean {
   return normalAttribs.includes(attrib);
@@ -81,4 +81,14 @@ export function shouldValidateElement(element: Domhandler.Element): boolean {
   //  原生组件有标识 且（有验证属性 或 有innerText）才需要验证
   return hasValidationMark(element.attribs)
     && ((Object.keys(element.attribs) as Attrib[]).some(isValidAttrib) || hasInnerText(element));
+}
+
+export function isLoopElement(blockType: BlockType[]): boolean {
+  // 包含wxFor的元素
+  return blockType.includes("wxFor");
+}
+
+export function isConditionalElement(blockType: BlockType[]): boolean {
+  // 包含wxIf的元素
+  return blockType.includes("wxIf") && !blockType.includes("wxFor");
 }

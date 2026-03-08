@@ -1,12 +1,15 @@
 import type { BaseContent, TagInfo } from "./types";
-import { capitalize, indent } from "./utils";
+import { capitalize, indent, isConditionalElement, isLoopElement } from "./utils";
 
+// eslint-disable-next-line complexity
 export function handleCustomTag(
   tagInfo: TagInfo,
   context: BaseContent,
   customComponents: string[],
   realCustomCompName: string,
+  rootElementTagName: string,
 ): void {
+  const { blockType } = tagInfo;
   const hasImport = context.importPart.includes(
     `from miniTest.components.${realCustomCompName} import ${capitalize(realCustomCompName)}Component, ${
       capitalize(realCustomCompName)
@@ -20,7 +23,7 @@ export function handleCustomTag(
       }ComponentInfo, Partial${capitalize(realCustomCompName)}ComponentInfo`,
     );
   }
-  // 2. 在CustomComponentInfo中添加属性
+  // 2. 首个自定义组件时,添加CustomComponentInfo和PartialCustomComponentInfo的定义，并将customComponents添加到组件信息和部分组件信息中
   if (context.customComponentInfo.length === 0) {
     context.customComponentInfo.push(
       `CustomComponentInfo = TypedDict(`,
@@ -29,6 +32,7 @@ export function handleCustomTag(
       `${indent}},`,
       ")",
     );
+
     context.componentInfo.splice(-2, 0, `${indent}${indent}"customComponents": CustomComponentInfo,`);
     context.partialCustomComponentInfo.push(
       `PartialCustomComponentInfo = TypedDict(`,
@@ -42,36 +46,128 @@ export function handleCustomTag(
   }
   // 3. 在组件信息中添加该标签的组件信息属性
   const customCompName = tagInfo.element.tagName;
-  context.customComponentInfo.splice(
-    -2,
-    0,
-    `${indent}${indent}"${customCompName}": ${capitalize(realCustomCompName)}ComponentInfo,`,
-  );
-  context.partialCustomComponentInfo.splice(
-    -3,
-    0,
-    `${indent}${indent}"${customCompName}": Partial${capitalize(realCustomCompName)}ComponentInfo,`,
-  );
-  // 4. 在测试类中添加获取组件信息的方法
-  const hasGetComponentInfoMethod = context.testClass.includes(
-    `${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self,cid:str) -> ${
-      capitalize(realCustomCompName)
-    }ComponentInfo:`,
-  );
-  if (!hasGetComponentInfoMethod) {
-    context.testClass.push(
-      `${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self,cid:str) -> ${
-        capitalize(realCustomCompName)
-      }ComponentInfo:`,
-      `${indent}${indent}return ${capitalize(realCustomCompName)}Component(cid).getComponentInfo()`,
+  if (isConditionalElement(blockType)) {
+    context.customComponentInfo.splice(
+      -2,
+      0,
+      `${indent}${indent}"${customCompName}": ${capitalize(realCustomCompName)}ComponentInfo | None,`,
+    );
+    context.partialCustomComponentInfo.splice(
+      -3,
+      0,
+      `${indent}${indent}"${customCompName}": Partial${capitalize(realCustomCompName)}ComponentInfo | None,`,
+    );
+  } else if (isLoopElement(blockType)) {
+    context.customComponentInfo.splice(
+      -2,
+      0,
+      `${indent}${indent}"${customCompName}": List[${capitalize(realCustomCompName)}ComponentInfo],`,
+    );
+    context.partialCustomComponentInfo.splice(
+      -3,
+      0,
+      `${indent}${indent}"${customCompName}": List[Partial${capitalize(realCustomCompName)}ComponentInfo],`,
+    );
+  } else {
+    // 普通元素
+    context.customComponentInfo.splice(
+      -2,
+      0,
+      `${indent}${indent}"${customCompName}": ${capitalize(realCustomCompName)}ComponentInfo,`,
+    );
+    context.partialCustomComponentInfo.splice(
+      -3,
+      0,
+      `${indent}${indent}"${customCompName}": Partial${capitalize(realCustomCompName)}ComponentInfo,`,
     );
   }
+  // 4. 在测试类中添加获取组件信息的方法
+  if (isConditionalElement(blockType)) {
+    const hasGetComponentInfoMethod = context.testClass.some(
+      (line) => line.includes(`${indent}def get${capitalize(realCustomCompName)}Component(cid: str)`),
+    );
+    if (!hasGetComponentInfoMethod) {
+      context.testClass.push(
+        // 条件元素 加入获取元素方法 有可能获取到None
+        `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
+          capitalize(realCustomCompName)
+        }Component | None:`,
+        `${indent}${indent}try:`,
+        `${indent}${indent}${indent}element = self.element.get_element(f"${rootElementTagName}[id$='{cid}']")`,
+        `${indent}${indent}${indent}return ${capitalize(realCustomCompName)}Component (element)`,
+        `${indent}${indent}except Exception:`,
+        `${indent}${indent}${indent}return None`,
+        // 加入获取元素信息方法 有可能获取到None
+        `${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self, cid: str) -> ${
+          capitalize(realCustomCompName)
+        }ComponentInfo | None:`,
+        `${indent}${indent}element = self.get${capitalize(realCustomCompName)}Component(cid)`,
+        `${indent}${indent}return element.getComponentInfo() if element else None`,
+      );
+    }
+  } else if (isLoopElement(blockType)) {
+    const hasGetComponentInfoMethod = context.testClass.some(
+      (line) => line.includes(`${indent}def get${capitalize(realCustomCompName)}ComponentList(cid: str)`),
+    );
+    if (!hasGetComponentInfoMethod) {
+      context.testClass.push(
+        // 循环元素 加入获取元素列表方法 可能获取到空列表
+        `${indent}def get${capitalize(realCustomCompName)}ComponentList(self, cid: str) -> List[${
+          capitalize(realCustomCompName)
+        }Component]:`,
+        `${indent}${indent}return self.element.get_elements(f"${rootElementTagName}[id$='{cid}']")`,
+        // 加入获取元素信息列表方法 可能获取到空列表
+        `${indent}def get${capitalize(realCustomCompName)}ComponentInfoList(self, cid: str) -> List[${
+          capitalize(realCustomCompName)
+        }ComponentInfo]:`,
+        `${indent}${indent}return [element.getComponentInfo() for element in self.get${
+          capitalize(realCustomCompName)
+        }ComponentList(cid)]`,
+      );
+    }
+  } else {
+    const hasGetComponentInfoMethod = context.testClass.some(
+      (line) => line.includes(`${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self, cid: str)`),
+    );
+    if (!hasGetComponentInfoMethod) {
+      context.testClass.push(
+        // 普通元素 加入获取元素方法
+        `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
+          capitalize(realCustomCompName)
+        }Component:`,
+        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(cid)`,
+        // 加入获取元素信息方法
+        `${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self, cid: str) -> ${
+          capitalize(realCustomCompName)
+        }ComponentInfo:`,
+        `${indent}${indent}return self.get${capitalize(realCustomCompName)}Component(cid).getComponentInfo()`,
+      );
+    }
+  }
   // 5.在getComponentInfo方法中添加调用获取组件信息的方法并将结果添加到组件信息字典中
-  customComponents.splice(
-    -1,
-    0,
-    `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
-      capitalize(realCustomCompName)
-    }ComponentInfo(cid="${customCompName}"),`,
-  );
+  if (isConditionalElement(blockType)) {
+    customComponents.splice(
+      -1,
+      0,
+      `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
+        capitalize(realCustomCompName)
+      }ComponentInfo(cid="${customCompName}"),`,
+    );
+  } else if (isLoopElement(blockType)) {
+    customComponents.splice(
+      -1,
+      0,
+      `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
+        capitalize(realCustomCompName)
+      }ComponentInfoList(cid="${customCompName}"),`,
+    );
+  } else {
+    customComponents.splice(
+      -1,
+      0,
+      `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
+        capitalize(realCustomCompName)
+      }ComponentInfo(cid="${customCompName}"),`,
+    );
+  }
 }

@@ -5,6 +5,7 @@ export type TagInfo = {
   blockType: BlockType[];
   element: Domhandler.Element;
   hasInnerText: boolean;
+  isCustomTag: boolean;
 };
 
 export type BlockType = "wxIf" | "wxFor";

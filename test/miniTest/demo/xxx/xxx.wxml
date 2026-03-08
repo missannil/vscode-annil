@@ -68,9 +68,20 @@
 				>{{content}}</view>
 			</block>
 		</block>
-		<!-- 自定义组件 subA1-->
+		<!-- 5.1 自定义组件 subA1-->
 		<subA1 cid="{{ subA1_cid }}" />
-		<!-- 自定义组件 subA2-->
+		<!-- 5.2 自定义组件 subA2-->
 		<subA2 cid="{{ subA2_cid }}" />
+		<block wx:if="{{true}}">
+			<!-- 5.3 条件下的自定义组件 subA3-->
+			<subA3 cid="{{ subA3_cid }}" />
+		</block>
+		<block
+			wx:for="{{true}}"
+			wx:key="index"
+		>
+			<!-- 5.4 条件下的自定义组件 subA4-->
+			<subA4 cid="{{index}}_subA4" />
+		</block>
 	</view>
 </block>

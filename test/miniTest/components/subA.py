@@ -1,8 +1,7 @@
-from typing import TYPE_CHECKING, TypedDict, List, Optional, Any
+from typing import TypedDict, List
 from miniTest.common import Common
+from minium import BaseElement
 
-if TYPE_CHECKING:
-    from minium import BaseElement
 SubAComponentInfo = TypedDict(
     "SubAComponentInfo",
     {
@@ -17,11 +16,12 @@ PartialSubAComponentInfo = TypedDict(
     total=False,
 )
 class SubAComponent(Common):
-    def __init__(self, cid: str = 'subA') -> None:
+    def __init__(self, element: BaseElement | None = None) -> None:
         super().__init__()
-        self.element: BaseElement = self.page.get_element(
-            f"scroll-view[id$='{cid}']", max_timeout=3
-        )
+        if element is None:
+            self.element = self.page.get_element("scroll-view[id$='subA']")
+        else:
+            self.element = element
     def getClass(self) -> str:
         return self.element.attribute("class")[0]
     def getComponentInfo(self) -> SubAComponentInfo:

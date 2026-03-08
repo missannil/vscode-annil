@@ -8,6 +8,8 @@ CustomComponentInfo = TypedDict(
     {
         "subA1": SubAComponentInfo,
         "subA2": SubAComponentInfo,
+        "subA3": SubAComponentInfo | None,
+        "subA4": List[SubAComponentInfo],
     },
 )
 PartialCustomComponentInfo = TypedDict(
@@ -15,6 +17,8 @@ PartialCustomComponentInfo = TypedDict(
     {
         "subA1": PartialSubAComponentInfo,
         "subA2": PartialSubAComponentInfo,
+        "subA3": PartialSubAComponentInfo | None,
+        "subA4": List[PartialSubAComponentInfo],
     },
     total=False,
 )
@@ -22,6 +26,7 @@ XxxComponentInfo = TypedDict(
     "XxxComponentInfo",
     {
         "xxx_class": str,
+        "xxx_src": str,
         "xxx_data-status-xxd": str,
         "xxx_style": str,
         "normal_class": str,
@@ -46,6 +51,7 @@ PartialXxxComponentInfo = TypedDict(
     "PartialXxxComponentInfo",
     {
         "xxx_class": str,
+        "xxx_src": str,
         "xxx_data-status-xxd": str,
         "xxx_style": str,
         "normal_class": str,
@@ -68,14 +74,16 @@ PartialXxxComponentInfo = TypedDict(
     total=False,
 )
 class XxxComponent(Common):
-    def __init__(self, cid: str = 'xxx') -> None:
+    def __init__(self, element: BaseElement | None = None) -> None:
         super().__init__()
-        test_instance = Common.get_current_test_instance()
-        self.element: BaseElement = test_instance.page.get_element(
-            f"view[id$='{cid}']", max_timeout=10
-        )
+        if element is None:
+            self.element = self.page.get_element("view[id$='xxx']")
+        else:
+            self.element = element
     def getClass(self) -> str:
         return self.element.attribute("class")[0]
+    def getSrc(self) -> str:
+        return self.element.attribute("src")[0]
     def getDataStatusXxd(self) -> str:
         return self.element.attribute("data-status-xxd")[0]
     def getStyle(self) -> str:
@@ -183,11 +191,27 @@ class XxxComponent(Common):
             raise Exception("Element not found")
     def getInnerTextListOfConditionAndLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOfConditionAndLoop()]
-    def getSubAComponentInfo(self,cid:str) -> SubAComponentInfo:
-        return SubAComponent(cid).getComponentInfo()
+    def getSubAComponent(self, cid: str) -> SubAComponent:
+        return SubAComponent(cid)
+    def getSubAComponentInfo(self, cid: str) -> SubAComponentInfo:
+        return self.getSubAComponent(cid).getComponentInfo()
+    def getSubAComponent(self, cid: str) -> SubAComponent | None:
+        try:
+            element = self.element.get_element(f"scroll-view[id$='{cid}']")
+            return SubAComponent (element)
+        except Exception:
+            return None
+    def getSubAComponentInfo(self, cid: str) -> SubAComponentInfo | None:
+        element = self.getSubAComponent(cid)
+        return element.getComponentInfo() if element else None
+    def getSubAComponentList(self, cid: str) -> List[SubAComponent]:
+        return self.element.get_elements(f"scroll-view[id$='{cid}']")
+    def getSubAComponentInfoList(self, cid: str) -> List[SubAComponentInfo]:
+        return [element.getComponentInfo() for element in self.getSubAComponentList(cid)]
     def getComponentInfo(self) -> XxxComponentInfo:
         return {
             "xxx_class": self.getClass(),
+            "xxx_src": self.getSrc(),
             "xxx_data-status-xxd": self.getDataStatusXxd(),
             "xxx_style": self.getStyle(),
             "normal_class": self.getClassOfNormal(),
@@ -208,6 +232,8 @@ class XxxComponent(Common):
             "customComponents": {
                 "subA1": self.getSubAComponentInfo(cid="subA1"),
                 "subA2": self.getSubAComponentInfo(cid="subA2"),
+                "subA3": self.getSubAComponentInfo(cid="subA3"),
+                "subA4": self.getSubAComponentInfoList(cid="subA4"),
             },
         }
     def assertComponentInfo(self, expectedInfo: PartialXxxComponentInfo) -> None:

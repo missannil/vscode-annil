@@ -12,6 +12,16 @@ const subA2 = CustomComponent<XxxRoot, $SubA, "2">()({
     subA2_cid: "subA2",
   },
 });
+const subA3 = CustomComponent<XxxRoot, $SubA, "3">()({
+  data: {
+    subA3_cid: "subA3",
+  },
+});
+const subA4 = CustomComponent<XxxRoot, $SubA, "4">()({
+  data: {
+    subA4_cid: "subA4",
+  },
+});
 export type XxxRoot = typeof rootComponent;
 const rootComponent = RootComponent()({
   properties: {},
@@ -20,7 +30,7 @@ const rootComponent = RootComponent()({
 const xxx = DefineComponent({
   name: "xxx",
   rootComponent,
-  subComponents: [subA1, subA2],
+  subComponents: [subA1, subA2, subA3, subA4],
 });
 export type $Xxx = {
   customEvents: {

@@ -1,5 +1,15 @@
 import type { Attrib, BaseContent, BlockType, FileName, TagInfo } from "./types";
-import { capitalize, indent, isDataAttrib, isEventAttrib, isNormalAttrib, isValidAttrib, kebabToCamel } from "./utils";
+import {
+  capitalize,
+  indent,
+  isConditionalElement,
+  isDataAttrib,
+  isEventAttrib,
+  isLoopElement,
+  isNormalAttrib,
+  isValidAttrib,
+  kebabToCamel,
+} from "./utils";
 
 /**
  * 加上_开头为了避免相同的id后缀导致冲突
@@ -13,16 +23,6 @@ function getElementId(id: string): string {
   }
 
   return id;
-}
-
-function isConditionalElement(blockType: BlockType[]): boolean {
-  // 包含wxIf的元素
-  return blockType.includes("wxIf") && !blockType.includes("wxFor");
-}
-
-function isLoopElement(blockType: BlockType[]): boolean {
-  // 包含wxFor的元素
-  return blockType.includes("wxFor");
 }
 
 function handleNormalAndDataAttrib(
@@ -225,12 +225,12 @@ export function handleNativeTag(
   const validAttribs = (Object.keys(element.attribs) as Attrib[]).filter(isValidAttrib);
   if (isRoot) {
     context.testClass.push(
-      `${indent}def __init__(self, cid: str = '${fileName}') -> None:`,
+      `${indent}def __init__(self, element: BaseElement | None = None) -> None:`,
       `${indent}${indent}super().__init__()`,
-      `${indent}${indent}test_instance = Common.get_current_test_instance()`,
-      `${indent}${indent}self.element: BaseElement = test_instance.page.get_element(`,
-      `${indent}${indent}${indent}f"${tagName}[id$='{cid}']", max_timeout=10`,
-      `${indent}${indent})`,
+      `${indent}${indent}if element is None:`,
+      `${indent}${indent}${indent}self.element = self.page.get_element("${tagName}[id$='${fileName}']")`,
+      `${indent}${indent}else:`,
+      `${indent}${indent}${indent}self.element = element`,
     );
   } else if (isLoopElement(blockType)) {
     context.testClass.push(
