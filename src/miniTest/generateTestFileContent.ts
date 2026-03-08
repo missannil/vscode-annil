@@ -1,5 +1,6 @@
 import * as htmlparser2 from "htmlparser2";
 import { Domhandler, vscode } from "../publicModule";
+import { logError, logInfo, logWarn } from "../utils/logger";
 import { getBaseContent } from "./baseContent";
 import { buildShouldValidateList } from "./getShouldValidateList";
 import { handleCustomTag } from "./handleCustomTag";
@@ -8,6 +9,7 @@ import type { FileName, FileText, FsPath } from "./types";
 import { capitalize, indent, isCustomTag } from "./utils";
 
 async function getRootElementTagName(uri: vscode.Uri): Promise<string> {
+  logInfo(`[miniTest] 正在解析自定义组件根元素标签名: ${uri.fsPath}`);
   const compWxmlDocument = await vscode.workspace.openTextDocument(uri);
   const compWxmlText = compWxmlDocument.getText();
   const compWxmlParsed = htmlparser2.parseDocument(compWxmlText, {
@@ -18,6 +20,8 @@ async function getRootElementTagName(uri: vscode.Uri): Promise<string> {
   // 获取第一个子元素类型的标签名
   const firstChildNode = compWxmlParsed.childNodes.find(node => node.type === "tag") as Domhandler.Element | undefined;
   if (!firstChildNode) {
+    logWarn(`[miniTest] 根节点未找到元素标签: ${uri.fsPath}`);
+
     return "未知标签名";
   }
   // 如果第一个子元素不是block，那么认为当前元素的标签名就是根元素的标签名
@@ -28,6 +32,11 @@ async function getRootElementTagName(uri: vscode.Uri): Promise<string> {
     const firstChildElement = firstChildNode.childNodes.find(node => node.type === "tag") as
       | Domhandler.Element
       | undefined;
+    logWarn(
+      `[miniTest] 根节点为 block，使用首个子元素作为根标签: ${uri.fsPath}, ${
+        firstChildElement?.tagName ?? "未知标签名"
+      }`,
+    );
 
     return firstChildElement?.tagName ?? "未知标签名";
   }
@@ -66,21 +75,23 @@ async function getCustomCompNameAndRootElementTageName(
     const hasIndexTail = tail === "index";
     const compFileName = hasIndexTail ? compPathParts[lenth - 2] : tail;
     res[0] = compFileName;
-    // 去除 compPathParts 中的..和.路径，得到相对于工作区根路径的路径，再从这个路径中找到对应的wxml文件，解析出根元素标签名
-    let validCustomCompPathParts = compPathParts.filter(part => part !== ".." && part !== ".").join("/"); // 变为 miniprogram/components/subA/index
-    if (hasIndexTail) {
-      validCustomCompPathParts = validCustomCompPathParts.replace(/\/index$/, "");
-    }
-    // 从当前工作区的根路径下搜索查找到 validCustomCompPathParts目录下的*.wxml文件路径，读取其中的根元素标签名
+    // 去除 compPathParts 中的..和.路径，并去除最后的文件名，剩下的路径即为自定义组件所在的目录  变为 miniprogram/components/subA
+    const validCustomCompDirPath = compPathParts.filter(part => part !== ".." && part !== ".").slice(0, -1).join("/");
+    // 从当前工作区的根路径下搜索查找到 validCustomCompDirPath目录下的*.wxml文件路径，读取其中的根元素标签名
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders) {
+      logError(`[miniTest] 获取工作区根路径失败: ${wxmlFsPath}`);
+
       return res;
     }
     const workspaceRootPath = workspaceFolders[0].uri.fsPath;
-    const pattern = new vscode.RelativePattern(workspaceRootPath, `**/${validCustomCompPathParts}/*.wxml`);
+    const pattern = new vscode.RelativePattern(workspaceRootPath, `**${validCustomCompDirPath}/*.wxml`);
     // 从工作区中找到匹配的文件
     const files = await vscode.workspace.findFiles(pattern);
+
     if (files.length === 0) {
+      logError(`[miniTest] 查找自定义组件文件: ${pattern.pattern}, 找到 ${files.length} 个文件`);
+
       return res;
     }
     const rootElementTagName = await getRootElementTagName(files[0]);
@@ -88,6 +99,8 @@ async function getCustomCompNameAndRootElementTageName(
 
     return res;
   } catch (error) {
+    logError(`[miniTest] 获取自定义组件信息失败: ${wxmlFsPath}, ${cusTomCompTagName}, 错误信息:`, error);
+
     return res;
   }
 }

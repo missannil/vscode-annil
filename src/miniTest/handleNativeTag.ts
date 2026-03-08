@@ -39,7 +39,7 @@ function handleNormalAndDataAttrib(
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${fileName}_${attrib}": str,`);
     context.testClass.push(
       `${indent}def get${capitalize(kebabToCamel(attrib))}(self) -> str:`,
-      `${indent}${indent}return self.element.attribute("${attrib}")[0]`,
+      `${indent}${indent}return self.rootElement.attribute("${attrib}")[0]`,
     );
     getComopnentInfo.splice(
       -1,
@@ -108,7 +108,7 @@ function handleEventAttribForNonRootElement(
   if (isRoot) {
     context.testClass.push(
       `${indent}def tap${capitalize(fileName)}(self, count: int = 1) -> None:`,
-      `${indent}${indent}self.tapElement(self.element, count)`,
+      `${indent}${indent}self.tapElement(self.rootElement, count)`,
     );
   } else if (isLoopElement(blockType)) {
     // 由于wxFor标签的元素有多个，先获取对应索引的元素,如果存在再执行点击操作,不存在报错
@@ -153,7 +153,7 @@ function appendInnerTextHandling(
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${fileName}_innerText": str,`);
     context.testClass.push(
       `${indent}def getInnerText(self) -> str:`,
-      `${indent}${indent}return self.element.inner_text`,
+      `${indent}${indent}return self.rootElement.inner_text`,
     );
     getComopnentInfo.splice(
       -1,
@@ -225,30 +225,27 @@ export function handleNativeTag(
   const validAttribs = (Object.keys(element.attribs) as Attrib[]).filter(isValidAttrib);
   if (isRoot) {
     context.testClass.push(
-      `${indent}def __init__(self, element: BaseElement | None = None) -> None:`,
+      `${indent}def __init__(self, rootElement: BaseElement) -> None:`,
       `${indent}${indent}super().__init__()`,
-      `${indent}${indent}if element is None:`,
-      `${indent}${indent}${indent}self.element = self.page.get_element("${tagName}[id$='${fileName}']")`,
-      `${indent}${indent}else:`,
-      `${indent}${indent}${indent}self.element = element`,
+      `${indent}${indent}self.rootElement = rootElement`,
     );
   } else if (isLoopElement(blockType)) {
     context.testClass.push(
       `${indent}def getElementsOf${capitalize(elementId)}(self) -> List[BaseElement]:`,
-      `${indent}${indent}return self.element.get_elements("${tagName}[id$='${elementId}']")`,
+      `${indent}${indent}return self.rootElement.get_elements("${tagName}[id$='${elementId}']")`,
     );
   } else if (isConditionalElement(blockType)) {
     context.testClass.push(
       `${indent}def getElementOf${capitalize(elementId)}(self) -> BaseElement | None:`,
       `${indent}${indent}try:`,
-      `${indent}${indent}${indent}return self.element.get_element("${tagName}[id$='${elementId}']")`,
+      `${indent}${indent}${indent}return self.rootElement.get_element("${tagName}[id$='${elementId}']")`,
       `${indent}${indent}except Exception:`,
       `${indent}${indent}${indent}return None`,
     );
   } else {
     context.testClass.push(
       `${indent}def getElementOf${capitalize(elementId)}(self) -> BaseElement:`,
-      `${indent}${indent}return self.element.get_element("${tagName}[id$='${elementId}']")`,
+      `${indent}${indent}return self.rootElement.get_element("${tagName}[id$='${elementId}']")`,
     );
   }
 

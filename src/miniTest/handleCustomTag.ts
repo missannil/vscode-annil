@@ -93,7 +93,7 @@ export function handleCustomTag(
           capitalize(realCustomCompName)
         }Component | None:`,
         `${indent}${indent}try:`,
-        `${indent}${indent}${indent}element = self.element.get_element(f"${rootElementTagName}[id$='{cid}']")`,
+        `${indent}${indent}${indent}element = self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`,
         `${indent}${indent}${indent}return ${capitalize(realCustomCompName)}Component (element)`,
         `${indent}${indent}except Exception:`,
         `${indent}${indent}${indent}return None`,
@@ -115,7 +115,10 @@ export function handleCustomTag(
         `${indent}def get${capitalize(realCustomCompName)}ComponentList(self, cid: str) -> List[${
           capitalize(realCustomCompName)
         }Component]:`,
-        `${indent}${indent}return self.element.get_elements(f"${rootElementTagName}[id$='{cid}']")`,
+        `${indent}${indent}return [`,
+        `${indent}${indent}${indent}${capitalize(realCustomCompName)}Component(element)`,
+        `${indent}${indent}${indent}for element in self.rootElement.get_elements(f"${rootElementTagName}[id$='{cid}']")`,
+        `${indent}${indent}]`,
         // 加入获取元素信息列表方法 可能获取到空列表
         `${indent}def get${capitalize(realCustomCompName)}ComponentInfoList(self, cid: str) -> List[${
           capitalize(realCustomCompName)
@@ -135,7 +138,8 @@ export function handleCustomTag(
         `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
           capitalize(realCustomCompName)
         }Component:`,
-        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(cid)`,
+        `${indent}${indent}element = self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`,
+        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(element)`,
         // 加入获取元素信息方法
         `${indent}def get${capitalize(realCustomCompName)}ComponentInfo(self, cid: str) -> ${
           capitalize(realCustomCompName)
