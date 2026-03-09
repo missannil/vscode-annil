@@ -9,6 +9,7 @@ CustomComponentInfo = TypedDict(
         "subA2": SubAComponentInfo,
         "subA3": SubAComponentInfo | None,
         "subA4": List[SubAComponentInfo],
+        "subA5": SubAComponentInfo,
     },
 )
 PartialCustomComponentInfo = TypedDict(
@@ -18,6 +19,7 @@ PartialCustomComponentInfo = TypedDict(
         "subA2": PartialSubAComponentInfo,
         "subA3": PartialSubAComponentInfo | None,
         "subA4": List[PartialSubAComponentInfo],
+        "subA5": PartialSubAComponentInfo,
     },
     total=False,
 )
@@ -44,6 +46,8 @@ XxxComponentInfo = TypedDict(
         "conditionAndLoop_styleList": List[str],
         "conditionAndLoop_innerTextList": List[str],
         "customComponents": CustomComponentInfo,
+        "slotView_class": str,
+        "slotView_innerText": str,
     }
 )
 PartialXxxComponentInfo = TypedDict(
@@ -69,6 +73,8 @@ PartialXxxComponentInfo = TypedDict(
         "conditionAndLoop_styleList": List[str],
         "conditionAndLoop_innerTextList": List[str],
         "customComponents": PartialCustomComponentInfo,
+        "slotView_class": str,
+        "slotView_innerText": str,
     },
     total=False,
 )
@@ -208,6 +214,12 @@ class XxxComponent(Common):
         ]
     def getSubAComponentInfoList(self, cid: str) -> List[SubAComponentInfo]:
         return [element.getComponentInfo() for element in self.getSubAComponentList(cid)]
+    def getElementOfSlotView(self) -> BaseElement:
+        return self.rootElement.get_element("view[id$='slotView']")
+    def getClassOfSlotView(self) -> str:
+        return self.getElementOfSlotView().attribute("class")[0]
+    def getInnerTextOfSlotView(self) -> str:
+        return self.getElementOfSlotView().inner_text
     def getComponentInfo(self) -> XxxComponentInfo:
         return {
             "xxx_class": self.getClass(),
@@ -229,11 +241,14 @@ class XxxComponent(Common):
             "conditionAndLoop_classList": self.getClassOfConditionAndLoop(),
             "conditionAndLoop_styleList": self.getStyleOfConditionAndLoop(),
             "conditionAndLoop_innerTextList": self.getInnerTextListOfConditionAndLoop(),
+            "slotView_class": self.getClassOfSlotView(),
+            "slotView_innerText": self.getInnerTextOfSlotView(),
             "customComponents": {
                 "subA1": self.getSubAComponentInfo(cid="subA1"),
                 "subA2": self.getSubAComponentInfo(cid="subA2"),
                 "subA3": self.getSubAComponentInfo(cid="subA3"),
                 "subA4": self.getSubAComponentInfoList(cid="subA4"),
+                "subA5": self.getSubAComponentInfo(cid="subA5"),
             },
         }
     def assertComponentInfo(

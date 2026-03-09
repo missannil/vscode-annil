@@ -22,19 +22,46 @@ const subA4 = CustomComponent<XxxRoot, $SubA, "4">()({
     subA4_cid: "subA4",
   },
 });
+const subA5 = CustomComponent<XxxRoot, $SubA, "5">()({
+  data: {
+    subA5_cid: "subA5",
+  },
+});
 export type XxxRoot = typeof rootComponent;
 const rootComponent = RootComponent()({
-  properties: {},
+  properties: {
+    cid: {
+      type: String,
+      value: "xxx",
+    }
+  },
+  data: {
+    bool: true,
+    list: [1, 2, 3, 4, 5],
+    content: 'xxx',
+    dynamicClass: 'dynamic-class',
+    dynamicStyle: "color: red;",
+  },
   customEvents: {},
+  events: {
+    onTap() { },
+    onNormalTap() { },
+    onLoopTap() { },
+    onConditionTap() { },
+    onConditionLoopTap() { },
+  }
 });
 const xxx = DefineComponent({
   name: "xxx",
   rootComponent,
-  subComponents: [subA1, subA2, subA3, subA4],
+  subComponents: [subA1, subA2, subA3, subA4, subA5],
 });
 export type $Xxx = {
+  properties: {
+    xxx_cid?: string;
+  };
   customEvents: {
     xxx_eventA: string | BubblesComposed;
   };
-};
+}
 typeEqual<$Xxx, typeof xxx>();

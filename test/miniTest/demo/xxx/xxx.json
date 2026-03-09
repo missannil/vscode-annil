@@ -4,12 +4,14 @@
     "subA1": "../../../miniprogram/components/subA/index",
     "subA2": "../../../miniprogram/components/subA/index",
     "subA3": "../../../miniprogram/components/subA/index",
-    "subA4": "../../../miniprogram/components/subA/index"
+    "subA4": "../../../miniprogram/components/subA/index",
+    "subA5": "../../../miniprogram/components/subA/index"
   },
   "componentPlaceholder": {
     "subA1": "view",
     "subA2": "view",
     "subA3": "view",
-    "subA4": "view"
+    "subA4": "view",
+    "subA5": "view"
   }
 }

@@ -10,7 +10,7 @@
 		bind:tap="onTap"
 	>
 		<!-- 1 没有id的元素,不生成验证信息-->
-		<view class="...">{{xxx}}</view>
+		<view class="...">{{content}}</view>
 		<!--2 有id且有规定的验证属性,生成验证信息-->
 		<view
 			id="normal"
@@ -20,7 +20,10 @@
 			bind:tap="onNormalTap"
 		></view>
 		<!-- 3.循环block元素 为内部需要验证的元素分别生成列表， -->
-		<block wx:for="{{list}}">
+		<block
+			wx:key="*this"
+			wx:for="{{list}}"
+		>
 			<!--3.1 仅循环-->
 			<view
 				id="{{index}}_onlyLoop"
@@ -46,7 +49,7 @@
 			<!--条件组件 4.1-->
 			<view
 				id="onlyCondition1"
-				class="condition-class {{conditionalClass}}"
+				class="condition-class {{dynamicClass}}"
 				bind:tap="onConditionTap"
 			>
 				<!-- 可以么？ -->
@@ -55,15 +58,18 @@
 			<!--条件组件 4.2-->
 			<view
 				id="onlyCondition2"
-				class="condition-class {{conditionalClass}}"
+				class="condition-class {{dynamicClass}}"
 				bind:tap="onConditionTap"
 			>{{content}}</view>
-			<block wx:for="{{list}}">
+			<block
+				wx:key="*this"
+				wx:for="{{list}}"
+			>
 				<!-- 5.条件且循环元素 -->
 				<view
 					id="conditionAndLoop"
 					class="loop-condition-class"
-					style="{{itemStyle}}"
+					style="{{dynamicStyle}}"
 					bind:tap="onConditionLoopTap"
 				>{{content}}</view>
 			</block>
@@ -72,7 +78,7 @@
 		<subA1 cid="{{ subA1_cid }}" />
 		<!-- 5.2 自定义组件 subA2-->
 		<subA2 cid="{{ subA2_cid }}" />
-		<block wx:if="{{true}}">
+		<block wx:if="{{bool}}">
 			<!-- 5.3 条件下的自定义组件 subA3-->
 			<subA3 cid="{{ subA3_cid }}" />
 		</block>
@@ -81,7 +87,14 @@
 			wx:key="index"
 		>
 			<!-- 5.4 条件下的自定义组件 subA4-->
-			<subA4 cid="{{index}}_subA4" />
+			<subA4 cid="{{ subA4_cid }}" />
 		</block>
+		<!-- 6. 自定义组件下的slot -->
+		<subA5 cid="{{subA5_cid}}">
+			<view
+				id="slotView"
+				class="ml-20"
+			>全部分类</view>
+		</subA5>
 	</view>
 </block>

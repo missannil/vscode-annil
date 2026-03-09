@@ -58,9 +58,8 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
           isCustomTag: true,
         },
       );
-      continue;
     }
-    if (shouldValidateElement(childNode)) {
+    else if (shouldValidateElement(childNode)) {
       result.push(
         {
           isRoot: params.isRootElement,
