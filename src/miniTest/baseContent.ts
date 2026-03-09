@@ -5,8 +5,7 @@ export function getBaseContent(fileName: FileName): BaseContent {
   return {
     importPart: [
       "from typing import TypedDict, List",
-      "from miniTest.common import Common",
-      "from minium import BaseElement",
+      "from miniTest.common import Common, BaseElement, FieldCompareConfig",
       "",
     ],
     customComponentInfo: [],

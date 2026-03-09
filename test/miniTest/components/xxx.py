@@ -1,6 +1,5 @@
 from typing import TypedDict, List
-from miniTest.common import Common
-from minium import BaseElement
+from miniTest.common import Common, BaseElement, FieldCompareConfig
 
 from miniTest.components.subA import SubAComponent, SubAComponentInfo, PartialSubAComponentInfo
 CustomComponentInfo = TypedDict(
@@ -74,24 +73,21 @@ PartialXxxComponentInfo = TypedDict(
     total=False,
 )
 class XxxComponent(Common):
-    def __init__(self, element: BaseElement | None = None) -> None:
+    def __init__(self, rootElement: BaseElement) -> None:
         super().__init__()
-        if element is None:
-            self.element = self.page.get_element("view[id$='xxx']")
-        else:
-            self.element = element
+        self.rootElement = rootElement
     def getClass(self) -> str:
-        return self.element.attribute("class")[0]
+        return self.rootElement.attribute("class")[0]
     def getSrc(self) -> str:
-        return self.element.attribute("src")[0]
+        return self.rootElement.attribute("src")[0]
     def getDataStatusXxd(self) -> str:
-        return self.element.attribute("data-status-xxd")[0]
+        return self.rootElement.attribute("data-status-xxd")[0]
     def getStyle(self) -> str:
-        return self.element.attribute("style")[0]
+        return self.rootElement.attribute("style")[0]
     def tapXxx(self, count: int = 1) -> None:
-        self.tapElement(self.element, count)
+        self.tapElement(self.rootElement, count)
     def getElementOfNormal(self) -> BaseElement:
-        return self.element.get_element("view[id$='normal']")
+        return self.rootElement.get_element("view[id$='normal']")
     def getClassOfNormal(self) -> str:
         return self.getElementOfNormal().attribute("class")[0]
     def getStyleOfNormal(self) -> str:
@@ -101,7 +97,7 @@ class XxxComponent(Common):
     def tapNormal(self, count: int = 1) -> None:
         self.tapElement(self.getElementOfNormal(), count)
     def getElementsOf_onlyLoop(self) -> List[BaseElement]:
-        return self.element.get_elements("view[id$='_onlyLoop']")
+        return self.rootElement.get_elements("view[id$='_onlyLoop']")
     def getClassOf_onlyLoop(self) -> List[str]:
         return [element.attribute("class")[0] for element in self.getElementsOf_onlyLoop()]
     def tap_onlyLoop(self,index: int, count: int = 1) -> None:
@@ -114,7 +110,7 @@ class XxxComponent(Common):
     def getInnerTextListOf_onlyLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOf_onlyLoop()]
     def getElementsOf_xxxonlyLoop(self) -> List[BaseElement]:
-        return self.element.get_elements("view[id$='_xxxonlyLoop']")
+        return self.rootElement.get_elements("view[id$='_xxxonlyLoop']")
     def getClassOf_xxxonlyLoop(self) -> List[str]:
         return [element.attribute("class")[0] for element in self.getElementsOf_xxxonlyLoop()]
     def tap_xxxonlyLoop(self,index: int, count: int = 1) -> None:
@@ -127,12 +123,12 @@ class XxxComponent(Common):
     def getInnerTextListOf_xxxonlyLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOf_xxxonlyLoop()]
     def getElementsOfDdddxxx(self) -> List[BaseElement]:
-        return self.element.get_elements("view[id$='ddddxxx']")
+        return self.rootElement.get_elements("view[id$='ddddxxx']")
     def getClassOfDdddxxx(self) -> List[str]:
         return [element.attribute("class")[0] for element in self.getElementsOfDdddxxx()]
     def getElementOfOnlyCondition1(self) -> BaseElement | None:
         try:
-            return self.element.get_element("view[id$='onlyCondition1']")
+            return self.rootElement.get_element("view[id$='onlyCondition1']")
         except Exception:
             return None
     def getClassOfOnlyCondition1(self) -> str | None:
@@ -155,7 +151,7 @@ class XxxComponent(Common):
             return None
     def getElementOfOnlyCondition2(self) -> BaseElement | None:
         try:
-            return self.element.get_element("view[id$='onlyCondition2']")
+            return self.rootElement.get_element("view[id$='onlyCondition2']")
         except Exception:
             return None
     def getClassOfOnlyCondition2(self) -> str | None:
@@ -177,7 +173,7 @@ class XxxComponent(Common):
         else:
             return None
     def getElementsOfConditionAndLoop(self) -> List[BaseElement]:
-        return self.element.get_elements("view[id$='conditionAndLoop']")
+        return self.rootElement.get_elements("view[id$='conditionAndLoop']")
     def getClassOfConditionAndLoop(self) -> List[str]:
         return [element.attribute("class")[0] for element in self.getElementsOfConditionAndLoop()]
     def getStyleOfConditionAndLoop(self) -> List[str]:
@@ -192,12 +188,13 @@ class XxxComponent(Common):
     def getInnerTextListOfConditionAndLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOfConditionAndLoop()]
     def getSubAComponent(self, cid: str) -> SubAComponent:
-        return SubAComponent(cid)
+        element = self.rootElement.get_element(f"scroll-view[id$='{cid}']")
+        return SubAComponent(element)
     def getSubAComponentInfo(self, cid: str) -> SubAComponentInfo:
         return self.getSubAComponent(cid).getComponentInfo()
     def getSubAComponent(self, cid: str) -> SubAComponent | None:
         try:
-            element = self.element.get_element(f"scroll-view[id$='{cid}']")
+            element = self.rootElement.get_element(f"scroll-view[id$='{cid}']")
             return SubAComponent (element)
         except Exception:
             return None
@@ -205,7 +202,10 @@ class XxxComponent(Common):
         element = self.getSubAComponent(cid)
         return element.getComponentInfo() if element else None
     def getSubAComponentList(self, cid: str) -> List[SubAComponent]:
-        return self.element.get_elements(f"scroll-view[id$='{cid}']")
+        return [
+            SubAComponent(element)
+            for element in self.rootElement.get_elements(f"scroll-view[id$='{cid}']")
+        ]
     def getSubAComponentInfoList(self, cid: str) -> List[SubAComponentInfo]:
         return [element.getComponentInfo() for element in self.getSubAComponentList(cid)]
     def getComponentInfo(self) -> XxxComponentInfo:
@@ -236,6 +236,14 @@ class XxxComponent(Common):
                 "subA4": self.getSubAComponentInfoList(cid="subA4"),
             },
         }
-    def assertComponentInfo(self, expectedInfo: PartialXxxComponentInfo) -> None:
+    def assertComponentInfo(
+        self,
+        expectedInfo: PartialXxxComponentInfo,
+        fieldCompare: FieldCompareConfig | None = None,
+    ) -> None:
         actual_info = self.getComponentInfo()
-        self._assertComponentInfo(dict(actual_info), dict(expectedInfo))
+        self._assertComponentInfo(
+            dict(actual_info),
+            dict(expectedInfo),
+            fieldCompare=fieldCompare,
+        )

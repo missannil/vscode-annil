@@ -151,9 +151,17 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
   }
   context.testClass.push(...getComopnentInfo);
   context.testClass.push(
-    `${indent}def assertComponentInfo(self, expectedInfo: Partial${capitalize(dirName)}ComponentInfo) -> None:`,
+    `${indent}def assertComponentInfo(`,
+    `${indent}${indent}self,`,
+    `${indent}${indent}expectedInfo: Partial${capitalize(dirName)}ComponentInfo,`,
+    `${indent}${indent}fieldCompare: FieldCompareConfig | None = None,`,
+    `${indent}) -> None:`,
     `${indent}${indent}actual_info = self.getComponentInfo()`,
-    `${indent}${indent}self._assertComponentInfo(dict(actual_info), dict(expectedInfo))`,
+    `${indent}${indent}self._assertComponentInfo(`,
+    `${indent}${indent}${indent}dict(actual_info),`,
+    `${indent}${indent}${indent}dict(expectedInfo),`,
+    `${indent}${indent}${indent}fieldCompare=fieldCompare,`,
+    `${indent}${indent})`,
   );
 
   return Object.values(context).flat().join("\n");
