@@ -1,4 +1,5 @@
 import * as Domhandler from "domhandler";
+import { vscode } from "../publicModule";
 import { nativeComponents } from "./nativeComponents";
 import type { Attrib, BlockType } from "./types";
 
@@ -52,12 +53,15 @@ export function hasInnerText(element: Domhandler.Element): boolean {
 
   return nonCommentChildren.some(child => (child as Domhandler.Text).data.trim() !== "");
 }
-const normalAttribs = ["class", "style", "mode", "src", "hidden", "value", "placeholder"];
+const normalAttribs = ["class", "style"];
 const dataPrefix = "data-";
 const eventPrefix = ["bind:tap", "catch:tap"];
 
 export function isNormalAttrib(attrib: Attrib): boolean {
-  return normalAttribs.includes(attrib);
+  // 获取配置中的generateAttrs属性列表
+  const generateAttrs: string[] = vscode.workspace.getConfiguration("annil").get("generateAttrs") || [];
+
+  return normalAttribs.includes(attrib) || generateAttrs.includes(attrib);
 }
 
 export function isDataAttrib(attrib: Attrib): boolean {

@@ -1,7 +1,12 @@
 from typing import TypedDict, List
 from miniTest.common import Common, BaseElement, FieldCompareConfig
 
-from miniTest.components.subA import SubAComponent, SubAComponentInfo, PartialSubAComponentInfo
+from miniTest.components.subA import (
+    SubAComponent,
+    SubAComponentInfo,
+    PartialSubAComponentInfo,
+)
+
 CustomComponentInfo = TypedDict(
     "CustomComponentInfo",
     {
@@ -48,7 +53,8 @@ XxxComponentInfo = TypedDict(
         "customComponents": CustomComponentInfo,
         "slotView_class": str,
         "slotView_innerText": str,
-    }
+        "scrollView_scroll-into-view": str,
+    },
 )
 PartialXxxComponentInfo = TypedDict(
     "PartialXxxComponentInfo",
@@ -75,151 +81,218 @@ PartialXxxComponentInfo = TypedDict(
         "customComponents": PartialCustomComponentInfo,
         "slotView_class": str,
         "slotView_innerText": str,
+        "scrollView_scroll-into-view": str,
     },
     total=False,
 )
+
+
 class XxxComponent(Common):
     def __init__(self, rootElement: BaseElement) -> None:
         super().__init__()
         self.rootElement = rootElement
+
     def getClass(self) -> str:
         return self.rootElement.attribute("class")[0]
+
     def getSrc(self) -> str:
         return self.rootElement.attribute("src")[0]
+
     def getDataStatusXxd(self) -> str:
         return self.rootElement.attribute("data-status-xxd")[0]
+
     def getStyle(self) -> str:
         return self.rootElement.attribute("style")[0]
+
     def tapXxx(self, count: int = 1) -> None:
         self.tapElement(self.rootElement, count)
+
     def getElementOfNormal(self) -> BaseElement:
         return self.rootElement.get_element("view[id$='normal']")
+
     def getClassOfNormal(self) -> str:
         return self.getElementOfNormal().attribute("class")[0]
+
     def getStyleOfNormal(self) -> str:
         return self.getElementOfNormal().attribute("style")[0]
+
     def getDataIndexOfNormal(self) -> str:
         return self.getElementOfNormal().attribute("data-index")[0]
+
     def tapNormal(self, count: int = 1) -> None:
         self.tapElement(self.getElementOfNormal(), count)
+
     def getElementsOf_onlyLoop(self) -> List[BaseElement]:
         return self.rootElement.get_elements("view[id$='_onlyLoop']")
+
     def getClassOf_onlyLoop(self) -> List[str]:
-        return [element.attribute("class")[0] for element in self.getElementsOf_onlyLoop()]
-    def tap_onlyLoop(self,index: int, count: int = 1) -> None:
+        return [
+            element.attribute("class")[0] for element in self.getElementsOf_onlyLoop()
+        ]
+
+    def tap_onlyLoop(self, index: int, count: int = 1) -> None:
         elementList = self.getElementsOf_onlyLoop()
         if index < len(elementList):
             element = elementList[index]
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+
     def getInnerTextListOf_onlyLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOf_onlyLoop()]
+
     def getElementsOf_xxxonlyLoop(self) -> List[BaseElement]:
         return self.rootElement.get_elements("view[id$='_xxxonlyLoop']")
+
     def getClassOf_xxxonlyLoop(self) -> List[str]:
-        return [element.attribute("class")[0] for element in self.getElementsOf_xxxonlyLoop()]
-    def tap_xxxonlyLoop(self,index: int, count: int = 1) -> None:
+        return [
+            element.attribute("class")[0]
+            for element in self.getElementsOf_xxxonlyLoop()
+        ]
+
+    def tap_xxxonlyLoop(self, index: int, count: int = 1) -> None:
         elementList = self.getElementsOf_xxxonlyLoop()
         if index < len(elementList):
             element = elementList[index]
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+
     def getInnerTextListOf_xxxonlyLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOf_xxxonlyLoop()]
+
     def getElementsOfDdddxxx(self) -> List[BaseElement]:
         return self.rootElement.get_elements("view[id$='ddddxxx']")
+
     def getClassOfDdddxxx(self) -> List[str]:
-        return [element.attribute("class")[0] for element in self.getElementsOfDdddxxx()]
+        return [
+            element.attribute("class")[0] for element in self.getElementsOfDdddxxx()
+        ]
+
     def getElementOfOnlyCondition1(self) -> BaseElement | None:
         try:
             return self.rootElement.get_element("view[id$='onlyCondition1']")
         except Exception:
             return None
+
     def getClassOfOnlyCondition1(self) -> str | None:
         element = self.getElementOfOnlyCondition1()
         if element:
             return element.attribute("class")[0]
         else:
             return None
+
     def tapOnlyCondition1(self, count: int = 1) -> None:
         element = self.getElementOfOnlyCondition1()
         if element:
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+
     def getInnerTextOfOnlyCondition1(self) -> str | None:
         element = self.getElementOfOnlyCondition1()
         if element:
             return element.inner_text
         else:
             return None
+
     def getElementOfOnlyCondition2(self) -> BaseElement | None:
         try:
             return self.rootElement.get_element("view[id$='onlyCondition2']")
         except Exception:
             return None
+
     def getClassOfOnlyCondition2(self) -> str | None:
         element = self.getElementOfOnlyCondition2()
         if element:
             return element.attribute("class")[0]
         else:
             return None
+
     def tapOnlyCondition2(self, count: int = 1) -> None:
         element = self.getElementOfOnlyCondition2()
         if element:
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+
     def getInnerTextOfOnlyCondition2(self) -> str | None:
         element = self.getElementOfOnlyCondition2()
         if element:
             return element.inner_text
         else:
             return None
+
     def getElementsOfConditionAndLoop(self) -> List[BaseElement]:
         return self.rootElement.get_elements("view[id$='conditionAndLoop']")
+
     def getClassOfConditionAndLoop(self) -> List[str]:
-        return [element.attribute("class")[0] for element in self.getElementsOfConditionAndLoop()]
+        return [
+            element.attribute("class")[0]
+            for element in self.getElementsOfConditionAndLoop()
+        ]
+
     def getStyleOfConditionAndLoop(self) -> List[str]:
-        return [element.attribute("style")[0] for element in self.getElementsOfConditionAndLoop()]
-    def tapConditionAndLoop(self,index: int, count: int = 1) -> None:
+        return [
+            element.attribute("style")[0]
+            for element in self.getElementsOfConditionAndLoop()
+        ]
+
+    def tapConditionAndLoop(self, index: int, count: int = 1) -> None:
         elementList = self.getElementsOfConditionAndLoop()
         if index < len(elementList):
             element = elementList[index]
             self.tapElement(element, count)
         else:
             raise Exception("Element not found")
+
     def getInnerTextListOfConditionAndLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOfConditionAndLoop()]
+
     def getSubAComponent(self, cid: str) -> SubAComponent:
         element = self.rootElement.get_element(f"scroll-view[id$='{cid}']")
         return SubAComponent(element)
+
     def getSubAComponentInfo(self, cid: str) -> SubAComponentInfo:
         return self.getSubAComponent(cid).getComponentInfo()
+
     def getSubAComponent(self, cid: str) -> SubAComponent | None:
         try:
             element = self.rootElement.get_element(f"scroll-view[id$='{cid}']")
-            return SubAComponent (element)
+            return SubAComponent(element)
         except Exception:
             return None
+
     def getSubAComponentInfo(self, cid: str) -> SubAComponentInfo | None:
         element = self.getSubAComponent(cid)
         return element.getComponentInfo() if element else None
+
     def getSubAComponentList(self, cid: str) -> List[SubAComponent]:
         return [
             SubAComponent(element)
             for element in self.rootElement.get_elements(f"scroll-view[id$='{cid}']")
         ]
+
     def getSubAComponentInfoList(self, cid: str) -> List[SubAComponentInfo]:
-        return [element.getComponentInfo() for element in self.getSubAComponentList(cid)]
+        return [
+            element.getComponentInfo() for element in self.getSubAComponentList(cid)
+        ]
+
     def getElementOfSlotView(self) -> BaseElement:
         return self.rootElement.get_element("view[id$='slotView']")
+
     def getClassOfSlotView(self) -> str:
         return self.getElementOfSlotView().attribute("class")[0]
+
     def getInnerTextOfSlotView(self) -> str:
         return self.getElementOfSlotView().inner_text
+
+    def getElementOfScrollView(self) -> BaseElement:
+        return self.rootElement.get_element("scroll-view[id$='scrollView']")
+
+    def getScrollIntoViewOfScrollView(self) -> str:
+        return self.getElementOfScrollView().attribute("scroll-into-view")[0]
+
     def getComponentInfo(self) -> XxxComponentInfo:
         return {
             "xxx_class": self.getClass(),
@@ -243,6 +316,7 @@ class XxxComponent(Common):
             "conditionAndLoop_innerTextList": self.getInnerTextListOfConditionAndLoop(),
             "slotView_class": self.getClassOfSlotView(),
             "slotView_innerText": self.getInnerTextOfSlotView(),
+            "scrollView_scroll-into-view": self.getScrollIntoViewOfScrollView(),
             "customComponents": {
                 "subA1": self.getSubAComponentInfo(cid="subA1"),
                 "subA2": self.getSubAComponentInfo(cid="subA2"),
@@ -251,6 +325,7 @@ class XxxComponent(Common):
                 "subA5": self.getSubAComponentInfo(cid="subA5"),
             },
         }
+
     def assertComponentInfo(
         self,
         expectedInfo: PartialXxxComponentInfo,

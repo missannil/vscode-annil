@@ -33,23 +33,23 @@ const rootComponent = RootComponent()({
     cid: {
       type: String,
       value: "xxx",
-    }
+    },
   },
   data: {
     bool: true,
     list: [1, 2, 3, 4, 5],
-    content: 'xxx',
-    dynamicClass: 'dynamic-class',
+    content: "xxx",
+    dynamicClass: "dynamic-class",
     dynamicStyle: "color: red;",
   },
   customEvents: {},
   events: {
-    onTap() { },
-    onNormalTap() { },
-    onLoopTap() { },
-    onConditionTap() { },
-    onConditionLoopTap() { },
-  }
+    onTap() {},
+    onNormalTap() {},
+    onLoopTap() {},
+    onConditionTap() {},
+    onConditionLoopTap() {},
+  },
 });
 const xxx = DefineComponent({
   name: "xxx",
@@ -63,5 +63,5 @@ export type $Xxx = {
   customEvents: {
     xxx_eventA: string | BubblesComposed;
   };
-}
+};
 typeEqual<$Xxx, typeof xxx>();

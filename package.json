@@ -128,6 +128,14 @@
           "type": "string",
           "default": "miniTest/components",
           "description": "生成的测试文件(*.py)存放的路径，路径相对于工作区根目录"
+        },
+        "annil.generateAttrs": {
+          "type": "array",
+          "default": ["class", "style"],
+          "items": {
+            "type": "string"
+          },
+          "description": "生成的测试类时,要生成的属性列表,逗号分隔,例如: [\"mode\",\"src\",\"hidden\",\"value\",\"placeholder\",\"scroll-into-view\"]"
         }
       }
     },

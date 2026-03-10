@@ -96,5 +96,6 @@
 				class="ml-20"
 			>全部分类</view>
 		</subA5>
+		<scroll-view id="scrollView" scroll-into-view="5_index"></scroll-view>
 	</view>
 </block>
