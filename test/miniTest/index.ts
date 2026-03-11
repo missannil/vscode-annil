@@ -9,7 +9,7 @@ export async function miniTest(): Promise<void> {
     preserveFocus: true, // 确保成为活动编辑器
   });
   // 调用命令生成测试文件
-  await vscode.commands.executeCommand("annil.generateTestFileForMiniTest");
+  await vscode.commands.executeCommand("annil.generateMiniTestClass");
   // 读取生成的测试文件内容
   const testFileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, "miniTest/components/xxx.py");
   const testDoc = await vscode.workspace.openTextDocument(testFileUri);

@@ -4,7 +4,7 @@ import type { FileText, FsPath } from "./types";
 
 export function miniTest(context: vscode.ExtensionContext): void {
   // 注册快捷键 Ctrl+Shift+T 来生成测试文件
-  context.subscriptions.push(vscode.commands.registerCommand("annil.generateTestFileForMiniTest", async () => {
+  context.subscriptions.push(vscode.commands.registerCommand("annil.generateMiniTestClass", async () => {
     const editor = vscode.window.activeTextEditor;
     const document = editor?.document;
     // 确保当前打开的文件是一个wxml文件

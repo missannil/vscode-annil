@@ -17,5 +17,10 @@
     "value",
     "placeholder",
     "scroll-into-view"
-  ]
+  ],
+  "editor.fontSize": 14,
+  "editor.formatOnSave": true,
+  "files.autoSave": "afterDelay",
+  "editor.defaultFormatter": "dprint.dprint",
+  "editor.wordWrap": "on"
 }

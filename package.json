@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.10.10",
+  "version": "0.10.12",
   "engines": {
     "vscode": "^1.98.2"
   },
@@ -52,8 +52,8 @@
         "title": "新建页面组件"
       },
       {
-        "command": "annil.generateTestFileForMiniTest",
-        "title": "生成MiniTest测试文件"
+        "command": "annil.generateMiniTestClass",
+        "title": "生成miniTest类"
       }
     ],
     "keybindings": [
@@ -75,7 +75,7 @@
         "when": "editorTextFocus"
       },
       {
-        "command": "annil.generateTestFileForMiniTest",
+        "command": "annil.generateMiniTestClass",
         "key": "ctrl+shift+t",
         "mac": "cmd+shift+t",
         "when": "editorTextFocus"
