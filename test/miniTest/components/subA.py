@@ -1,12 +1,12 @@
-from typing import TypedDict, List
-from miniTest.common import Common
-from minium import BaseElement
+import json
+from typing import TypedDict, List, cast
+from miniTest.common import BaseElement, DiffConfig, assertions, extension
 
 SubAComponentInfo = TypedDict(
     "SubAComponentInfo",
     {
         "subA_class": str,
-    }
+    },
 )
 PartialSubAComponentInfo = TypedDict(
     "PartialSubAComponentInfo",
@@ -15,19 +15,33 @@ PartialSubAComponentInfo = TypedDict(
     },
     total=False,
 )
-class SubAComponent(Common):
-    def __init__(self, element: BaseElement | None = None) -> None:
+
+
+class SubAComponent:
+    def __init__(self, rootElement: BaseElement) -> None:
         super().__init__()
-        if element is None:
-            self.element = self.page.get_element("scroll-view[id$='subA']")
-        else:
-            self.element = element
+        self.rootElement = rootElement
+
     def getClass(self) -> str:
-        return self.element.attribute("class")[0]
+        return self.rootElement.attribute("class")[0]
+
     def getComponentInfo(self) -> SubAComponentInfo:
         return {
             "subA_class": self.getClass(),
         }
-    def assertComponentInfo(self, expectedInfo: PartialSubAComponentInfo) -> None:
+
+    def assertComponentInfo(
+        self,
+        expectedInfo: PartialSubAComponentInfo,
+        diffConfig: DiffConfig | None = None,
+    ) -> None:
         actual_info = self.getComponentInfo()
-        self._assertComponentInfo(dict(actual_info), dict(expectedInfo))
+        diffs = (
+            assertions.dict_diff(
+                dict(actual_info), dict(expectedInfo), compareConfig=diffConfig
+            ),
+        )
+        if diffs:
+            raise AssertionError(
+                f"❌字典不匹配❌:字段差异: {json.dumps(diffs, ensure_ascii=False, indent=2)}"
+            )

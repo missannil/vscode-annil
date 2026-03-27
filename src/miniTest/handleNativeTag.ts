@@ -108,7 +108,7 @@ function handleEventAttribForNonRootElement(
   if (isRoot) {
     context.testClass.push(
       `${indent}def tap${capitalize(fileName)}(self, count: int = 1) -> None:`,
-      `${indent}${indent}self.tapElement(self.rootElement, count)`,
+      `${indent}${indent}extension.tapElement(self.rootElement, count)`,
     );
   } else if (isLoopElement(blockType)) {
     // 由于wxFor标签的元素有多个，先获取对应索引的元素,如果存在再执行点击操作,不存在报错
@@ -117,7 +117,7 @@ function handleEventAttribForNonRootElement(
       `${indent}${indent}elementList = self.getElementsOf${capitalize(elementId)}()`,
       `${indent}${indent}if index < len(elementList):`,
       `${indent}${indent}${indent}element = elementList[index]`,
-      `${indent}${indent}${indent}self.tapElement(element, count)`,
+      `${indent}${indent}${indent}extension.tapElement(element, count)`,
       `${indent}${indent}else:`,
       `${indent}${indent}${indent}raise Exception("Element not found")`,
     );
@@ -127,7 +127,7 @@ function handleEventAttribForNonRootElement(
       `${indent}def tap${capitalize(elementId)}(self, count: int = 1) -> None:`,
       `${indent}${indent}element = self.getElementOf${capitalize(elementId)}()`,
       `${indent}${indent}if element:`,
-      `${indent}${indent}${indent}self.tapElement(element, count)`,
+      `${indent}${indent}${indent}extension.tapElement(element, count)`,
       `${indent}${indent}else:`,
       `${indent}${indent}${indent}raise Exception("Element not found")`,
     );
@@ -135,7 +135,7 @@ function handleEventAttribForNonRootElement(
     // 普通元素直接生成点击方法
     context.testClass.push(
       `${indent}def tap${capitalize(elementId)}(self, count: int = 1) -> None:`,
-      `${indent}${indent}self.tapElement(self.getElementOf${capitalize(elementId)}(), count)`,
+      `${indent}${indent}extension.tapElement(self.getElementOf${capitalize(elementId)}(), count)`,
     );
   }
 }

@@ -1,5 +1,6 @@
-from typing import TypedDict, List
-from miniTest.common import Common, BaseElement, FieldCompareConfig
+import json
+from typing import TypedDict, List, cast
+from miniTest.common import BaseElement, DiffConfig, assertions,extension
 
 from miniTest.components.subA import SubAComponent, SubAComponentInfo, PartialSubAComponentInfo
 CustomComponentInfo = TypedDict(
@@ -48,6 +49,7 @@ XxxComponentInfo = TypedDict(
         "customComponents": CustomComponentInfo,
         "slotView_class": str,
         "slotView_innerText": str,
+        "scrollView_scroll-into-view": str,
     }
 )
 PartialXxxComponentInfo = TypedDict(
@@ -75,10 +77,11 @@ PartialXxxComponentInfo = TypedDict(
         "customComponents": PartialCustomComponentInfo,
         "slotView_class": str,
         "slotView_innerText": str,
+        "scrollView_scroll-into-view": str,
     },
     total=False,
 )
-class XxxComponent(Common):
+class XxxComponent:
     def __init__(self, rootElement: BaseElement) -> None:
         super().__init__()
         self.rootElement = rootElement
@@ -91,7 +94,7 @@ class XxxComponent(Common):
     def getStyle(self) -> str:
         return self.rootElement.attribute("style")[0]
     def tapXxx(self, count: int = 1) -> None:
-        self.tapElement(self.rootElement, count)
+        extension.tapElement(self.rootElement, count)
     def getElementOfNormal(self) -> BaseElement:
         return self.rootElement.get_element("view[id$='normal']")
     def getClassOfNormal(self) -> str:
@@ -101,7 +104,7 @@ class XxxComponent(Common):
     def getDataIndexOfNormal(self) -> str:
         return self.getElementOfNormal().attribute("data-index")[0]
     def tapNormal(self, count: int = 1) -> None:
-        self.tapElement(self.getElementOfNormal(), count)
+        extension.tapElement(self.getElementOfNormal(), count)
     def getElementsOf_onlyLoop(self) -> List[BaseElement]:
         return self.rootElement.get_elements("view[id$='_onlyLoop']")
     def getClassOf_onlyLoop(self) -> List[str]:
@@ -110,7 +113,7 @@ class XxxComponent(Common):
         elementList = self.getElementsOf_onlyLoop()
         if index < len(elementList):
             element = elementList[index]
-            self.tapElement(element, count)
+            extension.tapElement(element, count)
         else:
             raise Exception("Element not found")
     def getInnerTextListOf_onlyLoop(self) -> List[str]:
@@ -123,7 +126,7 @@ class XxxComponent(Common):
         elementList = self.getElementsOf_xxxonlyLoop()
         if index < len(elementList):
             element = elementList[index]
-            self.tapElement(element, count)
+            extension.tapElement(element, count)
         else:
             raise Exception("Element not found")
     def getInnerTextListOf_xxxonlyLoop(self) -> List[str]:
@@ -146,7 +149,7 @@ class XxxComponent(Common):
     def tapOnlyCondition1(self, count: int = 1) -> None:
         element = self.getElementOfOnlyCondition1()
         if element:
-            self.tapElement(element, count)
+            extension.tapElement(element, count)
         else:
             raise Exception("Element not found")
     def getInnerTextOfOnlyCondition1(self) -> str | None:
@@ -169,7 +172,7 @@ class XxxComponent(Common):
     def tapOnlyCondition2(self, count: int = 1) -> None:
         element = self.getElementOfOnlyCondition2()
         if element:
-            self.tapElement(element, count)
+            extension.tapElement(element, count)
         else:
             raise Exception("Element not found")
     def getInnerTextOfOnlyCondition2(self) -> str | None:
@@ -188,23 +191,22 @@ class XxxComponent(Common):
         elementList = self.getElementsOfConditionAndLoop()
         if index < len(elementList):
             element = elementList[index]
-            self.tapElement(element, count)
+            extension.tapElement(element, count)
         else:
             raise Exception("Element not found")
     def getInnerTextListOfConditionAndLoop(self) -> List[str]:
         return [element.inner_text for element in self.getElementsOfConditionAndLoop()]
-    def getSubAComponent(self, cid: str) -> SubAComponent:
-        element = self.rootElement.get_element(f"scroll-view[id$='{cid}']")
-        return SubAComponent(element)
-    def getSubAComponentInfo(self, cid: str) -> SubAComponentInfo:
-        return self.getSubAComponent(cid).getComponentInfo()
     def getSubAComponent(self, cid: str) -> SubAComponent | None:
         try:
             element = self.rootElement.get_element(f"scroll-view[id$='{cid}']")
-            return SubAComponent (element)
+            return SubAComponent(element)
         except Exception:
             return None
-    def getSubAComponentInfo(self, cid: str) -> SubAComponentInfo | None:
+    def getSubA1ComponentInfo(self, cid: str) -> SubAComponentInfo:
+        return cast(SubAComponent, self.getSubAComponent(cid)).getComponentInfo()
+    def getSubA2ComponentInfo(self, cid: str) -> SubAComponentInfo:
+        return cast(SubAComponent, self.getSubAComponent(cid)).getComponentInfo()
+    def getSubA3ComponentInfo(self, cid: str) -> SubAComponentInfo | None:
         element = self.getSubAComponent(cid)
         return element.getComponentInfo() if element else None
     def getSubAComponentList(self, cid: str) -> List[SubAComponent]:
@@ -212,14 +214,20 @@ class XxxComponent(Common):
             SubAComponent(element)
             for element in self.rootElement.get_elements(f"scroll-view[id$='{cid}']")
         ]
-    def getSubAComponentInfoList(self, cid: str) -> List[SubAComponentInfo]:
+    def getSubA4ComponentInfoList(self, cid: str) -> List[SubAComponentInfo]:
         return [element.getComponentInfo() for element in self.getSubAComponentList(cid)]
+    def getSubA5ComponentInfo(self, cid: str) -> SubAComponentInfo:
+        return cast(SubAComponent, self.getSubAComponent(cid)).getComponentInfo()
     def getElementOfSlotView(self) -> BaseElement:
         return self.rootElement.get_element("view[id$='slotView']")
     def getClassOfSlotView(self) -> str:
         return self.getElementOfSlotView().attribute("class")[0]
     def getInnerTextOfSlotView(self) -> str:
         return self.getElementOfSlotView().inner_text
+    def getElementOfScrollView(self) -> BaseElement:
+        return self.rootElement.get_element("scroll-view[id$='scrollView']")
+    def getScrollIntoViewOfScrollView(self) -> str:
+        return self.getElementOfScrollView().attribute("scroll-into-view")[0]
     def getComponentInfo(self) -> XxxComponentInfo:
         return {
             "xxx_class": self.getClass(),
@@ -243,22 +251,25 @@ class XxxComponent(Common):
             "conditionAndLoop_innerTextList": self.getInnerTextListOfConditionAndLoop(),
             "slotView_class": self.getClassOfSlotView(),
             "slotView_innerText": self.getInnerTextOfSlotView(),
+            "scrollView_scroll-into-view": self.getScrollIntoViewOfScrollView(),
             "customComponents": {
-                "subA1": self.getSubAComponentInfo(cid="subA1"),
-                "subA2": self.getSubAComponentInfo(cid="subA2"),
-                "subA3": self.getSubAComponentInfo(cid="subA3"),
-                "subA4": self.getSubAComponentInfoList(cid="subA4"),
-                "subA5": self.getSubAComponentInfo(cid="subA5"),
+                "subA1": self.getSubA1ComponentInfo(cid="subA1"),
+                "subA2": self.getSubA2ComponentInfo(cid="subA2"),
+                "subA3": self.getSubA3ComponentInfo(cid="subA3"),
+                "subA4": self.getSubA4ComponentInfoList(cid="subA4"),
+                "subA5": self.getSubA5ComponentInfo(cid="subA5"),
             },
         }
     def assertComponentInfo(
         self,
         expectedInfo: PartialXxxComponentInfo,
-        fieldCompare: FieldCompareConfig | None = None,
+        diffConfig: DiffConfig | None = None,
     ) -> None:
         actual_info = self.getComponentInfo()
-        self._assertComponentInfo(
-            dict(actual_info),
-            dict(expectedInfo),
-            fieldCompare=fieldCompare,
+        diffs = assertions.dict_diff(
+            dict(actual_info), dict(expectedInfo), compareConfig=diffConfig
         )
+        if diffs:
+            raise AssertionError(
+                f"❌字典不匹配❌:字段差异: {json.dumps(diffs, ensure_ascii=False, indent=2)}"
+            )
