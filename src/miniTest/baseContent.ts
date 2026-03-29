@@ -4,9 +4,7 @@ import { capitalize, indent } from "./utils";
 export function getBaseContent(fileName: FileName): BaseContent {
   return {
     importPart: [
-      "import json",
-      "from typing import TypedDict, List, cast",
-      "from miniTest.common import BaseElement, DiffConfig, assertions,extension",
+      "from miniTest.common import Common, BaseElement, TypedDict,cast, List, DiffConfig",
       "",
     ],
     customComponentInfo: [],
@@ -26,6 +24,6 @@ export function getBaseContent(fileName: FileName): BaseContent {
       `${indent}total=False,`,
       ")",
     ],
-    testClass: [`class ${capitalize(fileName)}Component:`],
+    testClass: [`class ${capitalize(fileName)}Component(Common):`],
   };
 }

@@ -157,13 +157,7 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
     `${indent}${indent}diffConfig: DiffConfig | None = None,`,
     `${indent}) -> None:`,
     `${indent}${indent}actual_info = self.getComponentInfo()`,
-    `${indent}${indent}diffs = assertions.dict_diff(`,
-    `${indent}${indent}${indent}dict(actual_info), dict(expectedInfo), compareConfig=diffConfig`,
-    `${indent}${indent})`,
-    `${indent}${indent}if diffs:`,
-    `${indent}${indent}${indent}raise AssertionError(`,
-    `${indent}${indent}${indent}${indent}f"❌字典不匹配❌:字段差异: {json.dumps(diffs, ensure_ascii=False, indent=2)}"`,
-    `${indent}${indent}${indent})`,
+    `${indent}${indent}self.dict_diff(dict(actual_info), dict(expectedInfo), compareConfig=diffConfig)`,
   );
 
   return Object.values(context).flat().join("\n");
