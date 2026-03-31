@@ -12,7 +12,8 @@ export async function generateTestFile(fsPath: FsPath, text: FileText): Promise<
   const testFilePath = getTestFilePath(fsPath, componentDirName);
   // 3.  写入测试文件
   vscode.workspace.fs.writeFile(vscode.Uri.file(testFilePath), fileBytes).then(() => {
-    void vscode.window.showInformationMessage("测试文件生成成功", { modal: true });
+    // void vscode.window.showInformationMessage("测试文件生成成功", { modal: true });
+    void 0;
   }, (error) => {
     void vscode.window.showErrorMessage(`生成测试文件失败: ${error.message}`, { modal: true });
   });

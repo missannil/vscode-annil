@@ -85,7 +85,8 @@ async function getCustomCompNameAndRootElementTageName(
       return res;
     }
     const workspaceRootPath = workspaceFolders[0].uri.fsPath;
-    const pattern = new vscode.RelativePattern(workspaceRootPath, `**${validCustomCompDirPath}/*.wxml`);
+    const normalizedDir = validCustomCompDirPath.replace(/^\/+/, ""); // 去掉开头的斜杠
+    const pattern = new vscode.RelativePattern(workspaceRootPath, `**/${normalizedDir}/*.wxml`);
     // 从工作区中找到匹配的文件
     const files = await vscode.workspace.findFiles(pattern);
 
