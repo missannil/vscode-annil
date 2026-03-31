@@ -1,4 +1,4 @@
-import type { BaseContent, TagInfo } from "./types";
+import type { BaseContent, MethodsRecord, TagInfo } from "./types";
 import { capitalize, indent, isConditionalElement, isLoopElement } from "./utils";
 
 // eslint-disable-next-line complexity
@@ -8,6 +8,7 @@ export function handleCustomTag(
   customComponents: string[],
   realCustomCompName: string,
   rootElementTagName: string,
+  methodsRecord: MethodsRecord,
 ): void {
   const { blockType } = tagInfo;
   const hasImport = context.importPart.includes(
@@ -46,6 +47,7 @@ export function handleCustomTag(
   }
   // 3. 在组件信息中添加该标签的组件信息属性
   const customCompName = tagInfo.element.tagName;
+
   if (isConditionalElement(blockType)) {
     context.customComponentInfo.splice(
       -2,
@@ -162,29 +164,33 @@ export function handleCustomTag(
     );
   }
   // 5.在getComponentInfo方法中添加调用获取组件信息的方法并将结果添加到组件信息字典中
+  const customCid = tagInfo.element.attribs["cid"] || realCustomCompName;
   if (isConditionalElement(blockType)) {
+    const methodStr = `get${capitalize(customCompName)}ComponentInfo`;
+    // 添加记录获取组件信息方法的字符串，便于assertComponentInfo中调用
+    methodsRecord[customCompName] = [methodStr, customCid];
     customComponents.splice(
       -1,
       0,
-      `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
-        capitalize(customCompName)
-      }ComponentInfo(cid="${customCompName}"),`,
+      `${indent}${indent}${indent}${indent}"${customCompName}": self.${methodStr}(cid="${customCid}"),`,
     );
   } else if (isLoopElement(blockType)) {
+    const methodStr = `get${capitalize(customCompName)}ComponentInfoList`;
+    // 添加记录获取组件信息方法的字符串，便于assertComponentInfo中调用
+    methodsRecord[customCompName] = [methodStr, customCid];
     customComponents.splice(
       -1,
       0,
-      `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
-        capitalize(customCompName)
-      }ComponentInfoList(cid="${customCompName}"),`,
+      `${indent}${indent}${indent}${indent}"${customCompName}": self.${methodStr}(cid="${customCid}"),`,
     );
   } else {
+    const methodStr = `get${capitalize(customCompName)}ComponentInfo`;
+    // 添加记录获取组件信息方法的字符串，便于assertComponentInfo中调用
+    methodsRecord[customCompName] = [methodStr, customCid];
     customComponents.splice(
       -1,
       0,
-      `${indent}${indent}${indent}${indent}"${customCompName}": self.get${
-        capitalize(customCompName)
-      }ComponentInfo(cid="${customCompName}"),`,
+      `${indent}${indent}${indent}${indent}"${customCompName}": self.${methodStr}(cid="${customCid}"),`,
     );
   }
 }

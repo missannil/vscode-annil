@@ -37,3 +37,6 @@ export type FileName = string & { __brand: "fileName" };
 export type FileText = string & { __brand: "fileText" };
 
 export type Attrib = string & { __brand: "attrib" };
+
+// 记录获取组件信息的方法和参数, string为字段信息, [string,string]中第一个是方法名,第二个是参数字符串
+export type MethodsRecord = Record<string, [string, string]>;

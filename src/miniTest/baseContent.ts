@@ -24,6 +24,11 @@ export function getBaseContent(fileName: FileName): BaseContent {
       `${indent}total=False,`,
       ")",
     ],
-    testClass: [`class ${capitalize(fileName)}Component(Common):`],
+    testClass: [
+      `class ${capitalize(fileName)}Component(Common):`,
+      `${indent}def __init__(self, rootElement: BaseElement) -> None:`,
+      `${indent}${indent}super().__init__()`,
+      `${indent}${indent}self.rootElement = rootElement`,
+    ],
   };
 }

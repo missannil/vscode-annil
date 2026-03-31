@@ -1,3 +1,4 @@
+import { vscode } from "../publicModule";
 import type { ShouldValidateListParams, TagInfo } from "./types";
 import {
   hasInnerText,
@@ -6,16 +7,16 @@ import {
   isCustomTag,
   isElement,
   isLoop,
+  isNativeTag,
   shouldValidateElement,
 } from "./utils";
 
 // eslint-disable-next-line complexity
 export function buildShouldValidateList(params: ShouldValidateListParams): TagInfo[] {
-  const { childNodes, blockType, result, isRootBlock } = params;
+  const { childNodes, blockType, result, isRootBlock, isRootElement } = params;
   for (const childNode of childNodes) {
     // 1. 非元素节点不处理
     if (!isElement(childNode)) continue;
-
     // 2. 最外层(root)的第一个条件block标签要被忽略(约定这个block是控制wxml渲染的，不参与测试)
     if (isRootBlock && isBlockTag(childNode.name) && isConditional(childNode)) {
       buildShouldValidateList({
@@ -28,7 +29,13 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
 
       continue;
     }
-    // 3. block标签本身不生成TagInfo,但它会改变blockType,且子元素仍可能为需要验证的元素,所以继续往下遍历
+    // 3. 如果当前组件不是原生组件或者没有id属性,那么认为没有根组件，报错
+    if (isRootElement && (!isNativeTag(childNode.name) || !childNode.attribs.id)) {
+      void vscode.window.showInformationMessage("缺少根组件,根组件必须原生组件且具有id属性", { modal: true });
+
+      throw new Error("缺少根组件,根组件必须原生组件且具有id属性");
+    }
+    // 4. block标签本身不生成TagInfo,但它会改变blockType,且子元素仍可能为需要验证的元素,所以继续往下遍历
     if (isBlockTag(childNode.name)) {
       const blockType = [...params.blockType];
       if (isConditional(childNode)) {
@@ -46,7 +53,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
 
       continue;
     }
-    // 4. 其他元素节点根据条件决定是否生成TagInfo,第一次isRootElement为true,之后都为false
+    // 5. 其他元素节点根据条件决定是否生成TagInfo,第一次isRootElement为true,之后都为false
     if (isCustomTag(childNode.name)) {
       result.push(
         {
@@ -71,7 +78,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
     }
     // 经过一次非block元素节点后，isRootElement就被认为是false了，后续的元素节点都不是根节点了
     params.isRootElement = false;
-    // 5. 继续遍历子节点
+    // 6. 继续遍历子节点
     buildShouldValidateList({
       childNodes: childNode.children,
       isRootBlock: false,

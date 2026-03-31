@@ -5,7 +5,7 @@ import { getBaseContent } from "./baseContent";
 import { buildShouldValidateList } from "./getShouldValidateList";
 import { handleCustomTag } from "./handleCustomTag";
 import { handleNativeTag } from "./handleNativeTag";
-import type { FileName, FileText, FsPath } from "./types";
+import type { FileName, FileText, FsPath, MethodsRecord } from "./types";
 import { capitalize, indent, isCustomTag } from "./utils";
 
 async function getRootElementTagName(uri: vscode.Uri): Promise<string> {
@@ -133,16 +133,18 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
     `${indent}${indent}${indent}"customComponents": {`,
     `${indent}${indent}${indent}},`,
   ];
+  // 记录各个字段信息的获取方法和参数,便于assertComponentInfo中调用 [string,string]中第一个是方法名,第二个是参数字符串
+  const methodsRecord: MethodsRecord = {};
   // 遍历shouldValidateList，处理每个标签
   for (const tagInfo of shouldValidateList) {
     const { element: { tagName } } = tagInfo;
     if (isCustomTag(tagName)) {
       //  得到自定义组件的组件名和根元素标签名。
       const [customCompName, rootElementTagName] = await getCustomCompNameAndRootElementTageName(fsPath, tagName);
-      handleCustomTag(tagInfo, context, customComponents, customCompName, rootElementTagName);
+      handleCustomTag(tagInfo, context, customComponents, customCompName, rootElementTagName, methodsRecord);
     } else {
       // 处理原生标签的属性和事件，生成组件信息和测试方法
-      handleNativeTag(dirName, tagInfo, context, getComopnentInfo);
+      handleNativeTag(dirName, tagInfo, context, getComopnentInfo, methodsRecord);
     }
   }
 
@@ -150,16 +152,71 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
     // 将customComponents插入到getComponentInfo方法中
     getComopnentInfo.splice(-1, 0, ...customComponents);
   }
+  // 将记录获取组件信息方法的字符串添加到测试类中
+  const methodsRecordEntries = Object.entries(methodsRecord);
+  if (methodsRecordEntries.length > 0) {
+    context.testClass.push(
+      `${indent}def methodsRecord(self) -> dict:`,
+      `${indent}${indent}return {`,
+      ...methodsRecordEntries.map(([key, [methodStr, argStr]]) =>
+        `${indent}${indent}${indent}"${key}": ["${methodStr}","${argStr}"],`
+      ),
+      `${indent}${indent}}`,
+    );
+  }
   context.testClass.push(...getComopnentInfo);
-  context.testClass.push(
-    `${indent}def assertComponentInfo(`,
-    `${indent}${indent}self,`,
-    `${indent}${indent}expectedInfo: Partial${capitalize(dirName)}ComponentInfo,`,
-    `${indent}${indent}diffConfig: DiffConfig | None = None,`,
-    `${indent}) -> None:`,
-    `${indent}${indent}actual_info = self.getComponentInfo()`,
-    `${indent}${indent}self.dict_diff(dict(actual_info), dict(expectedInfo), compareConfig=diffConfig)`,
-  );
+  // 判断 partialComponentInfo 是否包含 customComponents 字段
+  const hasCustomComponents = Array.isArray(context.partialComponentInfo)
+    ? context.partialComponentInfo.some((line) => line.includes("customComponents"))
+    : false;
+  // 生成 assertComponentInfo 方法
+  if (hasCustomComponents) {
+    context.testClass.push(
+      `${indent}def assertComponentInfo(`,
+      `${indent}${indent}self,`,
+      `${indent}${indent}expectedInfo: Partial${capitalize(dirName)}ComponentInfo,`,
+      `${indent}${indent}diffConfig: DiffConfig | None = None,`,
+      `${indent}) -> None:`,
+      `${indent}${indent}methods_record = self.methodsRecord()`,
+      `${indent}${indent}actual_info :dict = {}`,
+      `${indent}${indent}for key in expectedInfo:`,
+      `${indent}${indent}${indent}if key == "customComponents":`,
+      `${indent}${indent}${indent}${indent}actual_info["customComponents"] = {}`,
+      `${indent}${indent}${indent}${indent}for comp_key in expectedInfo["customComponents"]:`,
+      `${indent}${indent}${indent}${indent}${indent}if comp_key in methods_record:`,
+      `${indent}${indent}${indent}${indent}${indent}${indent}method_name, arg = methods_record[comp_key]`,
+      `${indent}${indent}${indent}${indent}${indent}${indent}if arg:`,
+      `${indent}${indent}${indent}${indent}${indent}${indent}${indent}actual_info["customComponents"][comp_key] = getattr(self, method_name)(cid=arg)`,
+      `${indent}${indent}${indent}${indent}${indent}${indent}else:`,
+      `${indent}${indent}${indent}${indent}${indent}${indent}${indent}actual_info["customComponents"][comp_key] = getattr(self, method_name)()`,
+      `${indent}${indent}${indent}else:`,
+      `${indent}${indent}${indent}${indent}if key in methods_record:`,
+      `${indent}${indent}${indent}${indent}${indent}method_name, arg = methods_record[key]`,
+      `${indent}${indent}${indent}${indent}${indent}if arg:`,
+      `${indent}${indent}${indent}${indent}${indent}${indent}actual_info[key] = getattr(self, method_name)(cid=arg)`,
+      `${indent}${indent}${indent}${indent}${indent}else:`,
+      `${indent}${indent}${indent}${indent}${indent}${indent}actual_info[key] = getattr(self, method_name)()`,
+      `${indent}${indent}self.dict_diff(dict(actual_info), dict(expectedInfo), compareConfig=diffConfig)`,
+    );
+  } else {
+    context.testClass.push(
+      `${indent}def assertComponentInfo(`,
+      `${indent}${indent}self,`,
+      `${indent}${indent}expectedInfo: Partial${capitalize(dirName)}ComponentInfo,`,
+      `${indent}${indent}diffConfig: DiffConfig | None = None,`,
+      `${indent}) -> None:`,
+      `${indent}${indent}methods_record = self.methodsRecord()`,
+      `${indent}${indent}actual_info :dict = {}`,
+      `${indent}${indent}for key in expectedInfo:`,
+      `${indent}${indent}${indent}if key in methods_record:`,
+      `${indent}${indent}${indent}${indent}method_name, arg = methods_record[key]`,
+      `${indent}${indent}${indent}${indent}if arg:`,
+      `${indent}${indent}${indent}${indent}${indent}actual_info[key] = getattr(self, method_name)(cid=arg)`,
+      `${indent}${indent}${indent}${indent}else:`,
+      `${indent}${indent}${indent}${indent}${indent}actual_info[key] = getattr(self, method_name)()`,
+      `${indent}${indent}self.dict_diff(dict(actual_info), dict(expectedInfo), compareConfig=diffConfig)`,
+    );
+  }
 
   return Object.values(context).flat().join("\n");
 }

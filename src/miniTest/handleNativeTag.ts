@@ -1,4 +1,4 @@
-import type { Attrib, BaseContent, BlockType, FileName, TagInfo } from "./types";
+import type { Attrib, BaseContent, BlockType, FileName, MethodsRecord, TagInfo } from "./types";
 import {
   capitalize,
   indent,
@@ -33,10 +33,12 @@ function handleNormalAndDataAttrib(
   attrib: string,
   context: BaseContent,
   getComopnentInfo: string[],
+  methodsRecord: MethodsRecord,
 ): void {
   if (isRoot) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${fileName}_${attrib}": str,`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${fileName}_${attrib}": str,`);
+
     context.testClass.push(
       `${indent}def get${capitalize(kebabToCamel(attrib))}(self) -> str:`,
       `${indent}${indent}return self.rootElement.attribute("${attrib}")[0]`,
@@ -46,9 +48,12 @@ function handleNormalAndDataAttrib(
       0,
       `${indent}${indent}${indent}"${fileName}_${attrib}": self.get${capitalize(kebabToCamel(attrib))}(),`,
     );
+
+    methodsRecord[`${fileName}_${attrib}`] = [`get${capitalize(kebabToCamel(attrib))}`, ``];
   } else if (isLoopElement(blockType)) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_${attrib}List": List[str],`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_${attrib}List": List[str],`);
+
     context.testClass.push(
       `${indent}def get${capitalize(kebabToCamel(attrib))}Of${capitalize(elementId)}(self) -> List[str]:`,
       `${indent}${indent}return [element.attribute("${attrib}")[0] for element in self.getElementsOf${
@@ -62,6 +67,10 @@ function handleNormalAndDataAttrib(
         capitalize(elementId)
       }(),`,
     );
+    methodsRecord[`${elementId}_${attrib}List`] = [
+      `get${capitalize(kebabToCamel(attrib))}Of${capitalize(elementId)}`,
+      ``,
+    ];
   } else if (isConditionalElement(blockType)) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_${attrib}": str | None,`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_${attrib}": str | None,`);
@@ -80,6 +89,7 @@ function handleNormalAndDataAttrib(
         capitalize(elementId)
       }(),`,
     );
+    methodsRecord[`${elementId}_${attrib}`] = [`get${capitalize(kebabToCamel(attrib))}Of${capitalize(elementId)}`, ``];
   } else {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_${attrib}": str,`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_${attrib}": str,`);
@@ -94,6 +104,7 @@ function handleNormalAndDataAttrib(
         capitalize(elementId)
       }(),`,
     );
+    methodsRecord[`${elementId}_${attrib}`] = [`get${capitalize(kebabToCamel(attrib))}Of${capitalize(elementId)}`, ``];
   }
 }
 
@@ -147,6 +158,7 @@ function appendInnerTextHandling(
   elementId: string,
   context: BaseContent,
   getComopnentInfo: string[],
+  methodsRecord: MethodsRecord,
 ): void {
   if (isRoot) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${fileName}_innerText": str,`);
@@ -160,6 +172,7 @@ function appendInnerTextHandling(
       0,
       `${indent}${indent}${indent}"${fileName}_innerText": self.getInnerText(),`,
     );
+    methodsRecord[`${fileName}_innerText`] = [`getInnerText`, ``];
 
     return;
   }
@@ -176,6 +189,8 @@ function appendInnerTextHandling(
       0,
       `${indent}${indent}${indent}"${elementId}_innerTextList": self.getInnerTextListOf${capitalize(elementId)}(),`,
     );
+
+    methodsRecord[`${elementId}_innerTextList`] = [`getInnerTextListOf${capitalize(elementId)}`, ``];
 
     return;
   }
@@ -196,6 +211,7 @@ function appendInnerTextHandling(
       0,
       `${indent}${indent}${indent}"${elementId}_innerText": self.getInnerTextOf${capitalize(elementId)}(),`,
     );
+    methodsRecord[`${elementId}_innerText`] = [`getInnerTextOf${capitalize(elementId)}`, ``];
 
     return;
   }
@@ -211,6 +227,7 @@ function appendInnerTextHandling(
     0,
     `${indent}${indent}${indent}"${elementId}_innerText": self.getInnerTextOf${capitalize(elementId)}(),`,
   );
+  methodsRecord[`${elementId}_innerText`] = [`getInnerTextOf${capitalize(elementId)}`, ``];
 }
 
 export function handleNativeTag(
@@ -218,17 +235,14 @@ export function handleNativeTag(
   tagInfo: TagInfo,
   context: BaseContent,
   getComopnentInfo: string[],
+  methodsRecord: MethodsRecord,
 ): void {
   const { element, blockType, isRoot, hasInnerText } = tagInfo;
   const elementId = getElementId(element.attribs.id);
   const tagName = element.tagName;
   const validAttribs = (Object.keys(element.attribs) as Attrib[]).filter(isValidAttrib);
   if (isRoot) {
-    context.testClass.push(
-      `${indent}def __init__(self, rootElement: BaseElement) -> None:`,
-      `${indent}${indent}super().__init__()`,
-      `${indent}${indent}self.rootElement = rootElement`,
-    );
+    void 0;
   } else if (isLoopElement(blockType)) {
     context.testClass.push(
       `${indent}def getElementsOf${capitalize(elementId)}(self) -> List[BaseElement]:`,
@@ -251,12 +265,21 @@ export function handleNativeTag(
 
   validAttribs.forEach((attrib) => {
     if (isNormalAttrib(attrib) || isDataAttrib(attrib)) {
-      handleNormalAndDataAttrib(fileName, isRoot, blockType, elementId, attrib, context, getComopnentInfo);
+      handleNormalAndDataAttrib(
+        fileName,
+        isRoot,
+        blockType,
+        elementId,
+        attrib,
+        context,
+        getComopnentInfo,
+        methodsRecord,
+      );
     } else if (isEventAttrib(attrib)) {
       handleEventAttribForNonRootElement(fileName, isRoot, blockType, elementId, attrib, context);
     }
   });
   if (hasInnerText) {
-    appendInnerTextHandling(fileName, isRoot, blockType, elementId, context, getComopnentInfo);
+    appendInnerTextHandling(fileName, isRoot, blockType, elementId, context, getComopnentInfo, methodsRecord);
   }
 }
