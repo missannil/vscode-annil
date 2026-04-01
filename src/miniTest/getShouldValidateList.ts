@@ -13,7 +13,7 @@ import {
 
 // eslint-disable-next-line complexity
 export function buildShouldValidateList(params: ShouldValidateListParams): TagInfo[] {
-  const { childNodes, blockType, result, isRootBlock, isRootElement } = params;
+  const { childNodes, scopeType, result, isRootBlock, isRootElement } = params;
   for (const childNode of childNodes) {
     // 1. 非元素节点不处理
     if (!isElement(childNode)) continue;
@@ -23,7 +23,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
         childNodes: childNode.children,
         isRootBlock: false,
         isRootElement: params.isRootElement,
-        blockType: [...blockType],
+        scopeType: [...scopeType],
         result,
       });
 
@@ -35,19 +35,19 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
 
       throw new Error("缺少根组件,根组件必须原生组件且具有id属性");
     }
-    // 4. block标签本身不生成TagInfo,但它会改变blockType,且子元素仍可能为需要验证的元素,所以继续往下遍历
+    // 4. block标签本身不生成TagInfo,但它会改变scopeType,且子元素仍可能为需要验证的元素,所以继续往下遍历
     if (isBlockTag(childNode.name)) {
-      const blockType = [...params.blockType];
+      const newScopeType = [...params.scopeType];
       if (isConditional(childNode)) {
-        blockType.push("wxIf");
+        newScopeType.push("wxIf");
       } else if (isLoop(childNode)) {
-        blockType.push("wxFor");
+        newScopeType.push("wxFor");
       }
       buildShouldValidateList({
         childNodes: childNode.children,
         isRootBlock: false,
         isRootElement: params.isRootElement,
-        blockType,
+        scopeType: newScopeType,
         result,
       });
 
@@ -58,7 +58,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
       result.push(
         {
           isRoot: params.isRootElement,
-          blockType: [...blockType],
+          scopeType: [...scopeType],
           element: childNode,
           // 自定义组件传入的solt内容应该是一个元素而不是文本，所以hasInnerText为false
           hasInnerText: false,
@@ -69,7 +69,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
       result.push(
         {
           isRoot: params.isRootElement,
-          blockType: [...blockType],
+          scopeType: [...scopeType],
           element: childNode,
           hasInnerText: hasInnerText(childNode),
           isCustomTag: false,
@@ -83,7 +83,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
       childNodes: childNode.children,
       isRootBlock: false,
       isRootElement: params.isRootElement,
-      blockType: [...blockType],
+      scopeType: [...scopeType],
       result,
     });
   }

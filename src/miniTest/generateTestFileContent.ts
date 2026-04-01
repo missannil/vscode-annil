@@ -118,7 +118,7 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
     childNodes: wxmlDocument.childNodes,
     isRootBlock: true,
     isRootElement: true,
-    blockType: [],
+    scopeType: [],
     result: [],
   });
   // 构建测试文件的内容

@@ -1,7 +1,7 @@
 import * as Domhandler from "domhandler";
 import { vscode } from "../publicModule";
 import { nativeComponents } from "./nativeComponents";
-import type { Attrib, BlockType } from "./types";
+import type { Attrib, ScopeType } from "./types";
 
 export const indent = "    ";
 
@@ -87,12 +87,12 @@ export function shouldValidateElement(element: Domhandler.Element): boolean {
     && ((Object.keys(element.attribs) as Attrib[]).some(isValidAttrib) || hasInnerText(element));
 }
 
-export function isLoopElement(blockType: BlockType[]): boolean {
+export function isLoopElement(scopeType: ScopeType[]): boolean {
   // 包含wxFor的元素
-  return blockType.includes("wxFor");
+  return scopeType.includes("wxFor");
 }
 
-export function isConditionalElement(blockType: BlockType[]): boolean {
+export function isConditionalElement(scopeType: ScopeType[]): boolean {
   // 包含wxIf的元素
-  return blockType.includes("wxIf") && !blockType.includes("wxFor");
+  return scopeType.includes("wxIf") && !scopeType.includes("wxFor");
 }

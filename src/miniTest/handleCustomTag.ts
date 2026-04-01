@@ -10,7 +10,7 @@ export function handleCustomTag(
   rootElementTagName: string,
   methodsRecord: MethodsRecord,
 ): void {
-  const { blockType } = tagInfo;
+  const { scopeType } = tagInfo;
   const hasImport = context.importPart.includes(
     `from miniTest.components.${realCustomCompName} import ${capitalize(realCustomCompName)}Component, ${
       capitalize(realCustomCompName)
@@ -48,7 +48,7 @@ export function handleCustomTag(
   // 3. 在组件信息中添加该标签的组件信息属性
   const customCompName = tagInfo.element.tagName;
 
-  if (isConditionalElement(blockType)) {
+  if (isConditionalElement(scopeType)) {
     context.customComponentInfo.splice(
       -2,
       0,
@@ -59,7 +59,7 @@ export function handleCustomTag(
       0,
       `${indent}${indent}"${customCompName}": Partial${capitalize(realCustomCompName)}ComponentInfo | None,`,
     );
-  } else if (isLoopElement(blockType)) {
+  } else if (isLoopElement(scopeType)) {
     context.customComponentInfo.splice(
       -2,
       0,
@@ -84,7 +84,7 @@ export function handleCustomTag(
     );
   }
   // 4. 在测试类中添加获取组件信息的方法
-  if (isConditionalElement(blockType)) {
+  if (isConditionalElement(scopeType)) {
     const methodStr = `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
       capitalize(realCustomCompName)
     }Component | None:`;
@@ -108,7 +108,7 @@ export function handleCustomTag(
       `${indent}${indent}element = self.get${capitalize(realCustomCompName)}Component(cid)`,
       `${indent}${indent}return element.getComponentInfo() if element else None`,
     );
-  } else if (isLoopElement(blockType)) {
+  } else if (isLoopElement(scopeType)) {
     const methodStr = `${indent}def get${capitalize(realCustomCompName)}ComponentList(self, cid: str) -> List[${
       capitalize(realCustomCompName)
     }Component]:`;
@@ -165,7 +165,7 @@ export function handleCustomTag(
   }
   // 5.在getComponentInfo方法中添加调用获取组件信息的方法并将结果添加到组件信息字典中
   const customCid = tagInfo.element.attribs["cid"] || realCustomCompName;
-  if (isConditionalElement(blockType)) {
+  if (isConditionalElement(scopeType)) {
     const methodStr = `get${capitalize(customCompName)}ComponentInfo`;
     // 添加记录获取组件信息方法的字符串，便于assertComponentInfo中调用
     methodsRecord[customCompName] = [methodStr, customCid];
@@ -174,7 +174,7 @@ export function handleCustomTag(
       0,
       `${indent}${indent}${indent}${indent}"${customCompName}": self.${methodStr}(cid="${customCid}"),`,
     );
-  } else if (isLoopElement(blockType)) {
+  } else if (isLoopElement(scopeType)) {
     const methodStr = `get${capitalize(customCompName)}ComponentInfoList`;
     // 添加记录获取组件信息方法的字符串，便于assertComponentInfo中调用
     methodsRecord[customCompName] = [methodStr, customCid];

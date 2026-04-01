@@ -1,4 +1,4 @@
-import type { Attrib, BaseContent, BlockType, FileName, MethodsRecord, TagInfo } from "./types";
+import type { Attrib, BaseContent, FileName, MethodsRecord, ScopeType, TagInfo } from "./types";
 import {
   capitalize,
   indent,
@@ -28,7 +28,7 @@ function getElementId(id: string): string {
 function handleNormalAndDataAttrib(
   fileName: string,
   isRoot: boolean,
-  blockType: BlockType[],
+  scopeType: ScopeType[],
   elementId: string,
   attrib: string,
   context: BaseContent,
@@ -50,7 +50,7 @@ function handleNormalAndDataAttrib(
     );
 
     methodsRecord[`${fileName}_${attrib}`] = [`get${capitalize(kebabToCamel(attrib))}`, ``];
-  } else if (isLoopElement(blockType)) {
+  } else if (isLoopElement(scopeType)) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_${attrib}List": List[str],`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_${attrib}List": List[str],`);
 
@@ -71,7 +71,7 @@ function handleNormalAndDataAttrib(
       `get${capitalize(kebabToCamel(attrib))}Of${capitalize(elementId)}`,
       ``,
     ];
-  } else if (isConditionalElement(blockType)) {
+  } else if (isConditionalElement(scopeType)) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_${attrib}": str | None,`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_${attrib}": str | None,`);
     context.testClass.push(
@@ -111,7 +111,7 @@ function handleNormalAndDataAttrib(
 function handleEventAttribForNonRootElement(
   fileName: string,
   isRoot: boolean,
-  blockType: BlockType[],
+  scopeType: ScopeType[],
   elementId: string,
   attrib: string,
   context: BaseContent,
@@ -121,7 +121,7 @@ function handleEventAttribForNonRootElement(
       `${indent}def tap${capitalize(fileName)}(self, count: int = 1) -> None:`,
       `${indent}${indent}self.tapElement(self.rootElement, count)`,
     );
-  } else if (isLoopElement(blockType)) {
+  } else if (isLoopElement(scopeType)) {
     // 由于wxFor标签的元素有多个，先获取对应索引的元素,如果存在再执行点击操作,不存在报错
     context.testClass.push(
       `${indent}def tap${capitalize(elementId)}(self,index: int, count: int = 1) -> None:`,
@@ -132,7 +132,7 @@ function handleEventAttribForNonRootElement(
       `${indent}${indent}else:`,
       `${indent}${indent}${indent}raise Exception("Element not found")`,
     );
-  } else if (isConditionalElement(blockType)) {
+  } else if (isConditionalElement(scopeType)) {
     // 由于wxIf标签的元素可能不存在，所以先获取元素再判断是否存在,如果存在再执行点击操作,不存在报错
     context.testClass.push(
       `${indent}def tap${capitalize(elementId)}(self, count: int = 1) -> None:`,
@@ -154,7 +154,7 @@ function handleEventAttribForNonRootElement(
 function appendInnerTextHandling(
   fileName: FileName,
   isRoot: boolean,
-  blockType: BlockType[],
+  scopeType: ScopeType[],
   elementId: string,
   context: BaseContent,
   getComopnentInfo: string[],
@@ -177,7 +177,7 @@ function appendInnerTextHandling(
     return;
   }
 
-  if (isLoopElement(blockType)) {
+  if (isLoopElement(scopeType)) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_innerTextList": List[str],`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_innerTextList": List[str],`);
     context.testClass.push(
@@ -195,7 +195,7 @@ function appendInnerTextHandling(
     return;
   }
 
-  if (isConditionalElement(blockType)) {
+  if (isConditionalElement(scopeType)) {
     context.componentInfo.splice(-2, 0, `${indent}${indent}"${elementId}_innerText": str | None,`);
     context.partialComponentInfo.splice(-3, 0, `${indent}${indent}"${elementId}_innerText": str | None,`);
     context.testClass.push(
@@ -237,18 +237,18 @@ export function handleNativeTag(
   getComopnentInfo: string[],
   methodsRecord: MethodsRecord,
 ): void {
-  const { element, blockType, isRoot, hasInnerText } = tagInfo;
+  const { element, scopeType, isRoot, hasInnerText } = tagInfo;
   const elementId = getElementId(element.attribs.id);
   const tagName = element.tagName;
   const validAttribs = (Object.keys(element.attribs) as Attrib[]).filter(isValidAttrib);
   if (isRoot) {
     void 0;
-  } else if (isLoopElement(blockType)) {
+  } else if (isLoopElement(scopeType)) {
     context.testClass.push(
       `${indent}def getElementsOf${capitalize(elementId)}(self) -> List[BaseElement]:`,
       `${indent}${indent}return self.rootElement.get_elements("${tagName}[id$='${elementId}']")`,
     );
-  } else if (isConditionalElement(blockType)) {
+  } else if (isConditionalElement(scopeType)) {
     context.testClass.push(
       `${indent}def getElementOf${capitalize(elementId)}(self) -> BaseElement | None:`,
       `${indent}${indent}try:`,
@@ -268,7 +268,7 @@ export function handleNativeTag(
       handleNormalAndDataAttrib(
         fileName,
         isRoot,
-        blockType,
+        scopeType,
         elementId,
         attrib,
         context,
@@ -276,10 +276,10 @@ export function handleNativeTag(
         methodsRecord,
       );
     } else if (isEventAttrib(attrib)) {
-      handleEventAttribForNonRootElement(fileName, isRoot, blockType, elementId, attrib, context);
+      handleEventAttribForNonRootElement(fileName, isRoot, scopeType, elementId, attrib, context);
     }
   });
   if (hasInnerText) {
-    appendInnerTextHandling(fileName, isRoot, blockType, elementId, context, getComopnentInfo, methodsRecord);
+    appendInnerTextHandling(fileName, isRoot, scopeType, elementId, context, getComopnentInfo, methodsRecord);
   }
 }
