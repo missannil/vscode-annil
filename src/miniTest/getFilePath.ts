@@ -1,5 +1,5 @@
 import { path, vscode } from "../publicModule";
-import type { FileName, FsPath } from "./types";
+import type { ComponentName, FsPath } from "./types";
 
 /**
  * 解析测试文件的路径
@@ -9,7 +9,7 @@ import type { FileName, FsPath } from "./types";
  * @param document
  * @returns 测试文件的路径，如果无法生成则返回undefined
  */
-export function getTestFilePath(fsPath: FsPath, componentDirName: FileName): FsPath {
+export function getTestFilePath(fsPath: FsPath, componentDirName: ComponentName): FsPath {
   // 1. 获取工作区根目录
   const workspaceRoot = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(fsPath));
   // 2. 如果配置了测试文件路径,就以工作区根目录为基础生成绝对路径

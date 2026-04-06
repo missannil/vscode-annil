@@ -14,9 +14,9 @@ export function miniTest(context: vscode.ExtensionContext): void {
       return;
     }
     // 生成测试文件
-    const fsPath: FsPath = document.uri.fsPath as FsPath;
+    const wxmlFsPath: FsPath = document.uri.fsPath as FsPath;
 
     const wxmlText: FileText = document.getText() as FileText;
-    void generateTestFile(fsPath, wxmlText);
+    void generateTestFile(wxmlFsPath, wxmlText);
   }));
 }

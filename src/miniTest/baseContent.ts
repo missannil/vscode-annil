@@ -1,7 +1,7 @@
-import type { BaseContent, FileName } from "./types";
+import type { BaseContent, ComponentName } from "./types";
 import { capitalize, indent } from "./utils";
 
-export function getBaseContent(fileName: FileName): BaseContent {
+export function getBaseContent(fileName: ComponentName): BaseContent {
   return {
     importPart: [
       "from miniTest.common import Common, BaseElement, TypedDict,cast, List, DiffConfig",
@@ -26,9 +26,14 @@ export function getBaseContent(fileName: FileName): BaseContent {
     ],
     testClass: [
       `class ${capitalize(fileName)}Component(Common):`,
-      `${indent}def __init__(self, rootElement: BaseElement) -> None:`,
+      `${indent}def __init__(self, rootElement: BaseElement = None) -> None:`,
       `${indent}${indent}super().__init__()`,
-      `${indent}${indent}self.rootElement = rootElement`,
+      `${indent}${indent}if rootElement is not None:`,
+      `${indent}${indent}${indent}self.rootElement = rootElement`,
+      `${indent}${indent}else:`,
+      `${indent}${indent}${indent}self.rootElement = cast(`,
+      `${indent}${indent}${indent}${indent}BaseElement, self.page.get_element("view[id$='page']")`,
+      `${indent}${indent}${indent})`,
     ],
   };
 }

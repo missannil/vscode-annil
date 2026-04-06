@@ -238,3 +238,4 @@ class XxxComponent(Common):
             "_onlyLoop_classList": self.getClassOf_onlyLoop(),
             "_onlyLoop_innerTextList": self.getInnerTextListOf_onlyLoop(),
             "_xxxonlyLoop_classList": self.getClassOf_xxxonlyLoop(),
+        }

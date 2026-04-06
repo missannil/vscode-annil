@@ -5,7 +5,7 @@ import { getBaseContent } from "./baseContent";
 import { buildShouldValidateList } from "./getShouldValidateList";
 import { handleCustomTag } from "./handleCustomTag";
 import { handleNativeTag } from "./handleNativeTag";
-import type { FileName, FileText, FsPath, MethodsRecord } from "./types";
+import type { ComponentName, FileText, FsPath, MethodsRecord } from "./types";
 import { capitalize, indent, isCustomTag } from "./utils";
 
 async function getRootElementTagName(uri: vscode.Uri): Promise<string> {
@@ -106,25 +106,36 @@ async function getCustomCompNameAndRootElementTageName(
   }
 }
 
-export async function generateTestFileContent(fsPath: FsPath, dirName: FileName, text: FileText): Promise<string> {
-  // 解析text
-  const wxmlDocument = htmlparser2.parseDocument(text, {
+/**
+ * 生成py文件的内容
+ * @param wxmlFsPath 当前wxml文件的路径
+ * @param componentName 自定义组件的名称，
+ * @param wxmlText 当前wxml文件的文本内容，用于解析出标签信息
+ * @returns 要py文件的文本内容
+ */
+export async function generateTextForPy(
+  wxmlFsPath: FsPath,
+  componentName: ComponentName,
+  wxmlText: FileText,
+): Promise<string> {
+  // htmlparser2解析能力符合小程序wxml的书写方式。
+  const wxmlDocument = htmlparser2.parseDocument(wxmlText, {
     xmlMode: true,
     withStartIndices: true,
     withEndIndices: true,
   });
   // 构建需要验证的标签列表，包含标签的层级关系和位置信息等
-  const shouldValidateList = buildShouldValidateList({
+  const shouldValidateTagList = buildShouldValidateList({
     childNodes: wxmlDocument.childNodes,
     isRootBlock: true,
     isRootElement: true,
     scopeType: [],
-    result: [],
+    tagInfoList: [],
   });
   // 构建测试文件的内容
-  const context = getBaseContent(dirName);
+  const context = getBaseContent(componentName);
   const getComopnentInfo = [
-    `${indent}def getComponentInfo(self) -> ${capitalize(dirName)}ComponentInfo:`,
+    `${indent}def getComponentInfo(self) -> ${capitalize(componentName)}ComponentInfo:`,
     `${indent}${indent}return {`,
     `${indent}${indent}}`,
   ];
@@ -136,15 +147,15 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
   // 记录各个字段信息的获取方法和参数,便于assertComponentInfo中调用 [string,string]中第一个是方法名,第二个是参数字符串
   const methodsRecord: MethodsRecord = {};
   // 遍历shouldValidateList，处理每个标签
-  for (const tagInfo of shouldValidateList) {
+  for (const tagInfo of shouldValidateTagList) {
     const { element: { tagName } } = tagInfo;
     if (isCustomTag(tagName)) {
       //  得到自定义组件的组件名和根元素标签名。
-      const [customCompName, rootElementTagName] = await getCustomCompNameAndRootElementTageName(fsPath, tagName);
+      const [customCompName, rootElementTagName] = await getCustomCompNameAndRootElementTageName(wxmlFsPath, tagName);
       handleCustomTag(tagInfo, context, customComponents, customCompName, rootElementTagName, methodsRecord);
     } else {
       // 处理原生标签的属性和事件，生成组件信息和测试方法
-      handleNativeTag(dirName, tagInfo, context, getComopnentInfo, methodsRecord);
+      handleNativeTag(componentName, tagInfo, context, getComopnentInfo, methodsRecord);
     }
   }
 
@@ -174,7 +185,7 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
     context.testClass.push(
       `${indent}def assertComponentInfo(`,
       `${indent}${indent}self,`,
-      `${indent}${indent}expectedInfo: Partial${capitalize(dirName)}ComponentInfo,`,
+      `${indent}${indent}expectedInfo: Partial${capitalize(componentName)}ComponentInfo,`,
       `${indent}${indent}diffConfig: DiffConfig | None = None,`,
       `${indent}) -> None:`,
       `${indent}${indent}methods_record = self.methodsRecord()`,
@@ -202,7 +213,7 @@ export async function generateTestFileContent(fsPath: FsPath, dirName: FileName,
     context.testClass.push(
       `${indent}def assertComponentInfo(`,
       `${indent}${indent}self,`,
-      `${indent}${indent}expectedInfo: Partial${capitalize(dirName)}ComponentInfo,`,
+      `${indent}${indent}expectedInfo: Partial${capitalize(componentName)}ComponentInfo,`,
       `${indent}${indent}diffConfig: DiffConfig | None = None,`,
       `${indent}) -> None:`,
       `${indent}${indent}methods_record = self.methodsRecord()`,

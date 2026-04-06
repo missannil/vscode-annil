@@ -1,4 +1,4 @@
-import type { Attrib, BaseContent, FileName, MethodsRecord, ScopeType, TagInfo } from "./types";
+import type { Attrib, BaseContent, ComponentName, MethodsRecord, ScopeType, TagInfo } from "./types";
 import {
   capitalize,
   indent,
@@ -152,7 +152,7 @@ function handleEventAttribForNonRootElement(
 }
 
 function appendInnerTextHandling(
-  fileName: FileName,
+  fileName: ComponentName,
   isRoot: boolean,
   scopeType: ScopeType[],
   elementId: string,
@@ -231,7 +231,7 @@ function appendInnerTextHandling(
 }
 
 export function handleNativeTag(
-  fileName: FileName,
+  fileName: ComponentName,
   tagInfo: TagInfo,
   context: BaseContent,
   getComopnentInfo: string[],
@@ -242,6 +242,7 @@ export function handleNativeTag(
   const tagName = element.tagName;
   const validAttribs = (Object.keys(element.attribs) as Attrib[]).filter(isValidAttrib);
   if (isRoot) {
+    // 根元素不加入获取元素的方法
     void 0;
   } else if (isLoopElement(scopeType)) {
     context.testClass.push(

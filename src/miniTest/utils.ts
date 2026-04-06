@@ -32,7 +32,7 @@ export function isBlockTag(tagName: string): boolean {
   return tagName === "block";
 }
 
-export function isConditional(element: Domhandler.Element): boolean {
+export function isConditionalBlock(element: Domhandler.Element): boolean {
   const attribs = ["wx:if", "wx:elif", "wx:else"];
 
   return attribs.some(attrib => element.attribs[attrib] !== undefined);
