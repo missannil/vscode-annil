@@ -26,14 +26,9 @@ export function getBaseContent(fileName: ComponentName): BaseContent {
     ],
     testClass: [
       `class ${capitalize(fileName)}Component(Common):`,
-      `${indent}def __init__(self, rootElement: BaseElement = None) -> None:`,
+      `${indent}def __init__(self, rootElement: BaseElement) -> None:`,
       `${indent}${indent}super().__init__()`,
-      `${indent}${indent}if rootElement is not None:`,
-      `${indent}${indent}${indent}self.rootElement = rootElement`,
-      `${indent}${indent}else:`,
-      `${indent}${indent}${indent}self.rootElement = cast(`,
-      `${indent}${indent}${indent}${indent}BaseElement, self.page.get_element("view[id$='page']")`,
-      `${indent}${indent}${indent})`,
+      `${indent}${indent}self.rootElement = rootElement`,
     ],
   };
 }
