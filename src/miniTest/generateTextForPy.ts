@@ -57,7 +57,7 @@ async function getCustomCompNameAndRootElementTageName(
   wxmlFsPath: FsPath,
   cusTomCompTagName: string,
 ): Promise<CustomCompNameAndRootElementTageName> {
-  const res: CustomCompNameAndRootElementTageName = ["未知组件名", "未知标签名"];
+  const res: CustomCompNameAndRootElementTageName = ["未知组件名", "自定义组件"];
   try {
     // 找到当前文件同目录下的json文件，从自定义组件路径分析出自定义组件名
     const jsonFilePath = wxmlFsPath.replace(/\.wxml$/, ".json");
@@ -146,6 +146,8 @@ export async function generateTextForPy(
   ];
   // 记录各个字段信息的获取方法和参数,便于assertComponentInfo中调用 [string,string]中第一个是方法名,第二个是参数字符串
   const methodsRecord: MethodsRecord = {};
+  // 记录获取组件信息方法的字符串，元祖0是组件名，元祖1是加入到context中的索引位置,便于后续修改。
+  // const getElementMethodStrRecord: [string, number][] = [];
   // 遍历shouldValidateList，处理每个标签
   for (const tagInfo of shouldValidateTagList) {
     const { element: { tagName } } = tagInfo;

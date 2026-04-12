@@ -1,4 +1,5 @@
 import { type Domhandler } from "../publicModule";
+import { logWarn } from "../utils/logger";
 import type { ShouldValidateListParams, TagInfo } from "./types";
 import {
   hasInnerText,
@@ -64,6 +65,7 @@ export function buildShouldValidateList(params: ShouldValidateListParams): TagIn
     }
     // 4. 其他元素节点根据条件决定是否生成TagInfo,第一次isRootElement为true,之后都为false
     if (isCustomTag(childNode.name)) {
+      logWarn(`[miniTest] 发现自定义组件标签: ${childNode.name}, ${params.isRootElement ? "根元素" : "非根元素"}`);
       tagInfoList.push(
         {
           isRoot: params.isRootElement,

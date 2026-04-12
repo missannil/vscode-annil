@@ -9,8 +9,9 @@ export function handleCustomTag(
   realCustomCompName: string,
   rootElementTagName: string,
   methodsRecord: MethodsRecord,
+  // getElementMethodStrRecord: [string, number][],
 ): void {
-  const { scopeType } = tagInfo;
+  const { scopeType, isRoot } = tagInfo;
   const hasImport = context.importPart.includes(
     `from miniTest.components.${realCustomCompName} import ${capitalize(realCustomCompName)}Component, ${
       capitalize(realCustomCompName)
@@ -83,86 +84,87 @@ export function handleCustomTag(
       `${indent}${indent}"${customCompName}": Partial${capitalize(realCustomCompName)}ComponentInfo,`,
     );
   }
-  // 4. 在测试类中添加获取组件信息的方法
+  // 4. 在测试类中添加获取组件和组件信息的方法
+  // 获取元素组件方法的第一行字符串。
+  const getComponentMethodFirstStr = `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
+    capitalize(realCustomCompName)
+  }Component:`;
+  const isExistMethodStr = context.testClass.some((line) => line.includes(getComponentMethodFirstStr));
+
   if (isConditionalElement(scopeType)) {
-    const methodStr = `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
-      capitalize(realCustomCompName)
-    }Component | None:`;
-    const hasGetComponentMethod = context.testClass.some((line) => line.includes(methodStr));
-    if (!hasGetComponentMethod) {
+    // 没有获取元素组件方法时,才添加获取元素组件方法,避免重复添加
+    if (!isExistMethodStr) {
       context.testClass.push(
-        // 条件元素 加入获取元素方法 有可能获取到None
-        methodStr,
-        `${indent}${indent}try:`,
-        `${indent}${indent}${indent}element = self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`,
-        `${indent}${indent}${indent}return ${capitalize(realCustomCompName)}Component(element)`,
-        `${indent}${indent}except Exception:`,
-        `${indent}${indent}${indent}return None`,
+        // 加入获取元素组件方法
+        getComponentMethodFirstStr,
+        `${indent}${indent}element = ${
+          isRoot ? "self.rootElement" : `self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`
+        }`,
+        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(element)`,
       );
     }
+    // 加入获取元素组件信息方法
     context.testClass.push(
-      // 加入获取元素信息方法 有可能获取到None
       `${indent}def get${capitalize(customCompName)}ComponentInfo(self, cid: str) -> ${
         capitalize(realCustomCompName)
       }ComponentInfo | None:`,
-      `${indent}${indent}element = self.get${capitalize(realCustomCompName)}Component(cid)`,
-      `${indent}${indent}return element.getComponentInfo() if element else None`,
+      `${indent}${indent}try:`,
+      `${indent}${indent}${indent}elementComp = self.get${capitalize(realCustomCompName)}Component(cid)`,
+      `${indent}${indent}${indent}return elementComp.getComponentInfo()`,
+      `${indent}${indent}except Exception:`,
+      `${indent}${indent}${indent}return None`,
     );
   } else if (isLoopElement(scopeType)) {
-    const methodStr = `${indent}def get${capitalize(realCustomCompName)}ComponentList(self, cid: str) -> List[${
+    //
+    const getComponentListMethodFirstStr = `${indent}def get${
       capitalize(realCustomCompName)
-    }Component]:`;
-    const hasMethod = context.testClass.some((line) => line.includes(methodStr));
-    if (!hasMethod) {
+    }ComponentList(self, cid: str) -> List[${capitalize(realCustomCompName)}Component]:`;
+    const isExistListMethodStr = context.testClass.some((line) => line.includes(getComponentListMethodFirstStr));
+    // 没有获取元素组件列表方法时,才添加获取元素组件列表方法,避免重复添加
+    if (!isExistListMethodStr) {
       context.testClass.push(
-        // 循环元素 加入获取元素列表方法 可能获取到空列表
-        methodStr,
-        `${indent}${indent}return [`,
-        `${indent}${indent}${indent}${capitalize(realCustomCompName)}Component(element)`,
-        `${indent}${indent}${indent}for element in self.rootElement.get_elements(f"${rootElementTagName}[id$='{cid}']")`,
-        `${indent}${indent}]`,
+        // 加入获取元素组件列表方法
+        getComponentListMethodFirstStr,
+        `${indent}${indent}try:`,
+        `${indent}${indent}${indent}elements = self.rootElement.get_elements(f"${rootElementTagName}[id$='{cid}']")`,
+        `${indent}${indent}${indent}return [${
+          capitalize(realCustomCompName)
+        }Component(element) for element in elements]`,
+        `${indent}${indent}except Exception:`,
+        `${indent}${indent}${indent}return []`,
       );
     }
     context.testClass.push(
-      // 加入获取元素信息列表方法 可能获取到空列表
+      // 加入获取元素组件信息列表方法 可能获取到空列表
       `${indent}def get${capitalize(customCompName)}ComponentInfoList(self, cid: str) -> List[${
         capitalize(realCustomCompName)
-      }ComponentInfo]:`,
-      `${indent}${indent}return [element.getComponentInfo() for element in self.get${
+      }ComponentInfo]: `,
+      `${indent}${indent} return [element.getComponentInfo() for element in self.get${
         capitalize(realCustomCompName)
       }ComponentList(cid)]`,
     );
   } else {
-    // 普通元素
-    const methodStr = `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
-      capitalize(realCustomCompName)
-    }Component | None:`;
-    const hasGetComponentMethod = context.testClass.some(
-      // 为了避免还有相同的自定义组件(有可能是条件元素),所以这里直接定义一个获取返回None的方法,这样避免重复定义。但不是条件的组件要强制返回非None类型。
-      (line) => line.includes(methodStr),
-    );
-    if (!hasGetComponentMethod) {
+    // 没有获取元素组件方法时,才添加获取元素组件方法,避免重复添加
+    if (!isExistMethodStr) {
       context.testClass.push(
-        // 加入获取元素方法
-        methodStr,
-        `${indent}${indent}try:`,
-        `${indent}${indent}${indent}element = self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`,
-        `${indent}${indent}${indent}return ${capitalize(realCustomCompName)}Component(element)`,
-        `${indent}${indent}except Exception:`,
-        `${indent}${indent}${indent}return None`,
+        // 加入获取元素组件方法
+        getComponentMethodFirstStr,
+        `${indent}${indent}element = ${
+          isRoot ? "self.rootElement" : `self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`
+        }`,
+        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(element)`,
       );
     }
+    // 加入获取元素组件信息方法
     context.testClass.push(
-      // 加入获取元素信息方法
+      // 加入获取元素组件信息方法
       `${indent}def get${capitalize(customCompName)}ComponentInfo(self, cid: str) -> ${
         capitalize(realCustomCompName)
-      }ComponentInfo:`,
-      // 强制返回非None类型 因为不是条件元素
-      `${indent}${indent}return cast(${capitalize(realCustomCompName)}Component, self.get${
-        capitalize(realCustomCompName)
-      }Component(cid)).getComponentInfo()`,
+      }ComponentInfo: `,
+      `${indent}${indent} return  self.get${capitalize(realCustomCompName)}Component(cid).getComponentInfo()`,
     );
   }
+
   // 5.在getComponentInfo方法中添加调用获取组件信息的方法并将结果添加到组件信息字典中
   const customCid = tagInfo.element.attribs["cid"] || realCustomCompName;
   if (isConditionalElement(scopeType)) {
@@ -172,7 +174,7 @@ export function handleCustomTag(
     customComponents.splice(
       -1,
       0,
-      `${indent}${indent}${indent}${indent}"${customCompName}": self.${methodStr}(cid="${customCid}"),`,
+      `${indent}${indent}${indent}${indent} "${customCompName}": self.${methodStr} (cid = "${customCid}"), `,
     );
   } else if (isLoopElement(scopeType)) {
     const methodStr = `get${capitalize(customCompName)}ComponentInfoList`;
@@ -181,7 +183,7 @@ export function handleCustomTag(
     customComponents.splice(
       -1,
       0,
-      `${indent}${indent}${indent}${indent}"${customCompName}": self.${methodStr}(cid="${customCid}"),`,
+      `${indent}${indent}${indent}${indent} "${customCompName}": self.${methodStr} (cid = "${customCid}"), `,
     );
   } else {
     const methodStr = `get${capitalize(customCompName)}ComponentInfo`;
@@ -190,7 +192,7 @@ export function handleCustomTag(
     customComponents.splice(
       -1,
       0,
-      `${indent}${indent}${indent}${indent}"${customCompName}": self.${methodStr}(cid="${customCid}"),`,
+      `${indent}${indent}${indent}${indent} "${customCompName}": self.${methodStr} (cid = "${customCid}"), `,
     );
   }
 }
