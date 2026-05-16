@@ -85,22 +85,32 @@ export function handleCustomTag(
     );
   }
   // 4. 在测试类中添加获取组件和组件信息的方法
+  // 获取元素根节点方法的第一行字符串。
+  const getRootMethodFirstStr = `${indent}def get${capitalize(realCustomCompName)}Root(self, cid: str) -> BaseElement:`;
   // 获取元素组件方法的第一行字符串。
   const getComponentMethodFirstStr = `${indent}def get${capitalize(realCustomCompName)}Component(self, cid: str) -> ${
     capitalize(realCustomCompName)
   }Component:`;
+  const isExistRootMethodStr = context.testClass.some((line) => line.includes(getRootMethodFirstStr));
   const isExistMethodStr = context.testClass.some((line) => line.includes(getComponentMethodFirstStr));
 
   if (isConditionalElement(scopeType)) {
+    // 没有获取元素根节点方法时,才添加获取元素根节点方法,避免重复添加
+    if (!isExistRootMethodStr) {
+      context.testClass.push(
+        getRootMethodFirstStr,
+        `${indent}${indent}return ${
+          isRoot ? "self.rootElement" : `self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`
+        }`,
+      );
+    }
     // 没有获取元素组件方法时,才添加获取元素组件方法,避免重复添加
     if (!isExistMethodStr) {
       context.testClass.push(
-        // 加入获取元素组件方法
         getComponentMethodFirstStr,
-        `${indent}${indent}element = ${
-          isRoot ? "self.rootElement" : `self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`
-        }`,
-        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(element)`,
+        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(self.get${
+          capitalize(realCustomCompName)
+        }Root(cid))`,
       );
     }
     // 加入获取元素组件信息方法
@@ -115,27 +125,35 @@ export function handleCustomTag(
       `${indent}${indent}${indent}return None`,
     );
   } else if (isLoopElement(scopeType)) {
-    //
-    const getComponentListMethodFirstStr = `${indent}def get${
+    // 没有获取元素根节点列表方法时,才添加获取元素根节点列表方法,避免重复添加
+    const getRootListMethodFirstStr = `${indent}def get${
       capitalize(realCustomCompName)
-    }ComponentList(self, cid: str) -> List[${capitalize(realCustomCompName)}Component]:`;
-    const isExistListMethodStr = context.testClass.some((line) => line.includes(getComponentListMethodFirstStr));
-    // 没有获取元素组件列表方法时,才添加获取元素组件列表方法,避免重复添加
-    if (!isExistListMethodStr) {
+    }RootList(self, cid: str) -> List[BaseElement]:`;
+    const isExistRootListMethodStr = context.testClass.some((line) => line.includes(getRootListMethodFirstStr));
+    if (!isExistRootListMethodStr) {
       context.testClass.push(
-        // 加入获取元素组件列表方法
-        getComponentListMethodFirstStr,
+        getRootListMethodFirstStr,
         `${indent}${indent}try:`,
-        `${indent}${indent}${indent}elements = self.rootElement.get_elements(f"${rootElementTagName}[id$='{cid}']")`,
-        `${indent}${indent}${indent}return [${
-          capitalize(realCustomCompName)
-        }Component(element) for element in elements]`,
+        `${indent}${indent}${indent}return self.rootElement.get_elements(f"${rootElementTagName}[id$='{cid}']")`,
         `${indent}${indent}except Exception:`,
         `${indent}${indent}${indent}return []`,
       );
     }
+
+    // 没有获取元素组件列表方法时,才添加获取元素组件列表方法,避免重复添加
+    const getComponentListMethodFirstStr = `${indent}def get${
+      capitalize(realCustomCompName)
+    }ComponentList(self, cid: str) -> List[${capitalize(realCustomCompName)}Component]:`;
+    const isExistListMethodStr = context.testClass.some((line) => line.includes(getComponentListMethodFirstStr));
+    if (!isExistListMethodStr) {
+      context.testClass.push(
+        getComponentListMethodFirstStr,
+        `${indent}${indent}return [${capitalize(realCustomCompName)}Component(element) for element in self.get${
+          capitalize(realCustomCompName)
+        }RootList(cid)]`,
+      );
+    }
     context.testClass.push(
-      // 加入获取元素组件信息列表方法 可能获取到空列表
       `${indent}def get${capitalize(customCompName)}ComponentInfoList(self, cid: str) -> List[${
         capitalize(realCustomCompName)
       }ComponentInfo]: `,
@@ -144,15 +162,22 @@ export function handleCustomTag(
       }ComponentList(cid)]`,
     );
   } else {
+    // 没有获取元素根节点方法时,才添加获取元素根节点方法,避免重复添加
+    if (!isExistRootMethodStr) {
+      context.testClass.push(
+        getRootMethodFirstStr,
+        `${indent}${indent}return ${
+          isRoot ? "self.rootElement" : `self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`
+        }`,
+      );
+    }
     // 没有获取元素组件方法时,才添加获取元素组件方法,避免重复添加
     if (!isExistMethodStr) {
       context.testClass.push(
-        // 加入获取元素组件方法
         getComponentMethodFirstStr,
-        `${indent}${indent}element = ${
-          isRoot ? "self.rootElement" : `self.rootElement.get_element(f"${rootElementTagName}[id$='{cid}']")`
-        }`,
-        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(element)`,
+        `${indent}${indent}return ${capitalize(realCustomCompName)}Component(self.get${
+          capitalize(realCustomCompName)
+        }Root(cid))`,
       );
     }
     // 加入获取元素组件信息方法

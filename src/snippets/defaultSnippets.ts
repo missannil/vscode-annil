@@ -48,7 +48,27 @@ export const defaultSnippets: DefaultSnippets = {
         "export type $$2 = {}",
         "typeEqual<$$2, typeof $1>();",
       ],
-      "description": "Annil comp default snippet",
+      "description": "Annil component default snippet",
+    },
+    "annil-class-default": {
+      "prefix": "annil-class-default",
+      "body": [
+        "import { typeEqual } from \"annil\";",
+        "import type { ComputeObject } from \"annil/src/types/ComputeObject\";",
+        "",
+        "type I${1/(.*)/${1:/pascalcase}/} = {",
+        "\t$2",
+        "}",
+        "",
+        "export class ${1/(.*)/${1:/pascalcase}/} implements I${1/(.*)/${1:/pascalcase}/} {",
+        "\t$3",
+        "}",
+        "",
+        "export const ${1/(.*)/${1:/camelcase}/} = new ${1/(.*)/${1:/pascalcase}/}();",
+        "",
+        "typeEqual<I${1/(.*)/${1:/pascalcase}/}, ComputeObject<${1/(.*)/${1:/pascalcase}/}>>();",
+      ],
+      "description": "Annil class template with auto PascalCase/CamelCase transforms",
     },
     "annil-page-default": {
       "prefix": "annil-page-default",
@@ -83,7 +103,7 @@ export const defaultSnippets: DefaultSnippets = {
         " ",
         "</block>",
       ],
-      "description": "Annil comp default snippet",
+      "description": "Annil component default snippet",
     },
     "annil-page-default": {
       "prefix": "annil-page-default",
@@ -99,7 +119,7 @@ export const defaultSnippets: DefaultSnippets = {
     "annil-component-default": {
       "prefix": "annil-comp-wxss-default",
       "body": [], // 改成空数组，而不是包含空字符串的数组
-      "description": "Annil comp default snippet",
+      "description": "Annil component default snippet",
     },
     "annil-page-default": {
       "prefix": "annil-page-wxss-default",
