@@ -1,32 +1,35 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "es2024",
     "lib": [
-      "ES2022"
+      "ESNext"
     ],
     "removeComments": true,
-    "module": "CommonJS",
-    // "noEmit": true,
-    // "sourceMap": true,
-    "skipDefaultLibCheck": true,
-    "declaration": true,
-    "esModuleInterop": true, // 默认false. 兼容非ES模块引用的写法(如 import fs from 'fs').
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "module": "NodeNext", // node16+ 支持 ES 模块，tsconfig 中设置 module 为 NodeNext 或 Node16 可以启用对 ES 模块的支持,要求导入路径必须包含文件扩展名
+    "moduleResolution": "NodeNext", // NodeNext 模块解析策略，与module: NodeNext 配合使用，支持 ES 模块的解析
+    "resolveJsonModule": true, // 允许导入 JSON 文件作为模块
+    "skipLibCheck": true, // 跳过库文件的类型检查，可以加快编译速度，尤其是在大型项目中
     "exactOptionalPropertyTypes": true, // 带有?标志的属性类型不再包含undefined类型
-    "strict": true, /* enable all strict type-checking options */
-    "types": [
+    "strict": true, // 启用所有严格类型检查选项
+    "noEmit": true, // 只做类型检查，不输出文件,解决include中包含了js文件时,报错的问题(tsc时会认为编译会重写了js文件,导致报错提示)
+    "checkJs": true, // 启用对 include中包含的 .js 文件的类型检查 相当于在js文件中使用了//@ts-check注释
+    "types": [ // 指定要包含的类型声明文件，通常用于引入第三方库的类型定义
       "hry-types",
       "node",
-      "miniprogram-api-typings",
       "mobx",
       "vscode",
-      "domhandler",
-      "jsonc-parser"
-    ]
+      // "jsonc-parser"
+    ],
   },
   "include": [
-    "src/**/*.ts"
-    // "test/**/*.ts"
+    "_src/**/*.ts",
+    "esbuild.config.js", // 为了让esbuild.config.js文件也能被tsc检查类型,不然会报错,但如果不配置noEmit: true,tsc会编译esbuild.config.js文件,导致报错提示
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src",
+    "out",
+    "test"
   ]
 }

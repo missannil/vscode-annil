@@ -16,4 +16,3 @@ tsconfig-src.json
 **/*.map
 **/*.ts
 **/.vscode-test.*
-node_modules/**

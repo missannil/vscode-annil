@@ -3,9 +3,9 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.10.19",
+  "version": "0.10.20",
   "engines": {
-    "vscode": "^1.98.2"
+    "vscode": "^1.123.0"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,7 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
+  "type": "module",
   "contributes": {
     "languages": [
       {
@@ -131,7 +132,10 @@
         },
         "annil.generateAttrs": {
           "type": "array",
-          "default": ["class", "style"],
+          "default": [
+            "class",
+            "style"
+          ],
           "items": {
             "type": "string"
           },
@@ -156,39 +160,42 @@
   },
   "scripts": {
     "prepare": "husky",
-    "clean": "rm -rf ./out && find ./src ./test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
-    "compile": "rollup -c",
-    "vscode:prepublish": " npm run clean && npm run compile",
+    "clean": "rm -rf ./out && find ./src ./_src ./test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
+    "compile": "node esbuild.config.js",
+    "vscode:prepublish": "npm run clean && npm run compile",
     "vsix": "vsce package",
     "publish": "vsce publish",
     "fmt": "dprint fmt",
     "lint": "eslint . --max-warnings 0",
-    "dev": "npm run clean &&  tsc -w -p ./tsconfig-src.json & tsc -w -p ./test/tsconfig.json ",
-    "check": "tsc -p tsconfig.json  &&  eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
+    "dev": "node esbuild.config.js --watch & tsc -w --noEmit",
+    "check": "tsc &&  eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@types/babel__traverse": "^7.20.5",
-    "@types/node": "^20.11.10",
-    "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
-    "@vscode/test-cli": "^0.0.10",
-    "annil": "^1.12.0-alpha.7",
-    "eslint": "^8.56.0",
-    "hry-types": "^0.19.2",
+    "@types/babel__traverse": "^7.28.0",
+    "@types/node": "^24.13.2",
+    "@types/vscode": "^1.98.0",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/parser": "^8.61.1",
+    "@vscode/test-cli": "^0.0.12",
+    "annil": "^1.16.0",
+    "dprint": "^0.54.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "globals": "^16.5.0",
+    "hry-types": "^0.19.3",
     "husky": "^9.1.7",
-    "mobx": "^6.13.1",
-    "rollup-plugin-typescript2": "^0.36.0",
+    "miniprogram-api-typings": "^3.12.3",
+    "mobx": "^6.16.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
   },
   "dependencies": {
-    "@babel/parser": "^7.23.6",
-    "@babel/traverse": "^7.24.1",
-    "htmlparser2": "^9.1.0",
+    "@babel/parser": "^7.29.7",
+    "@babel/traverse": "^7.29.7",
+    "domhandler": "^6.0.1",
+    "htmlparser2": "^12.0.0",
     "jsonc-parser": "^3.3.1"
-  }
+  },
+  "packageManager": "pnpm@11.8.0+sha512.c1f5e7c4cb241c8f174b743851d82f42b802324afc8b0f116b96adb15aa06664948dde36960a3ba1079ba5b4b29dd0140135b94b5b5f5263592249d68e555f26"
 }
