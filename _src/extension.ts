@@ -16,9 +16,11 @@ import { linter } from "./linter/index.js";
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
-  console.log("Annil 插件已激活222");
+  console.log("Annil 插件已激活");
   configuration.init(context);
   linter.init(context);
 }
 
-// export function deactivate(): void {}
+export function deactivate(): void {
+  linter.dispose();
+}

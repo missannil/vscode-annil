@@ -177,7 +177,7 @@
     "vsix": "vsce package",
     "publish": "vsce publish",
     "fmt": "dprint fmt",
-    "predev": "mkdir -p out && printf 'export { activate } from \"./_src/extension.js\";\\n' > out/extension.js",
+    "predev": "mkdir -p out && printf 'export { activate, deactivate } from \"./_src/extension.js\";\\n' > out/extension.js",
     "dev": "tsc --watch",
     "check": "tsc --noEmit &&  eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
   },

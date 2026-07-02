@@ -5,7 +5,20 @@
   "tasks": [
     {
       "type": "npm",
+      "script": "clean",
+      "label": "clean",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never",
+        "clear": true
+      },
+      "group": "build"
+    },
+    {
+      "type": "npm",
       "script": "dev",
+      "label": "dev",
+      "dependsOn": ["clean"],
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "presentation": {
