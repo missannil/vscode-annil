@@ -1,22 +1,18 @@
 
-import * as esbuild from "esbuild";
-import process from "node:process";
+//@ts-check
+// 生产发布专用：将扩展打包为单一 bundle
+import * as esbuild from 'esbuild';
 
-const isWatch = process.argv.includes("--watch");
-/** @type {Readonly<esbuild.BuildOptions>} */
-const options = {
-  entryPoints: ["./_src/extension.ts"],
-  outfile: "./out/extension.js",
+await esbuild.build({
+  entryPoints: ['./_src/extension.ts'],
+  outfile: './out/extension.js',
   bundle: true,
-  platform: "node",
-  format: "esm",
-  packages: "external",
-}
+  platform: 'node',
+  format: 'esm',
+  packages: 'external',
+  alias: {
+    '#deps': './_src/utils/deps.ts',
+  },
+});
 
-if (isWatch) {
-  const ctx = await esbuild.context(options);
-  await ctx.watch();
-  console.log("[esbuild] 正在监听 _src/ 变化...");
-} else {
-  await esbuild.build(options);
-}
+console.log('[esbuild] 生产打包完成 → out/extension.js');

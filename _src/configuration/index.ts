@@ -1,4 +1,4 @@
-import * as vscode from "vscode";
+import { vscode } from "#deps";
 /**
  * 插件配置模块
  */
@@ -13,7 +13,7 @@ class Configuration {
     return this.#validDatas;
   }
   public updateValidDatas(): void {
-    this.#validDatas = vscode.workspace.getConfiguration("annil").get("validDatas") || [];
+    this.#validDatas = vscode.workspace.getConfiguration("annil").get("validDatas") ?? [];
   }
   public get ignoreTags(): string[] {
     return this.#ignoreTags;
@@ -23,18 +23,18 @@ class Configuration {
   }
   #allowUnknownAttributes!: string[];
   private updateIgnoreFields(): void {
-    this.#userIgnoreFields = vscode.workspace.getConfiguration("annil").get("ignoreFields") || [];
+    this.#userIgnoreFields = vscode.workspace.getConfiguration("annil").get("ignoreFields") ?? [];
     this.#ignoreFields = [...this.#defualtIgnoreFields, ...this.#userIgnoreFields];
   }
   private updateIgnoreTags(): void {
-    this.#ignoreTags = vscode.workspace.getConfiguration("annil").get<string[]>("ignoreTags") || [];
+    this.#ignoreTags = vscode.workspace.getConfiguration("annil").get<string[]>("ignoreTags") ?? [];
   }
   private updateInnerDataPrefix(): void {
-    this.#innerDataPrefix = vscode.workspace.getConfiguration("annil").get<string>("innerDataPrefix") || "_";
+    this.#innerDataPrefix = vscode.workspace.getConfiguration("annil").get<string>("innerDataPrefix") ?? "_";
   }
   private updateAllowUnknownAttributes(): void {
     try {
-      const configValue = vscode.workspace.getConfiguration("annil").get<string[]>("allowUnknownAttributes");
+      const configValue = vscode.workspace.getConfiguration("annil").get<string[]>("allowUnknownAttributes") ?? [];
       // 如果配置值存在且是数组，则使用该值；否则使用默认值
       this.#allowUnknownAttributes = Array.isArray(configValue) && configValue.length > 0
         ? configValue

@@ -1,4 +1,4 @@
-import { DefineComponent, type DetailedType, RootComponent } from "annil";
+import { type BubblesComposed, DefineComponent, type DetailedType, RootComponent, typeEqual } from "annil";
 
 export type User = {
   cid?: string;
@@ -37,4 +37,15 @@ const subA = DefineComponent({
   rootComponent,
 });
 
-export type $SubA = typeof subA;
+export type $SubA = {
+  properties: {
+    subA_cid?: string;
+    subA_numA?: number;
+    subA_userList?: User[];
+  };
+  events: {
+    subA_onTap: string;
+    subA_eventA: string | BubblesComposed;
+  };
+};
+typeEqual<$SubA>()(subA);

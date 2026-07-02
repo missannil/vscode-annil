@@ -39,3 +39,10 @@ VS Code 核心代码迁移到 ESM：v1.94 版本（2024年9月）
 ## 关于 dprint
 
 - dprint 支持 npm 包（不是 Deno 专属），被 pnpm 正常管理
+
+## 测试
+
+开发模式下 `npm run dev` 运行 `tsc --watch` 编译 TS 源码到 `out/` 目录，然后在 VS Code 中 F5 运行调试。
+
+- Run Annil (调试) -> 不运行测试 不会自动关闭host
+- Run Annil Tests (调试) -> 运行测试 运行完会关闭host

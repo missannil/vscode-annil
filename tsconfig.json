@@ -11,19 +11,24 @@
     "skipLibCheck": true, // 跳过库文件的类型检查，可以加快编译速度，尤其是在大型项目中
     "exactOptionalPropertyTypes": true, // 带有?标志的属性类型不再包含undefined类型
     "strict": true, // 启用所有严格类型检查选项
-    "noEmit": true, // 只做类型检查，不输出文件,解决include中包含了js文件时,报错的问题(tsc时会认为编译会重写了js文件,导致报错提示)
+    "outDir": "./out", // 输出目录
+    "rootDir": ".", // 保持原目录结构
+    "sourceMap": true, // 方便 F5 调试
     "checkJs": true, // 启用对 include中包含的 .js 文件的类型检查 相当于在js文件中使用了//@ts-check注释
     "types": [ // 指定要包含的类型声明文件，通常用于引入第三方库的类型定义
       "hry-types",
       "node",
       "mobx",
       "vscode",
+      "annil",
+      "miniprogram-api-typings",
+      "mocha", // ← 测试用
       // "jsonc-parser"
     ],
   },
   "include": [
     "_src/**/*.ts",
-    "esbuild.config.js", // 为了让esbuild.config.js文件也能被tsc检查类型,不然会报错,但如果不配置noEmit: true,tsc会编译esbuild.config.js文件,导致报错提示
+    "_test/**/*.ts"
   ],
   "exclude": [
     "node_modules",

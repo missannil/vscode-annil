@@ -14,9 +14,10 @@ const subD = DefineComponent({
   rootComponent,
   subComponents: [],
 });
+
 export type $SubD = {
   properties: {
     subD_str: string;
   };
 };
-typeEqual<$SubD, typeof subD>();
+typeEqual<$SubD>()(subD);

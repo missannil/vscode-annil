@@ -32,8 +32,8 @@ export class CheckContext extends CommentManager {
     return this.#tsFileInfo;
   }
   // 忽略的字段
-  public get ignoreFeilds(): string[] {
-    return configuration.ignoreFeilds;
+  public get ignoreFields(): string[] {
+    return configuration.ignoreFields;
   }
   public get ignoreTags(): string[] {
     return configuration.ignoreTags;
@@ -140,7 +140,7 @@ export class CheckContext extends CommentManager {
   }
 
   public isIgnoreAttr(rawAttrName: string): boolean {
-    return rawAttrName.startsWith("data-") || this.ignoreFeilds.includes(rawAttrName);
+    return rawAttrName.startsWith("data-") || this.ignoreFields.includes(rawAttrName);
   }
 
   // 待检测的条件元素信息

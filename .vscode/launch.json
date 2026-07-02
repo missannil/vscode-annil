@@ -6,11 +6,24 @@
   "version": "0.7.8",
   "configurations": [
     {
-      "name": "Run Annil",
+      "name": "Run Annil (调试)",
       "type": "extensionHost",
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ],
+      "preLaunchTask": "${defaultBuildTask}"
+    },
+    {
+      "name": "Run Annil Tests",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionTestsPath=${workspaceFolder}/out/_test/index.js"
       ],
       "outFiles": [
         "${workspaceFolder}/out/**/*.js"

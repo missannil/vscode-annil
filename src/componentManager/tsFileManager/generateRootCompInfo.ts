@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import type { ArrowFunctionExpression, ObjectMethod } from "@babel/types";
+import { configuration } from "../../configuration/index.js";
 import {
   isArrayTypeFunction,
   isArrayTypeOfPropertiesFields,
@@ -15,6 +16,7 @@ import type { RootComponentInfo } from "./types";
 const rootComponentExtractedFields = ["properties", "data", "computed", "store", "events", "customEvents"];
 
 export function generateRootComponentInfo(expression: any): RootComponentInfo {
+  const innerPrefix = configuration.innerDataPrefix;
   const rootComponentInfo: RootComponentInfo = {
     arrTypeDatas: [],
     boolTypeDatas: [],
@@ -31,8 +33,8 @@ export function generateRootComponentInfo(expression: any): RootComponentInfo {
         (secondLevelField: any) => {
           // secondLevelFieldName有可能为 properties data computed store events了
           const secondLevelFieldName: string = secondLevelField.key.name;
-          // 如果是以_开头的字段,则不需要处理,这些是定义的内部字段。
-          if (secondLevelFieldName.startsWith("_")) {
+          // 内部字段跳过
+          if (secondLevelFieldName.startsWith(innerPrefix)) {
             return;
           }
           switch (firstLevelAttrName) {

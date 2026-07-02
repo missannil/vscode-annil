@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { configuration } from "../../configuration/index.js";
 import { assertNonNullable } from "../../utils/assertNonNullable";
 
 import { getInheritValue } from "./getInheritValue";
@@ -7,6 +8,7 @@ const customComponentExtractedFields = ["inherit", "data", "computed", "store", 
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types,
 export function generateCustomCompConfigInfo(expression: any): CustomComponentConfigInfo {
+  const innerPrefix = configuration.innerDataPrefix;
   const customCompAttrs: CustomComponentConfigInfo = {};
   // 因为就一个参数,所以直接取第一个 arguments[0]即可,properties为配置对象的第一层配置字段 inherit data store computed watch methods evnets lifetimes等
   expression.arguments[0].properties.forEach(
@@ -19,8 +21,8 @@ export function generateCustomCompConfigInfo(expression: any): CustomComponentCo
         (secondLevelField: any) => {
           // secondLevelFieldName为第二层级的配置字段名
           const secondLevelFieldName = secondLevelField.key.name as string;
-          // 如果是以_开头的字段,则不需要处理,这些是定义的内部字段。
-          if (secondLevelFieldName.startsWith("_")) {
+          // 内部字段跳过
+          if (secondLevelFieldName.startsWith(innerPrefix)) {
             return;
           }
           // 不是以_开头的字段,则需要处理,因为这是要传递给组件的属性

@@ -19,6 +19,12 @@
   ],
   "main": "./out/extension.js",
   "type": "module",
+  "imports": {
+    "#deps": {
+      "types": "./_src/utils/deps.ts",
+      "default": "./out/_src/utils/deps.js"
+    }
+  },
   "contributes": {
     "languages": [
       {
@@ -85,13 +91,18 @@
     "configuration": {
       "title": "annil",
       "properties": {
-        "annil.ignoreFeilds": {
+        "annil.ignoreFields": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "default": [],
           "description": "忽略检查的字段"
+        },
+        "annil.innerDataPrefix": {
+          "type": "string",
+          "default": "_",
+          "description": "内部字段前缀，以该前缀开头的 data/properties/computed/store/events 字段不会被收集（默认 _）"
         },
         "annil.ignoreTags": {
           "type": "array",
@@ -160,23 +171,21 @@
   },
   "scripts": {
     "prepare": "husky",
-    "clean": "rm -rf ./out && find ./src ./_src ./test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
+    "clean": "rm -rf ./out && find ./src ./_src ./_test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
     "compile": "node esbuild.config.js",
     "vscode:prepublish": "npm run clean && npm run compile",
     "vsix": "vsce package",
     "publish": "vsce publish",
     "fmt": "dprint fmt",
-    "lint": "eslint . --max-warnings 0",
-    "dev": "node esbuild.config.js --watch & tsc -w --noEmit",
-    "check": "tsc &&  eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
+    "predev": "mkdir -p out && printf 'export { activate } from \"./_src/extension.js\";\\n' > out/extension.js",
+    "dev": "tsc --watch",
+    "check": "tsc --noEmit &&  eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
   },
   "devDependencies": {
     "@types/babel__traverse": "^7.28.0",
     "@types/node": "^24.13.2",
     "@types/vscode": "^1.98.0",
-    "@typescript-eslint/eslint-plugin": "^8.61.1",
-    "@typescript-eslint/parser": "^8.61.1",
-    "@vscode/test-cli": "^0.0.12",
+    "typescript-eslint": "^8.61.1",
     "annil": "^1.16.0",
     "dprint": "^0.54.0",
     "esbuild": "^0.28.1",
@@ -186,13 +195,13 @@
     "husky": "^9.1.7",
     "miniprogram-api-typings": "^3.12.3",
     "mobx": "^6.16.1",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.1"
+    "mocha": "^10.2.0",
+    "@types/mocha": "^10.0.0"
   },
   "dependencies": {
-    "@babel/parser": "^7.29.7",
-    "@babel/traverse": "^7.29.7",
+    "@babel/parser": "^8.0.0",
+    "@babel/traverse": "^8.0.0",
+    "@babel/types": "^8.0.0",
     "domhandler": "^6.0.1",
     "htmlparser2": "^12.0.0",
     "jsonc-parser": "^3.3.1"

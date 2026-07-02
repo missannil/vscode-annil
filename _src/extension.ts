@@ -1,9 +1,6 @@
-// import { componentManager } from "./componentManager.js";
-// import { configuration } from "./configuration.js";
-// import { diagnosticCollection } from "./diagnosticCollection.js";
-// import { codeActionsProviderManager } from "./diagnosticFixProvider.js";
-
-import { vscode } from "./utils/dependencies.js";
+import { vscode } from "#deps";
+import { configuration } from "./configuration/index.js";
+import { linter } from "./linter/index.js";
 
 // import { rightClickManager } from "./rightClickManager";
 
@@ -14,25 +11,14 @@ import { vscode } from "./utils/dependencies.js";
 // import { initSnippet } from "./snippets";
 // import { initLogger, logInfo } from "../src/utils/logger.js";
 
-const OUTPUT_CHANNEL_NAME = "Annil";
+// const OUTPUT_CHANNEL_NAME = "Annil";
 
 export async function activate(
   context: vscode.ExtensionContext,
 ): Promise<void> {
-  console.log("Annil 插件已激活");
-  const outputChannel = vscode.window.createOutputChannel(OUTPUT_CHANNEL_NAME);
-  context.subscriptions.push(outputChannel);
-  // initLogger(context);
-  // logInfo("Annil extension activated successfully.");
-  //   configuration.init(context);
-  //   diagnosticCollection.init(context);
-  //   componentManager.init();
-  //   codeActionsProviderManager.init(context);
-  //   goToDefinition(context);
-  //   rightClickManager(context);
-  //   initSnippet();
-  //   miniTest(context);
-  //   logInfo("Annil extension activated successfully.");
+  console.log("Annil 插件已激活222");
+  configuration.init(context);
+  linter.init(context);
 }
 
 // export function deactivate(): void {}
