@@ -20,7 +20,6 @@ export const expectedRootComponentInfo = {
     "storeBool",
     "storeList",
     "storeOther",
-    "viewSingleGoods__singleGoods",
   ],
   events: ["eventsOnTap"],
 };

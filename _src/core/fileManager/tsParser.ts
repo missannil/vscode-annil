@@ -13,10 +13,10 @@ class TsParser {
   /**
    * 解析 TS 文件，返回组件信息
    */
-  public async parse(uri: vscode.Uri): Promise<TraverseAstResult> {
+  public async tsParse(uri: vscode.Uri): Promise<TraverseAstResult> {
     const fsPath = uri.fsPath;
     const cached = this.#cache.get(fsPath);
-    if (cached !== undefined) return cached;
+    if (cached) return cached;
 
     const text = (await vscode.workspace.openTextDocument(uri)).getText();
     const result = traverseAst(fsPath, text, configuration.innerDataPrefix);

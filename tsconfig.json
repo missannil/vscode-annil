@@ -11,6 +11,9 @@
     "skipLibCheck": true, // 跳过库文件的类型检查，可以加快编译速度，尤其是在大型项目中
     "exactOptionalPropertyTypes": true, // 带有?标志的属性类型不再包含undefined类型
     "strict": true, // 启用所有严格类型检查选项
+    "paths": {
+      "~/*": ["./_test/miniprogram/components/*"]
+    },
     "outDir": "./out", // 输出目录
     "rootDir": ".", // 保持原目录结构
     "sourceMap": true, // 方便 F5 调试

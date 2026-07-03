@@ -1,0 +1,23 @@
+<view id="index">
+	<block wx:if="{{subInline_isReady}}">
+		<subInline />
+	</block>
+	<block wx:if="{{subExternal_isReady}}">
+		<block
+			wx:for="{{subExternal_userList}}"
+			wx:key="id"
+		>
+			<subExternal user="{{item}}" />
+		</block>
+	</block>
+	<block wx:if="{{chunkA_isReady}}">
+		<view id="chunkA">
+			<block
+				wx:for="{{chunkA_userList}}"
+				wx:key="id"
+			>
+				<view></view>
+			</block>
+		</view>
+	</block>
+</view>

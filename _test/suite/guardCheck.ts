@@ -53,9 +53,9 @@ suite("guardCheck", () => {
     await new Promise((r) => setTimeout(r, 1000));
   });
 
-  test("打开 subA/index.ts（组件文件）不应被跳过", async () => {
+  test("打开 subInline/index.ts（组件文件）不应被跳过", async () => {
     const uri = Uri.file(
-      path.join(PROJECT_ROOT, "_test/miniprogram/components/subA/index.ts"),
+      path.join(PROJECT_ROOT, "_test/miniprogram/components/subInline/index.ts"),
     );
     const doc = await workspace.openTextDocument(uri);
     await window.showTextDocument(doc);
@@ -70,7 +70,7 @@ suite("guardCheck", () => {
 
   test("再次打开同一组件文件应被 checkedDir 跳过", async () => {
     const uri = Uri.file(
-      path.join(PROJECT_ROOT, "_test/miniprogram/components/subB/subB.ts"),
+      path.join(PROJECT_ROOT, "_test/miniprogram/components/subExternal/subExternal.ts"),
     );
 
     // 第一次打开，触发首次检测
@@ -84,7 +84,7 @@ suite("guardCheck", () => {
     // 关闭 active editor，再打开同目录的兄弟文件 – 目录已在 #checkedDirs 中
     await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
     const siblingUri = Uri.file(
-      path.join(PROJECT_ROOT, "_test/miniprogram/components/subB/subB.json"),
+      path.join(PROJECT_ROOT, "_test/miniprogram/components/subExternal/subExternal.json"),
     );
     const siblingDoc = await workspace.openTextDocument(siblingUri);
     await window.showTextDocument(siblingDoc);

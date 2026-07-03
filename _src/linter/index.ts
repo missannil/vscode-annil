@@ -110,7 +110,7 @@ class Linter {
       const tsUri = getSiblingUri(uri, ".ts");
       const wxmlUri = getSiblingUri(uri, ".wxml");
 
-      const tsInfo = await tsParser.parse(tsUri);
+      const tsInfo = await tsParser.tsParse(tsUri);
       const wxmlInfo = await wxmlParser.parse(wxmlUri);
 
       // 当前只校验 WXML 中数据引用
