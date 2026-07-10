@@ -1,17 +1,16 @@
 /** ------------------- RootComponentInfo----------------*/
 
 /**
- * 根组件（Page/Component）的配置信息
- * 描述组件自身的数据、事件、计算属性等
+ * 提供 RootComponent API 中定义的数据信息，用于校验 WXML 中非自定义组件用到的数据。
  */
 export type RootComponentInfo = {
-  /** 数组类型的数据名列表，用于判断 wxml 中 wx:for 循环变量的类型 */
+  /** 数组类型的数据列表，用于判断 wxml 中 wx:for 循环变量的类型 */
   arrTypeDatas: string[];
-  /** 布尔类型的数据名列表,用于判断 wxml 中 wx:if 条件变量的类型 */
+  /** 布尔类型的数据列表,用于判断 wxml 中 wx:if 条件变量的类型 */
   boolTypeDatas: string[];
-  /** 所有非自定义组件数据名列表 用于判断 wxml 中数据绑定(大胡子语法中)的值 */
+  /** 所有数据列表 用于验证 wxml 绑定数据 */
   dataList: string[];
-  /** 所有非自定义组件事件名列表 用于判断 wxml 中 bind:xxx 和 catch:xxx 中事件属性的值 */
+  /** 所有事件列表 用于验证事件属性 (bind:tap="xxx")值(xxx) */
   events: string[];
 };
 
