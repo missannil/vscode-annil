@@ -41,8 +41,11 @@ export type Self = { type: "Self"; value: string };
 export type AttrValue = Inherit | Events | Self;
 
 export type CustomComponentInfo = {
+  // 为了跳转功能
   line: number;
+  // 为了跳转功能
   fsPath: string;
+  //
   componentTypeName: string;
   configInfo: CustomComponentConfigInfo;
 };

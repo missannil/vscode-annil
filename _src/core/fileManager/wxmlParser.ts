@@ -1,4 +1,4 @@
-import { type Document, type Options, parseDocument, vscode } from "#deps";
+import { type Domhandler, type Options, parseDocument, vscode } from "#deps";
 import { FileCache } from "./fileCache.js";
 
 /**
@@ -8,14 +8,15 @@ export type WxmlFileInfo = {
   /** 原始文本 */
   text: string;
   /** HTML 解析后的 DOM */
-  wxmlDocument: Document;
+  wxmlDocument: Domhandler.Document;
   /** 文件中出现的自定义标签名列表 */
   componentTagNameList: string[];
 };
 
 const parserOptions: Options = {
-  lowerCaseTags: false,
-  lowerCaseAttributeNames: false,
+  xmlMode: true,
+  withStartIndices: true,
+  withEndIndices: true,
 };
 
 /**
@@ -30,14 +31,14 @@ class WxmlParser {
     if (cached !== undefined) return cached;
 
     const text = (await vscode.workspace.openTextDocument(uri)).getText();
-    const info = this.#parseText(fsPath, text);
+    const info = this.#parseText(text);
     this.#cache.set(fsPath, info);
 
     return info;
   }
 
   public updateFromText(uri: vscode.Uri, text: string): WxmlFileInfo {
-    const info = this.#parseText(uri.fsPath, text);
+    const info = this.#parseText(text);
     this.#cache.set(uri.fsPath, info);
 
     return info;
@@ -51,25 +52,26 @@ class WxmlParser {
     this.#cache.invalidate(fsPath);
   }
 
-  #parseText(fsPath: string, text: string): WxmlFileInfo {
+  #parseText(text: string): WxmlFileInfo {
     const wxmlDocument = parseDocument(text, parserOptions);
-    const componentTagNameList = collectCustomTags(wxmlDocument.children);
+    const componentTagNameList = this.collectCustomTags(wxmlDocument.children);
 
     return { text, wxmlDocument, componentTagNameList };
   }
-}
-
-/** 递归收集 WXML 元素中的自定义标签名 */
-function collectCustomTags(childNodes: unknown[], result: string[] = []): string[] {
-  for (const node of childNodes) {
-    const el = node as { type?: string; name?: string; children?: unknown[] };
-    if (el.type === "tag" && el.name !== undefined) {
-      result.push(el.name);
-      if (el.children) collectCustomTags(el.children, result);
-    }
+  private isElement(document: Domhandler.Node): document is Domhandler.Element {
+    return document.type === "tag";
   }
+  /** 递归收集 WXML 元素中的自定义标签名 */
+  private collectCustomTags(childNodes: Domhandler.ChildNode[], result: string[] = []): string[] {
+    for (const childNode of childNodes) {
+      if (this.isElement(childNode)) {
+        result.push(childNode.name);
+        this.collectCustomTags(childNode.children, result);
+      }
+    }
 
-  return result;
+    return result;
+  }
 }
 
 export const wxmlParser = new WxmlParser();

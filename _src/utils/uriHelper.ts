@@ -43,3 +43,7 @@ export function isTsFile(uri: vscode.Uri): boolean {
 export function isWxmlFile(uri: vscode.Uri): boolean {
   return uri.fsPath.endsWith(".wxml");
 }
+
+export function isJsonFile(uri: vscode.Uri): boolean {
+  return uri.fsPath.endsWith(".json");
+}

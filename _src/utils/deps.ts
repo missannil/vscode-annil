@@ -11,7 +11,7 @@ import * as jsonc from "jsonc-parser";
 import * as vscode from "vscode";
 
 // ── 类型重新导出 ──
-export type { Document } from "domhandler";
+export type * as Domhandler from "domhandler";
 
 // ── 值导出 ──
 export { assert, fileURLToPath, fs, jsonc, parseDocument, path, process, vscode };

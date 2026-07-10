@@ -9,15 +9,15 @@ export type RootComponentInfo = {
   arrTypeDatas: string[];
   /** 布尔类型的数据名列表,用于判断 wxml 中 wx:if 条件变量的类型 */
   boolTypeDatas: string[];
-  /** 所有数据名列表 用于判断 wxml 中数据绑定的值是否正确 */
+  /** 所有非自定义组件数据名列表 用于判断 wxml 中数据绑定(大胡子语法中)的值 */
   dataList: string[];
-  /** 事件名列表 用于判断 wxml 中 bind:xxx 和 catch:xxx 中事件数据的类型 */
+  /** 所有非自定义组件事件名列表 用于判断 wxml 中 bind:xxx 和 catch:xxx 中事件属性的值 */
   events: string[];
 };
 
 /** ------------------- AttrValue（属性值类型）----------------*/
 
-/** "自定义" 常量，表示属性值来自 WXML 自定义传值 */
+/** "自定义" 常量，用于默认情况(缺失属性)时修复诊断错误(缺少属性)时使用的默认值 */
 export const CUSTOM = "自定义";
 
 /** 自定义值类型 — 表示属性值由 WXML 模板传入，无法在 TS 中静态推断 */
@@ -26,11 +26,11 @@ export type Custom = { type: "Custom"; value: typeof CUSTOM };
 /** 根数据路径引用 — 表示属性值来自 RootComponent 的数据路径 */
 export type Root = { type: "Root"; value: string };
 
-/** 联合类型值 — 表示属性值可以是多个联合成员之一 */
-export type Union = { type: "Union"; values: string[] };
+/** 三元表达式类型 — 表示属性值为三元表达式，依赖多个数据源 */
+export type Ternary = { type: "Ternary"; values: string[] };
 
-/** 继承类型 — 表示子组件属性可接受的值的来源：自定义传入 | 根数据路径 | 联合类型 */
-export type Inherit = Custom | Root | Union;
+/** 继承类型 — 表示子组件属性可接受的值的来源：自定义传入 | 根数据路径 | 三元表达式 */
+export type Inherit = Custom | Root | Ternary;
 
 /** 事件类型 — 表示属性值是一个事件绑定 */
 export type Events = { type: "Events"; value: string };
@@ -49,10 +49,10 @@ type SubCompName = string;
 /**
  * 子组件配置信息（统一类型）
  *
- * annil 升级后，原有的 CustomComponent 和 ChunkComponent 统一为 SubComponent API。
- * 此类型兼顾了过去两种 API 的数据结构：
- * - configInfo: 属性值映射（继承自旧 CustomComponent），用于校验 WXML 属性绑定
- * - arrTypeDatas / boolTypeDatas / dataList / events: 数据类型列表（继承自旧 ChunkComponent），用于校验 WXML 数据引用
+ * configInfo: 属性值映射，用于校验 WXML 属性绑定。
+ * - inherit 字段 → Root / Ternary / Custom
+ * - data/computed/store 字段 → Self
+ * - events 字段 → Events
  */
 export type SubComponentInfo = {
   /** 声明所在行号 */
@@ -63,18 +63,16 @@ export type SubComponentInfo = {
   componentTypeName?: string;
   /**
    * 属性配置映射
-   * - inherit 字段 → AttrValue（Root/Union/Custom）
+   * - inherit 字段 → AttrValue（Root / Ternary / Custom）
    * - data/computed/store 字段 → Self
    * - events 字段 → Events
    */
   configInfo: Record<string, AttrValue>;
-  /** 数组类型的数据名列表 */
+  /** 数组类型的数据名列表（来自 data/computed/store） */
   arrTypeDatas: string[];
-  /** 布尔类型的数据名列表 */
+  /** 布尔类型的数据名列表（来自 data/computed/store） */
   boolTypeDatas: string[];
-  /** 所有数据名列表 */
-  dataList: string[];
-  /** 事件名列表 */
+  /** 事件名列表（原始方法名，如 subInline_onTap） */
   events: string[];
 };
 

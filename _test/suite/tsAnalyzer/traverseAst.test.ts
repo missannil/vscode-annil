@@ -79,7 +79,6 @@ suite("traverseAst", () => {
       assert.deepStrictEqual(actual.configInfo, exp.configInfo, `${key}.configInfo 不匹配`);
       assert.deepStrictEqual(sorted(actual.arrTypeDatas), sorted(exp.arrTypeDatas), `${key}.arrTypeDatas 不匹配`);
       assert.deepStrictEqual(sorted(actual.boolTypeDatas), sorted(exp.boolTypeDatas), `${key}.boolTypeDatas 不匹配`);
-      assert.deepStrictEqual(sorted(actual.dataList), sorted(exp.dataList), `${key}.dataList 不匹配`);
       assert.deepStrictEqual(sorted(actual.events), sorted(exp.events), `${key}.events 不匹配`);
     }
   });

@@ -1,0 +1,11 @@
+{
+  "component": true,
+  "usingComponents": {
+    "subInline": "/components/subInline",
+    "subExternal": "/components/subExternal/subExternal"
+  },
+  "componentPlaceholder": {
+    "subInline": "view",
+    "subExternal": "view"
+  }
+}

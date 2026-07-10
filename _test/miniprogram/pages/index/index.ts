@@ -5,6 +5,8 @@ import { subExternal } from "./useSubExternal.js";
 
 type $ChunkA = ComponentDoc<{
   properties: {
+    chunkA_customProp: string;
+    chunkA_ternary: unknown[];
     chunkA_propOptionalList?: unknown[];
     chunkA_propOptionalBool?: boolean;
     chunkA_propRequiredList: unknown[];
@@ -14,8 +16,21 @@ type $ChunkA = ComponentDoc<{
     chunkA_eventsOnTap: string;
   };
 }>;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const chunkComp = SubComponent<Root, $ChunkA>()({});
+const chunkComp = SubComponent<Root, $ChunkA>()({
+  inherit: {
+    chunkA_customProp: "wxml",
+    chunkA_ternary: ["propRequiredList", "propOptionalList"],
+    chunkA_propRequiredList: "propRequiredList",
+    chunkA_propOptionalList: "propOptionalList",
+    chunkA_propRequiredBool: "propRequiredBool",
+    chunkA_propOptionalBool: "propOptionalBool",
+  },
+  events: {
+    chunkA_eventsOnTap() {
+      // ...
+    },
+  },
+});
 /**
  * 收集说明：
  * 1 数组类型是为了wxml中block for中数据类型的验证
@@ -122,7 +137,7 @@ const rootComponent = RootComponent()({
 const index = DefineComponent({
   name: "index",
   rootComponent,
-  subComponents: [subInline, subExternal],
+  subComponents: [subInline, subExternal, chunkComp],
 });
 
 export type $Index = {
