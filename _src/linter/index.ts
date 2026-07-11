@@ -1,10 +1,10 @@
 import { vscode } from "#deps";
-// import { configuration } from "../configuration/index.js";
+import { configuration } from "../configuration/index.js";
 import { jsonParser } from "../core/fileManager/jsonParser.js";
 import { tsParser } from "../core/fileManager/tsParser.js";
 import { wxmlParser } from "../core/fileManager/wxmlParser.js";
 // import { validateJson } from "../core/jsonValidator/index.js";
-// import { validateWxmlData } from "../core/wxmlValidator/validateData.js";
+import { validateWxmlData } from "../core/wxmlValidator/validateData.js";
 import { debounce } from "../utils/debounce.js";
 import { nonNullable } from "../utils/nonNullable.js";
 import {
@@ -153,35 +153,29 @@ class Linter {
     const tsInfo = nonNullable(tsParser.getCached(tsUri.fsPath));
     const jsonInfo = nonNullable(jsonParser.getCached(jsonUri.fsPath));
     const wxmlInfo = nonNullable(wxmlParser.getCached(wxmlUri.fsPath));
-    void tsInfo;
     void jsonInfo;
-    void wxmlInfo;
-    // // 合并所有合法数据名：RootComponent + SubComponents + 用户配置
-    // const validNames = new Set(tsInfo.rootComponentInfo.dataList);
-    // for (const sub of Object.values(tsInfo.subComponentInfoRecord)) {
-    //   if (sub) { for (const name of sub.dataList) validNames.add(name); }
-    // }
-    // for (const name of configuration.validDatas) validNames.add(name);
+    // 合并所有合法数据名：RootComponent + SubComponents + 用户配置
+    const validNames = new Set(tsInfo.rootComponentInfo.dataList);
+    for (const subInfo of Object.values(tsInfo.subComponentInfoRecord)) {
+      if (!subInfo) continue;
+      for (const attrValue of Object.values(subInfo.configInfo)) {
+        if (attrValue.type === "Root" || attrValue.type === "Self") {
+          validNames.add(attrValue.value);
+        }
+      }
+    }
+    for (const name of configuration.validDatas) {
+      validNames.add(name);
+    }
 
-    // // WXML 数据引用诊断
-    // const wxmlDiagnostics = validateWxmlData(
-    //   wxmlInfo.text.split("\n"),
-    //   wxmlInfo.wxmlDocument,
-    //   validNames,
-    // );
+    // WXML 数据引用诊断
+    const wxmlDiagnostics = validateWxmlData(
+      wxmlInfo.text.split("\n"),
+      wxmlInfo.wxmlDocument,
+      validNames,
+    );
 
-    // // 构建 JSON 校验所需的 importedSubCompInfo（组件名 → 路径）
-    // const importedSubCompInfo: Record<string, string | undefined> = {};
-    // for (const [name, subInfo] of Object.entries(tsInfo.subComponentInfoRecord)) {
-    //   if (subInfo?.fsPath != null) {
-    //     importedSubCompInfo[name] = subInfo.fsPath;
-    //   }
-    // }
-
-    // // JSON 配置校验诊断
-    // const jsonDiagnostics = validateJson(jsonInfo, importedSubCompInfo);
-
-    // this.#diagnosticCollection.set(wxmlUri, wxmlDiagnostics);
+    this.#diagnosticCollection.set(wxmlUri, wxmlDiagnostics);
     // this.#diagnosticCollection.set(jsonUri, jsonDiagnostics);
   }
 

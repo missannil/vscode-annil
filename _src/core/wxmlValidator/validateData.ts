@@ -1,5 +1,8 @@
 import { type Domhandler, vscode } from "#deps";
 
+import { WxmlValidationContext } from "./context.js";
+import { walkWxmlNodeList } from "./walkNodeList.js";
+
 /**
  * 校验 WXML 中使用的数据是否在合法数据集合中
  *
@@ -11,56 +14,26 @@ export function validateWxmlData(
   wxmlDocument: Domhandler.Document,
   validNames: Set<string>,
 ): vscode.Diagnostic[] {
-  const diagnostics: vscode.Diagnostic[] = [];
+  // 1. 构造验证上下文，把诊断收集和遍历状态集中管理。
+  const context = new WxmlValidationContext(textlines);
 
-  walkNodes(wxmlDocument.children, textlines, validNames, diagnostics);
+  // 2. 复用通用节点遍历框架，只在 hooks 中补充当前这类校验。
+  walkWxmlNodeList(wxmlDocument.children, context, {
+    onElementNode(node, _, currentContext) {
+      for (const value of Object.values(node.attribs)) {
+        checkMustacheMatches(value, currentContext.textlines, validNames, currentContext.diagnosticList);
+      }
+    },
+    onTextNode(node, _, currentContext) {
+      checkMustacheMatches(node.data, currentContext.textlines, validNames, currentContext.diagnosticList);
+    },
+  });
 
-  return diagnostics;
-}
-
-// ---- 内联类型 ----
-
-interface DomNode {
-  type?: string;
-  name?: string;
-  attribs?: Record<string, string>;
-  data?: string;
-  children?: DomNode[];
+  // 3. 统一返回收集到的诊断结果。
+  return context.diagnosticList;
 }
 
 const MUSTACHE_RE = /\{\{(.+?)\}\}/g;
-
-// ---- DOM 遍历 ----
-
-/** 递归遍历 DOM 节点，检查所有 mustache 引用 */
-function walkNodes(
-  nodes: unknown[],
-  textlines: string[],
-  validNames: Set<string>,
-  diagnostics: vscode.Diagnostic[],
-): void {
-  for (const node of nodes) {
-    const el = node as DomNode;
-
-    if (el.type === "tag") {
-      // 检查属性中的 mustache 表达式
-      if (el.attribs) {
-        for (const value of Object.values(el.attribs)) {
-          checkMustacheMatches(value, textlines, validNames, diagnostics);
-        }
-      }
-
-      if (el.children) {
-        walkNodes(el.children, textlines, validNames, diagnostics);
-      }
-    }
-
-    // 文本节点中的 mustache
-    if (el.data !== undefined) {
-      checkMustacheMatches(el.data, textlines, validNames, diagnostics);
-    }
-  }
-}
 
 // ---- mustache 匹配 ----
 
@@ -71,22 +44,26 @@ function checkMustacheMatches(
   validNames: Set<string>,
   diagnostics: vscode.Diagnostic[],
 ): void {
+  // 1. 依次扫描文本中的所有 {{...}} 片段。
   for (const match of text.matchAll(MUSTACHE_RE)) {
+    // 2. 提取 mustache 内部表达式并去掉首尾空白。
     const expr = match[1].trim();
 
-    // 跳过内置变量
+    // 3. 跳过循环变量和展开语法，这些不是普通数据引用。
     if (expr === "item" || expr === "index" || expr.startsWith("...")) continue;
-    // 跳过运算符表达式（包含 ( + ? 说明是运算而非简单变量引用）
+    // 4. 跳过带运算符的表达式，只处理简单变量引用。
     if (expr.includes("(") || expr.includes("+") || expr.includes("?")) continue;
 
-    // 提取顶部变量名（a.b.c → a）
+    // 5. 提取顶部变量名（例如 a.b.c 只取 a）。
     const topVar = expr.split(".")[0];
 
+    // 6. 如果变量名合法，直接跳过。
     if (validNames.has(topVar)) continue;
 
-    // 在源码行中定位该 mustache 出现的位置
+    // 7. 定位错误 mustache 在源码中的具体位置。
     const { line, col } = findMustachePosition(match, textlines);
 
+    // 8. 生成未知数据诊断并加入结果集。
     diagnostics.push(
       new vscode.Diagnostic(
         new vscode.Range(line, col, line, col + match[0].length),
@@ -108,14 +85,18 @@ function findMustachePosition(
   match: RegExpMatchArray,
   textlines: string[],
 ): { line: number; col: number } {
+  // 1. 记录本次匹配的完整文本。
   const needle = match[0];
 
+  // 2. 从上到下逐行查找 mustache 第一次出现的位置。
   for (let i = 0; i < textlines.length; i++) {
     const col = textlines[i].indexOf(needle);
     if (col >= 0) {
+      // 3. 找到后直接返回行列号。
       return { line: i, col };
     }
   }
 
+  // 4. 找不到时回退到默认位置，保证调用方始终有可用范围。
   return { line: 0, col: 0 };
 }
