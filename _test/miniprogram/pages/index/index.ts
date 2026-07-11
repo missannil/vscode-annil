@@ -39,17 +39,33 @@ const chunkComp = SubComponent<Root, $ChunkA>()({
  */
 const subInline = SubComponent<Root, $SubInline>()({
   inherit: {
-    subInline_str: "propRequiredOther",
+    // 1 & 2
+    subInline_inheritBool: "propRequiredBool",
+    subInline_inheritList: "propRequiredList",
   },
   data: {
     subInline_cid: "subInline",
+    // 1
+    subInline_dataList: [],
+    //  2
+    subInline_dataBool: true,
   },
   store: {
-    subInline_userList: (): unknown[] => [],
-    _subInline_xxx: () => {},
+    // 1
+    subInline_storeList: (): unknown[] => [],
+    // 2
+    subInline_storeBool: (): boolean => true,
   },
   computed: {
-    subInline_isReady() {
+    subInline_isReady(): boolean {
+      return true;
+    },
+    // 1
+    subInline_computedList(): unknown[] {
+      return [];
+    },
+    // 2
+    subInline_computedBool(): boolean {
       return true;
     },
   },

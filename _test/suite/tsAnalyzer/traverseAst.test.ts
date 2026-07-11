@@ -35,6 +35,7 @@ suite("traverseAst", () => {
   );
 
   test("解析 pages/index/index.ts 的 RootComponent 信息与预期一致", () => {
+    console.log("hry 1", expectedRootComponentInfo);
     assert.deepStrictEqual(
       sorted(rootComponentInfo.arrTypeDatas),
       sorted(expectedRootComponentInfo.arrTypeDatas),
