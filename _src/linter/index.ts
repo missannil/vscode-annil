@@ -4,7 +4,7 @@ import { jsonParser } from "../core/fileManager/jsonParser.js";
 import { tsParser } from "../core/fileManager/tsParser.js";
 import { wxmlParser } from "../core/fileManager/wxmlParser.js";
 // import { validateJson } from "../core/jsonValidator/index.js";
-import { validateWxmlData } from "../core/wxmlValidator/validateData.js";
+import { checkWxml } from "../core/wxmlValidator/wxmlChecker.js";
 import { debounce } from "../utils/debounce.js";
 import { nonNullable } from "../utils/nonNullable.js";
 import {
@@ -154,25 +154,13 @@ class Linter {
     const jsonInfo = nonNullable(jsonParser.getCached(jsonUri.fsPath));
     const wxmlInfo = nonNullable(wxmlParser.getCached(wxmlUri.fsPath));
     void jsonInfo;
-    // 合并所有合法数据名：RootComponent + SubComponents + 用户配置
-    const validNames = new Set(tsInfo.rootComponentInfo.dataList);
-    for (const subInfo of Object.values(tsInfo.subComponentInfoRecord)) {
-      if (!subInfo) continue;
-      for (const attrValue of Object.values(subInfo.configInfo)) {
-        if (attrValue.type === "Root" || attrValue.type === "Self") {
-          validNames.add(attrValue.value);
-        }
-      }
-    }
-    for (const name of configuration.validDatas) {
-      validNames.add(name);
-    }
 
-    // WXML 数据引用诊断
-    const wxmlDiagnostics = validateWxmlData(
-      wxmlInfo.text.split("\n"),
+    // WXML 诊断统一由校验入口编排，Linter 不感知具体规则。
+    const wxmlDiagnostics = checkWxml(
+      wxmlInfo.text,
       wxmlInfo.wxmlDocument,
-      validNames,
+      tsInfo,
+      configuration.validDatas,
     );
 
     this.#diagnosticCollection.set(wxmlUri, wxmlDiagnostics);

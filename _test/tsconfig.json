@@ -1,20 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2024",
-    "lib": [
-      "ES2024"
-    ],
     "removeComments": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    // "outDir": "../testOut", // 指定输出文件的目录
-    // "rootDir": "./", // 指定输入文件的根目录
-    // "noEmit": true,
-    // "sourceMap": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "skipDefaultLibCheck": true,
-    // "declaration": true,
-    // NodeNext 下 esModuleInterop 隐含为 true
-    // "resolveJsonModule": true,
     "skipLibCheck": true,
     "exactOptionalPropertyTypes": true, // 带有?标志的属性类型不再包含undefined类型
     "strict": true, /* enable all strict type-checking options */
@@ -35,11 +24,7 @@
     ]
   },
   "include": [
-    "../out/**/*.ts",
+    // "../out/**/*.ts",
     "./**/*.ts"
-  ],
-  "exclude": [
-    "../out/**/*.ts",
-    "node_modules"
   ]
 }

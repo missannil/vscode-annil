@@ -1,3 +1,6 @@
 allowBuilds:
   dprint: true
   esbuild: true
+minimumReleaseAgeExclude:
+  - annil@1.18.1
+  - annil@1.18.2

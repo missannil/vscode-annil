@@ -11,3 +11,5 @@ export type { CommentStatus, CommentText, CommentType } from "./comment/types.js
 export { WxmlValidationContext } from "./context.js";
 
 export { walkWxmlNodeList } from "./walkNodeList.js";
+
+export { checkWxml } from "./wxmlChecker.js";

@@ -1,4 +1,4 @@
-import { SubComponent } from "annil";
+import { CustomComponent } from "annil";
 import type { $SubExternal } from "~/subExternal/subExternal.js";
 import type { Root } from "./index.js";
 
@@ -8,7 +8,7 @@ import type { Root } from "./index.js";
  * 2 布尔类型是为了wxml中block if中数据类型的验证
  * 3 events是为了wxml中bind:xxx和catch:xxx中事件数据的验证
  */
-export const subExternal = SubComponent<Root, $SubExternal>()({
+export const subExternal = CustomComponent<Root, $SubExternal>()({
   inherit: {
     subExternal_str: "propRequiredOther",
   },

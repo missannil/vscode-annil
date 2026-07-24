@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Node } from "@babel/traverse";
+import type { Node } from "@babel/types";
 import type { AttrValue, Custom, CustomComponentConfigInfo, Events, Root, Self, Union } from "./types";
 
 export function isArraySingleType(node: Node): boolean {

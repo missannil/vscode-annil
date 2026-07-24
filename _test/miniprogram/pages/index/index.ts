@@ -1,22 +1,21 @@
-import { DefineComponent, RootComponent, SubComponent, typeEqual } from "annil";
-import type { ComponentDoc } from "annil/dist/api/DefineComponent/returnType/ComponentDoc.js";
+import { type CreateComponentDoc, CustomComponent, DefineComponent, RootComponent, typeEqual } from "annil";
 import type { $SubInline } from "~/subInline/index.js";
 import { subExternal } from "./useSubExternal.js";
 
-type $ChunkA = ComponentDoc<{
+type $ChunkA = CreateComponentDoc<"chunkA", {
   properties: {
-    chunkA_customProp: string;
-    chunkA_ternary: unknown[];
-    chunkA_propOptionalList?: unknown[];
-    chunkA_propOptionalBool?: boolean;
-    chunkA_propRequiredList: unknown[];
-    chunkA_propRequiredBool: boolean;
+    customProp: string;
+    ternary: unknown[];
+    propOptionalList?: unknown[];
+    propOptionalBool?: boolean;
+    propRequiredList: unknown[];
+    propRequiredBool: boolean;
   };
   events: {
-    chunkA_eventsOnTap: string;
+    eventsOnTap: string;
   };
 }>;
-const chunkComp = SubComponent<Root, $ChunkA>()({
+const chunkComp = CustomComponent<Root, $ChunkA>()({
   inherit: {
     chunkA_customProp: "wxml",
     chunkA_ternary: ["propRequiredList", "propOptionalList"],
@@ -37,7 +36,7 @@ const chunkComp = SubComponent<Root, $ChunkA>()({
  * 2 布尔类型是为了wxml中block if中数据类型的验证
  * 3 events是为了wxml中bind:xxx和catch:xxx中事件数据的验证
  */
-const subInline = SubComponent<Root, $SubInline>()({
+const subInline = CustomComponent<Root, $SubInline>()({
   inherit: {
     // 1 & 2
     subInline_inheritBool: "propRequiredBool",

@@ -186,17 +186,18 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^24.13.2",
     "@types/vscode": "^1.98.0",
-    "annil": "^1.17.0",
+    "annil": "^1.18.2",
     "dprint": "^0.54.0",
     "esbuild": "^0.28.1",
     "eslint": "^10.5.0",
     "globals": "^16.5.0",
     "hry-types": "^0.19.3",
     "husky": "^9.1.7",
-    "miniprogram-api-typings": "^3.12.3",
+    "miniprogram-api-typings": "^5.2.1",
     "mobx": "^6.16.1",
     "mocha": "^10.2.0",
-    "typescript-eslint": "^8.61.1"
+    "typescript-eslint": "^8.61.1",
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "@babel/parser": "^8.0.0",
