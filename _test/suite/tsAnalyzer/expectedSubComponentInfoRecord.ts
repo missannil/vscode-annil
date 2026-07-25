@@ -1,18 +1,18 @@
-import type { SubComponentInfoRecord } from "../../../_src/core/types/index.js";
+import type { CustomComponentInfoRecord } from "../../../_src/core/types/index.js";
 
 /**
- * 与 _test/miniprogram/pages/index/index.ts 中 DefineComponent({ subComponents }) 引用的 SubComponent 一一对应
+ * 与 _test/miniprogram/pages/index/index.ts 中 DefineComponent({ subComponents }) 引用的 CustomComponent 一一对应
  *
- * - chunkComp：内部定义且被 subComponents 引用的 SubComponent（inherit + events）
- * - subInline：内部定义且被 subComponents 引用的完整 SubComponent（inherit + data + store + computed + events）
- * - subExternal 定义在 useSubExternal.ts 外部文件中，traverseAst 不跨文件解析，因此不在此预期中
+ * - chunkComp：内部定义且被 subComponents 引用的 CustomComponent（inherit + events）
+ * - subInline：内部定义且被 subComponents 引用的完整 CustomComponent（inherit + data + store + computed + events）
+ * - subExternal 定义在 useSubExternal.ts 外部文件中，当前 traverseAst 不跨文件解析，因此不在此预期中
  *
  * fsPath 和 line 由测试运行时动态拼接。
  */
-export function expectedSubComponentInfoRecord(fsPath: string): SubComponentInfoRecord {
+export function expectedCustomComponentInfoRecord(fsPath: string): CustomComponentInfoRecord {
   return {
     chunkComp: {
-      line: 19,
+      line: 25,
       fsPath,
       componentTypeName: "$ChunkA",
       configInfo: {
@@ -29,7 +29,7 @@ export function expectedSubComponentInfoRecord(fsPath: string): SubComponentInfo
       events: ["chunkA_eventsOnTap"],
     },
     subInline: {
-      line: 40,
+      line: 46,
       fsPath,
       componentTypeName: "$SubInline",
       configInfo: {

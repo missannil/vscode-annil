@@ -64,7 +64,11 @@ class Linter {
     this.#disposables.push(vscode.workspace.onDidChangeTextDocument(async (event) => {
       const uri = event.document.uri;
       if (event.contentChanges.length === 0) return;
-      if (!this.#guardCheck(uri)) return;
+      if (!isComponentUri(uri)) {
+        this.__test__?.skippedNonComponent.push(uri.fsPath);
+
+        return;
+      }
 
       // 仅更新变更文件对应 parser 的缓存，不触发全量重新解析
       const text = event.document.getText();

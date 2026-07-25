@@ -1,4 +1,11 @@
-import { type CreateComponentDoc, CustomComponent, DefineComponent, RootComponent, typeEqual } from "annil";
+import {
+  ChunkComponent,
+  type CreateComponentDoc,
+  CustomComponent,
+  DefineComponent,
+  RootComponent,
+  typeEqual,
+} from "annil";
 import type { $SubInline } from "~/subInline/index.js";
 import { subExternal } from "./useSubExternal.js";
 
@@ -78,6 +85,23 @@ const subInline = CustomComponent<Root, $SubInline>()({
   },
 });
 
+const chunkInline = ChunkComponent<Root, "chunkInline">()({
+  data: {
+    chunkInline_list: [],
+    chunkInline_visible: true,
+  },
+  computed: {
+    chunkInline_isReady(): boolean {
+      return true;
+    },
+  },
+  events: {
+    chunkInline_onTap() {
+      // ...
+    },
+  },
+});
+
 export type Root = typeof rootComponent;
 /**
  * 收集说明：
@@ -152,7 +176,7 @@ const rootComponent = RootComponent()({
 const index = DefineComponent({
   name: "index",
   rootComponent,
-  subComponents: [subInline, subExternal, chunkComp],
+  subComponents: [subInline, subExternal, chunkComp, chunkInline],
 });
 
 export type $Index = {

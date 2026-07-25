@@ -9,13 +9,15 @@ import {
   isObjectProperty,
   isTSTypeReference,
 } from "@babel/types";
-import type { RootComponentInfo, SubComponentInfoRecord } from "../types/index.js";
+import type { ChunkComponentInfoRecord, CustomComponentInfoRecord, RootComponentInfo } from "../types/index.js";
+import { collectChunkComponentInfo } from "./chunkComponentCollector.js";
+import { collectCustomComponentInfo } from "./customComponentCollector.js";
 import { collectRootComponentInfo } from "./rootComponentCollector.js";
-import { collectSubComponentInfo } from "./subComponentCollector.js";
 
 export type TraverseAstResult = {
   rootComponentInfo: RootComponentInfo;
-  subComponentInfoRecord: SubComponentInfoRecord;
+  customComponentInfoRecord: CustomComponentInfoRecord;
+  chunkComponentInfoRecord: ChunkComponentInfoRecord;
 };
 
 /**
@@ -29,8 +31,8 @@ export type TraverseAstResult = {
  * @param innerDataPrefix - 内部字段前缀，匹配该前缀的字段不会被收集（默认 "_"）
  */
 
-/** 从 SubComponent<Root, $X>()({...}) 泛型参数中提取第二个类型名 */
-function extractSubComponentTypeName(callee: CallExpression): string | undefined {
+/** 从 CustomComponent<Root, $X>()({...}) 泛型参数中提取第二个类型名。 */
+function extractCustomComponentTypeName(callee: CallExpression): string | undefined {
   const typeArgs = callee.typeArguments;
   if (typeArgs == null || typeArgs.params[1] == null) return undefined;
   if (!isTSTypeReference(typeArgs.params[1])) return undefined;
@@ -40,20 +42,20 @@ function extractSubComponentTypeName(callee: CallExpression): string | undefined
   return isIdentifier(typeRef.typeName) ? typeRef.typeName.name : undefined;
 }
 
-/** 处理 SubComponent 变量声明：提取变量名 & 类型名，调用收集器 */
-function handleSubComponent(
+/** 处理 CustomComponent 变量声明：提取变量名、类型名并调用收集器。 */
+function handleCustomComponent(
   id: Identifier,
   callee: CallExpression,
   expression: CallExpression,
-  subComponentInfoRecord: SubComponentInfoRecord,
+  customComponentInfoRecord: CustomComponentInfoRecord,
   fsPath: string,
   innerDataPrefix: string,
 ): void {
-  collectSubComponentInfo(
+  collectCustomComponentInfo(
     id.name,
-    extractSubComponentTypeName(callee),
+    extractCustomComponentTypeName(callee),
     expression,
-    subComponentInfoRecord,
+    customComponentInfoRecord,
     fsPath,
     innerDataPrefix,
   );
@@ -73,7 +75,8 @@ export function traverseAst(
     events: [],
   };
 
-  const subComponentInfoRecord: SubComponentInfoRecord = {};
+  const customComponentInfoRecord: CustomComponentInfoRecord = {};
+  const chunkComponentInfoRecord: ChunkComponentInfoRecord = {};
   // DefineComponent 中 subComponents 字段引用的子组件变量名集合
   const subComponentNames = new Set<string>();
 
@@ -118,23 +121,38 @@ export function traverseAst(
       if (topCallee.name === "RootComponent") {
         // 5a. 从第二次调用表达式参数中收集根组件配置信息
         collectRootComponentInfo(node, rootComponentInfo, innerDataPrefix);
-      } else if (topCallee.name === "SubComponent") {
-        // 5b. 收集子组件配置信息（统一了旧版 CustomComponent 和 ChunkComponent）
+      } else if (topCallee.name === "CustomComponent") {
+        // 5b. CustomComponent 需要收集逐属性传值契约。
         if (!isIdentifier(variableDeclarator.node.id)) return;
         const id = variableDeclarator.node.id;
-        handleSubComponent(id, node.callee, node, subComponentInfoRecord, fsPath, innerDataPrefix);
+        handleCustomComponent(id, node.callee, node, customComponentInfoRecord, fsPath, innerDataPrefix);
+      } else if (topCallee.name === "ChunkComponent") {
+        // 5c. ChunkComponent 提供局部数据作用域，不应按属性契约收集。
+        if (!isIdentifier(variableDeclarator.node.id)) return;
+        collectChunkComponentInfo(
+          variableDeclarator.node.id.name,
+          node,
+          chunkComponentInfoRecord,
+          fsPath,
+          innerDataPrefix,
+        );
       }
     },
   });
 
-  // 过滤：只保留 DefineComponent 中 subComponents 数组实际引用的 SubComponent
+  // 过滤：只保留 DefineComponent 中 subComponents 数组实际引用的组件。
   if (subComponentNames.size > 0) {
-    for (const name of Object.keys(subComponentInfoRecord)) {
+    for (const name of Object.keys(customComponentInfoRecord)) {
       if (!subComponentNames.has(name)) {
-        delete subComponentInfoRecord[name];
+        delete customComponentInfoRecord[name];
+      }
+    }
+    for (const name of Object.keys(chunkComponentInfoRecord)) {
+      if (!subComponentNames.has(name)) {
+        delete chunkComponentInfoRecord[name];
       }
     }
   }
 
-  return { rootComponentInfo, subComponentInfoRecord };
+  return { rootComponentInfo, customComponentInfoRecord, chunkComponentInfoRecord };
 }

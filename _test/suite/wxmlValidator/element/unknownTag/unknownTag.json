@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "usingComponents": {
+    "subB": "/components/subB"
+  },
+  "componentPlaceholder": {
+    "subB": "view"
+  }
+}

@@ -1,7 +1,11 @@
 import { type Domhandler, vscode } from "#deps";
+import { configuration } from "../../configuration/index.js";
 import type { TsFileInfo } from "../types/TsFileInfo.js";
 import { checkAnnilCommentNode } from "./comment/checkAnnilCommentNode.js";
 import { WxmlValidationContext } from "./context.js";
+import { validateCustomComponent } from "./customComponent/validateCustomComponent.js";
+import { validateDuplicateId } from "./element/validateDuplicateId.js";
+import { isNativeTag, validateUnknownTag } from "./element/validateUnknownTag.js";
 import { walkWxmlNodeList } from "./walkNodeList.js";
 
 /**
@@ -19,18 +23,23 @@ export function checkWxml(
   const textlines = text.split("\n");
   const validNames = new Set([...tsFileInfo.rootComponentInfo.dataList, ...validDatas]);
   const context = new WxmlValidationContext(textlines);
+  // ID 重复不受 annil disable 影响，用独立集合追踪
+  const existingIds = new Set<string>();
 
   // 所有 WXML 规则复用同一套遍历和诊断上下文。
   walkWxmlNodeList(wxmlDocument.children, context, {
-    onElementNode(node, _, currentContext) {
+    onElementNode(node, startLine, currentContext) {
+      // ID 重复校验在所有注释屏蔽之前，annil disable 无法绕过
+      validateDuplicateId(node, startLine, currentContext.textlines, existingIds, currentContext.diagnosticList);
+
       // 第一个元素之后，`annil disable all` 不再允许出现。
       currentContext.traversal.isHeadLocation = false;
       // 注释状态由本模块维护，生效时跳过当前元素的全部校验规则。
       if (currentContext.comment.isCommented()) return;
 
-      const subComponentInfo = tsFileInfo.subComponentInfoRecord[node.name];
+      const customComponentInfo = tsFileInfo.customComponentInfoRecord[node.name];
       // 如果是自定义组件
-      if (subComponentInfo) {
+      if (customComponentInfo) {
         // 自定义组件的普通属性必须按 configInfo 精确校验，不能当作根数据直接扫描。
         // 当前先校验仍处于父级模板作用域的 wx:* 控制属性；普通属性校验将在此处接入。
         checkRootDataAttributes(
@@ -39,6 +48,19 @@ export function checkWxml(
           validNames,
           currentContext.diagnosticList,
         );
+        validateCustomComponent(
+          node,
+          startLine,
+          customComponentInfo,
+          validNames,
+          currentContext.diagnosticList,
+        );
+
+        return;
+      }
+
+      if (!isNativeTag(node.name) && !configuration.ignoreTags.includes(node.name)) {
+        validateUnknownTag(node, startLine, currentContext.textlines, currentContext.diagnosticList);
 
         return;
       }

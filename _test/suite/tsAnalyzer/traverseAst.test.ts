@@ -11,8 +11,9 @@ import { describe as suite, it as test } from "mocha";
 import { configuration } from "../../../_src/configuration/index.js";
 import { traverseAst } from "../../../_src/core/tsAnalyzer/index.js";
 // 预期数据
+import { expectedChunkComponentInfoRecord } from "./expectedChunkComponentInfoRecord.js";
 import { expectedRootComponentInfo } from "./expectedRootComponentInfo.js";
-import { expectedSubComponentInfoRecord } from "./expectedSubComponentInfoRecord.js";
+import { expectedCustomComponentInfoRecord } from "./expectedSubComponentInfoRecord.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,14 +29,13 @@ suite("traverseAst", () => {
     "_test/miniprogram/pages/index/index.ts",
   );
   const tsText = fs.readFileSync(demoFsPath, "utf-8");
-  const { rootComponentInfo, subComponentInfoRecord } = traverseAst(
+  const { chunkComponentInfoRecord, customComponentInfoRecord, rootComponentInfo } = traverseAst(
     demoFsPath,
     tsText,
     configuration.innerDataPrefix,
   );
 
   test("解析 pages/index/index.ts 的 RootComponent 信息与预期一致", () => {
-    console.log("hry 1", expectedRootComponentInfo);
     assert.deepStrictEqual(
       sorted(rootComponentInfo.arrTypeDatas),
       sorted(expectedRootComponentInfo.arrTypeDatas),
@@ -58,18 +58,18 @@ suite("traverseAst", () => {
     );
   });
 
-  test("解析 pages/index/index.ts 的 SubComponent 信息与预期一致", () => {
-    const expected = expectedSubComponentInfoRecord(demoFsPath);
+  test("解析 pages/index/index.ts 的 CustomComponent 信息与预期一致", () => {
+    const expected = expectedCustomComponentInfoRecord(demoFsPath);
 
-    // 验证收集到的 SubComponent 数量
-    const actualKeys = Object.keys(subComponentInfoRecord).sort();
+    // 验证收集到的 CustomComponent 数量
+    const actualKeys = Object.keys(customComponentInfoRecord).sort();
     const expectedKeys = Object.keys(expected).sort();
-    assert.deepStrictEqual(actualKeys, expectedKeys, "SubComponent 变量名列表不匹配");
+    assert.deepStrictEqual(actualKeys, expectedKeys, "CustomComponent 变量名列表不匹配");
 
     for (const key of expectedKeys) {
-      const actual = subComponentInfoRecord[key];
+      const actual = customComponentInfoRecord[key];
       const exp = expected[key];
-      assert.strictEqual(typeof actual, "object", `subComponentInfoRecord["${key}"] 不应为 undefined`);
+      assert.strictEqual(typeof actual, "object", `customComponentInfoRecord["${key}"] 不应为 undefined`);
       assert.strictEqual(typeof exp, "object", `expected["${key}"] 不应为 undefined`);
 
       if (actual === undefined || exp === undefined) continue;
@@ -80,6 +80,30 @@ suite("traverseAst", () => {
       assert.deepStrictEqual(actual.configInfo, exp.configInfo, `${key}.configInfo 不匹配`);
       assert.deepStrictEqual(sorted(actual.arrTypeDatas), sorted(exp.arrTypeDatas), `${key}.arrTypeDatas 不匹配`);
       assert.deepStrictEqual(sorted(actual.boolTypeDatas), sorted(exp.boolTypeDatas), `${key}.boolTypeDatas 不匹配`);
+      assert.deepStrictEqual(sorted(actual.events), sorted(exp.events), `${key}.events 不匹配`);
+    }
+  });
+
+  test("解析 pages/index/index.ts 的 ChunkComponent 信息与预期一致", () => {
+    const expected = expectedChunkComponentInfoRecord(demoFsPath);
+    const actualKeys = Object.keys(chunkComponentInfoRecord).sort();
+    const expectedKeys = Object.keys(expected).sort();
+
+    assert.deepStrictEqual(actualKeys, expectedKeys, "ChunkComponent 变量名列表不匹配");
+
+    for (const key of expectedKeys) {
+      const actual = chunkComponentInfoRecord[key];
+      const exp = expected[key];
+      assert.strictEqual(typeof actual, "object", `chunkComponentInfoRecord["${key}"] 不应为 undefined`);
+      assert.strictEqual(typeof exp, "object", `expected["${key}"] 不应为 undefined`);
+
+      if (actual === undefined || exp === undefined) continue;
+
+      assert.strictEqual(actual.line, exp.line, `${key}.line 不匹配`);
+      assert.strictEqual(actual.fsPath, exp.fsPath, `${key}.fsPath 不匹配`);
+      assert.deepStrictEqual(sorted(actual.arrTypeDatas), sorted(exp.arrTypeDatas), `${key}.arrTypeDatas 不匹配`);
+      assert.deepStrictEqual(sorted(actual.boolTypeDatas), sorted(exp.boolTypeDatas), `${key}.boolTypeDatas 不匹配`);
+      assert.deepStrictEqual(sorted(actual.dataList), sorted(exp.dataList), `${key}.dataList 不匹配`);
       assert.deepStrictEqual(sorted(actual.events), sorted(exp.events), `${key}.events 不匹配`);
     }
   });

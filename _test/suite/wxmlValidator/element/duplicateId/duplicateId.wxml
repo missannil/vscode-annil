@@ -1,0 +1,19 @@
+<!-- 第一个 aaa -->
+<view id="aaa"></view>
+<!-- 重复的 aaa — 产生诊断 -->
+<view id="aaa"></view>
+<!-- annil disable 对 id 重复检测无效 — 仍产生诊断 -->
+<!-- annil disable line -->
+<view id="aaa"></view>
+
+<block
+	wx:key="xxx"
+	wx:for="{{list}}"
+>
+	<!-- _aaa 与上面静态 aaa 重复 — 产生诊断 -->
+	<view id="{{fff}}_aaa"></view>
+
+	<view id="{{xxx}}_bbb"></view>
+	<!-- _bbb 重复 — 产生诊断 -->
+	<view id="{{xxx}}_bbb"></view>
+</block>

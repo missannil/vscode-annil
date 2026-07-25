@@ -40,10 +40,10 @@ export type Self = { type: "Self"; value: string };
 /** 属性值联合类型 — 所有可能的属性值来源 */
 export type AttrValue = Inherit | Events | Self;
 
-/** ------------------- SubComponentInfo----------------*/
+/** ------------------- CustomComponentInfo----------------*/
 
-/** 子组件名（变量名） */
-type SubCompName = string;
+/** 子组件变量名 */
+type ComponentName = string;
 
 /**
  * 子组件配置信息（统一类型）
@@ -53,7 +53,7 @@ type SubCompName = string;
  * - data/computed/store 字段 → Self
  * - events 字段 → Events
  */
-export type SubComponentInfo = {
+export type CustomComponentInfo = {
   /** 声明所在行号 */
   line: number;
   /** 文件路径（子组件可能定义在不同文件） */
@@ -75,13 +75,37 @@ export type SubComponentInfo = {
   events: string[];
 };
 
-/** 子组件信息映射表，以变量名为 key */
-export type SubComponentInfoRecord = Record<SubCompName, SubComponentInfo | undefined>;
+/** CustomComponent 信息映射表，以变量名为 key。 */
+export type CustomComponentInfoRecord = Record<ComponentName, CustomComponentInfo | undefined>;
+
+/** ------------------- ChunkComponentInfo----------------*/
+
+/**
+ * ChunkComponent 在 WXML 中提供局部数据作用域，而非自定义组件的属性契约。
+ */
+export type ChunkComponentInfo = {
+  /** 声明所在行号 */
+  line: number;
+  /** 定义 ChunkComponent 的 TS 文件路径 */
+  fsPath: string;
+  /** 数组类型的数据名列表 */
+  arrTypeDatas: string[];
+  /** 布尔类型的数据名列表 */
+  boolTypeDatas: string[];
+  /** Chunk 内可访问的全部数据名 */
+  dataList: string[];
+  /** Chunk 内可绑定的事件名 */
+  events: string[];
+};
+
+/** ChunkComponent 信息映射表，以变量名为 key。 */
+export type ChunkComponentInfoRecord = Record<ComponentName, ChunkComponentInfo | undefined>;
 
 /** ------------------- TsFileInfo----------------*/
 
 /** TS 文件解析结果 */
 export type TsFileInfo = {
   rootComponentInfo: RootComponentInfo;
-  subComponentInfoRecord: SubComponentInfoRecord;
+  customComponentInfoRecord: CustomComponentInfoRecord;
+  chunkComponentInfoRecord: ChunkComponentInfoRecord;
 };

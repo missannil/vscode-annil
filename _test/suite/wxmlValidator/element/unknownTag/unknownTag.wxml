@@ -1,0 +1,10 @@
+<!-- unknown-tag-test -->
+
+<view>
+	<!-- 正常的原生组件 -->
+	<image />
+	<!-- 正常的自定义组件 -->
+	<subB subB_cid="{{cid}}"></subB>
+	<!-- 未知的组件标签 -->
+	<unknownTag cid="{{cid}}"></unknownTag>
+</view>
