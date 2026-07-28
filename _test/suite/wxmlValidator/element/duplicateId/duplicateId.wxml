@@ -1,4 +1,4 @@
-<!-- duplicateId 验证逻辑: 重复id验证时有效的id值为按 _ 分割后的最后一段,且 annil disable 注释不屏蔽此检测,动态id值全值比较 -->
+<!-- 测试目标：重复 id 按下划线后的末段比较，规范化动态表达式空格，且不受 annil disable 影响。 -->
 
 <!-- 第一个 aaa 不产生诊断 -->
 <view id="aaa"></view>
@@ -19,7 +19,7 @@
 >
 	<!-- {{index}}_aaa 与上面静态 aaa 重复 — 产生诊断 -->
 	<view id="{{index}}_aaa"></view>
-	<!-- 动态id值-->
+	<!-- 第一个动态 id：建立 {{index}} 的比较基准，不产生诊断。 -->
 	<view id="{{index}}"></view>
 	<!-- 与上面重复 产生诊断 -->
 	<view id="{{ index }}"></view>

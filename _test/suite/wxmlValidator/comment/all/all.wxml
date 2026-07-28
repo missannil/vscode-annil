@@ -1,3 +1,11 @@
-<!-- annil disable all -->
-<view>{{disabledByAll}}</view>
-<view>{{alsoDisabledByAll}}</view>
+<!-- 测试目标：annil disable all 屏蔽后续元素诊断，但不屏蔽重复 id 诊断。 -->
+<!-- 第一个相同 id：用于建立重复 id 的比较基准，不产生诊断。 -->
+<image id="sameId"></image>
+<!-- 第二个相同 id：始终产生“重复的id”诊断。 -->
+<image id="sameId"></image>
+<view>
+	<!-- 未知组件：插入 all 注释后，此诊断应消失。 -->
+	<unknownTagA></unknownTagA>
+	<!-- 另一个未知组件：插入 all 注释后，此诊断也应消失。 -->
+	<unknownTagB></unknownTagB>
+</view>

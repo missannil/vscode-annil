@@ -1,1 +1,3 @@
-<!-- annil disable invalid -->
+<!-- 测试目标：插入不支持的 annil disable 类型后，原有诊断保留并新增无效注释诊断。 -->
+<!-- 初始诊断：未注册组件应产生“未知标签”诊断。 -->
+<unknownTag></unknownTag>

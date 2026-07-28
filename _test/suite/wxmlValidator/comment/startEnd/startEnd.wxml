@@ -1,4 +1,5 @@
-<!-- annil disable start -->
+<!-- 测试目标：动态插入 start/end 后，区间内诊断被屏蔽，end 后诊断保留。 -->
+<!-- 初始诊断之一：该未知数据将在 start/end 区间内被屏蔽。 -->
 <view>{{disabledByStart}}</view>
-<!-- annil disable end -->
+<!-- 初始诊断之二：该未知数据位于 end 后，应始终保留。 -->
 <view>{{enabledAfterEnd}}</view>
