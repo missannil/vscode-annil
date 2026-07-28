@@ -5,6 +5,7 @@ import { checkAnnilCommentNode } from "./comment/checkAnnilCommentNode.js";
 import { WxmlValidationContext } from "./context.js";
 import { validateCustomComponent } from "./customComponent/validateCustomComponent.js";
 import { validateDuplicateId } from "./element/validateDuplicateId.js";
+import { validateRepeatSubComponentTag } from "./element/validateRepeatSubComponentTag.js";
 import { isNativeTag, validateUnknownTag } from "./element/validateUnknownTag.js";
 import { walkWxmlNodeList } from "./walkNodeList.js";
 
@@ -40,6 +41,14 @@ export function checkWxml(
       const customComponentInfo = tsFileInfo.customComponentInfoRecord[node.name];
       // 如果是自定义组件
       if (customComponentInfo) {
+        validateRepeatSubComponentTag(
+          node,
+          startLine,
+          currentContext.textlines,
+          currentContext.scope.checkedSubComponentTags,
+          currentContext.comment.repeatTagStatus,
+          currentContext.diagnosticList,
+        );
         // 自定义组件的普通属性必须按 configInfo 精确校验，不能当作根数据直接扫描。
         // 当前先校验仍处于父级模板作用域的 wx:* 控制属性；普通属性校验将在此处接入。
         checkRootDataAttributes(

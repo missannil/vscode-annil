@@ -19,7 +19,7 @@ export type WxmlScopeState = {
   /** 已出现的 id 列表 */
   existingIdList: string[];
   /** 已确认处理过的自定义组件标签 */
-  checkedSubComponentTags: string[];
+  checkedSubComponentTags: Set<string>;
 };
 
 /**
@@ -61,7 +61,7 @@ export class WxmlValidationContext {
     pendingConditionBlockInfo: null,
     outerChunkTagMarks: [],
     existingIdList: [],
-    checkedSubComponentTags: [],
+    checkedSubComponentTags: new Set<string>(),
   };
 
   public constructor(textlines: string[], diagnosticList: vscode.Diagnostic[] = []) {

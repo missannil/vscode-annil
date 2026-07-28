@@ -23,11 +23,21 @@ const manuallyFocusedTests: readonly string[] = [
   // "wxmlValidator/element/unknownTag/unknownTag.test.ts",
   // "wxmlValidator/comment/all/all.test.ts",
   // "wxmlValidator/comment/invalidComment/invalidComment.test.ts",
+  // "wxmlValidator/comment/invalidComment/invalidComment.codeAction.test.ts",
   // "wxmlValidator/comment/line/line.test.ts",
   // "wxmlValidator/comment/startEnd/startEnd.test.ts",
+  // "wxmlValidator/comment/startEnd/startEnd.codeAction.test.ts",
+  // "wxmlValidator/comment/fixAll/fixAll.codeAction.test.ts",
   // "wxmlValidator/comment/noStart/noStart.test.ts",
+  // "wxmlValidator/comment/noStart/noStart.codeAction.test.ts",
   // "wxmlValidator/comment/invalidLocation/invalidLocation.test.ts",
-  // "wxmlValidator/comment/repeated/repeated.test.ts",
+  // "wxmlValidator/comment/invalidLocation/invalidLocation.codeAction.test.ts",
+  // "wxmlValidator/comment/repeatedLine/repeatedLine.test.ts",
+  // "wxmlValidator/comment/repeatedLine/repeatedLine.codeAction.test.ts",
+  // "wxmlValidator/comment/repeatedStart/repeatedStart.test.ts",
+  // "wxmlValidator/comment/repeatedRepeatTag/repeatedRepeatTag.test.ts",
+  // "wxmlValidator/comment/startScope/startScope.test.ts",
+  // "wxmlValidator/comment/repeatTag/repeatTag.test.ts",
 ];
 
 function getFocusedTests(): readonly string[] {

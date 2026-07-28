@@ -1,8 +1,8 @@
-import { assert, fileURLToPath, path } from "#deps";
+import { fileURLToPath, path } from "#deps";
 import { after, describe, it as test } from "mocha";
 import type { Diagnostic } from "vscode";
 import { Position, Range, Uri, window, workspace, WorkspaceEdit } from "vscode";
-import { waitForDiagnostics, waitForDiagnosticUpdate } from "../../diagnosticHelper.js";
+import { applyEditAndWaitForDiagnostics, assertDiagnosticDetails, waitForDiagnostics } from "../../diagnosticHelper.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,23 +22,37 @@ describe("annil 注释：line", () => {
     const document = await workspace.openTextDocument(wxmlUri);
     await window.showTextDocument(document);
 
-    initialDiagnostics = await waitForDiagnostics(wxmlUri, (current) => current.length === 1);
+    initialDiagnostics = await waitForDiagnostics(wxmlUri, (current) => current.length === 2);
   });
 
-  test("插入 line 注释前，下一元素产生未知数据诊断", () => {
-    assert.deepStrictEqual(
-      initialDiagnostics.map((diagnostic) => diagnostic.message),
-      ["未知数据: \"xxx\""],
-    );
+  test("插入 line 注释前，两个元素分别产生未知数据诊断", () => {
+    assertDiagnosticDetails(initialDiagnostics[0], {
+      message: "未知数据: \"xxx\"",
+      source: undefined,
+      code: undefined,
+      range: [2, 6, 2, 13],
+    });
+    assertDiagnosticDetails(initialDiagnostics[1], {
+      message: "未知数据: \"yyy\"",
+      source: undefined,
+      code: undefined,
+      range: [4, 6, 4, 13],
+    });
   });
 
-  test("插入 line 注释后，下一元素的未知数据诊断消失", async () => {
-    const diagnosticsReady = waitForDiagnosticUpdate(wxmlUri, (current) => current.length === 0);
+  test("插入 line 注释后，仅紧随元素的未知数据诊断消失", async () => {
     const edit = new WorkspaceEdit();
     edit.insert(wxmlUri, new Position(2, 0), `${LINE_COMMENT}\n`);
-    assert.strictEqual(await workspace.applyEdit(edit), true);
 
-    assert.deepStrictEqual(await diagnosticsReady, []);
+    assertDiagnosticDetails(
+      (await applyEditAndWaitForDiagnostics(wxmlUri, edit, (current) => current.length === 1))[0],
+      {
+        message: "未知数据: \"yyy\"",
+        source: undefined,
+        code: undefined,
+        range: [5, 6, 5, 13],
+      },
+    );
   });
 
   // 测试会插入 line 注释，结束后恢复 fixture，确保后续运行从原始场景开始。
@@ -46,11 +60,8 @@ describe("annil 注释：line", () => {
     const document = await workspace.openTextDocument(wxmlUri);
     if (document.lineAt(2).text !== LINE_COMMENT) return;
 
-    const diagnosticsReady = waitForDiagnosticUpdate(wxmlUri, (current) => current.length === 1);
     const edit = new WorkspaceEdit();
     edit.delete(wxmlUri, new Range(new Position(2, 0), new Position(3, 0)));
-    assert.strictEqual(await workspace.applyEdit(edit), true);
-    assert.strictEqual(await document.save(), true);
-    await diagnosticsReady;
+    await applyEditAndWaitForDiagnostics(wxmlUri, edit, (current) => current.length === 2, true);
   });
 });

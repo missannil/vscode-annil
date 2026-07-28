@@ -1,0 +1,5 @@
+<!-- 测试目标：fix-all 应一次删除全部可修复的 Annil 注释诊断。 -->
+<!-- 第一个元素使后续 all 注释不再位于文件头部。 -->
+<view></view>
+<!-- annil disable all -->
+<!-- annil disable end -->

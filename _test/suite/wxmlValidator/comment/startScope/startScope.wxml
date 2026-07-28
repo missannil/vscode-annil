@@ -1,0 +1,7 @@
+<!-- 测试目标：start 注释在所在节点列表结束时自动失效，不影响外层同级元素。 -->
+<!-- 初始诊断之一：嵌套元素的 nestedData 将被动态插入的 start 注释屏蔽。 -->
+<view>
+	<view>{{nestedData}}</view>
+</view>
+<!-- 初始诊断之二：外层同级元素的 siblingData 不受嵌套 start 注释影响。 -->
+<view>{{siblingData}}</view>

@@ -1,4 +1,26 @@
-import { vscode } from "#deps";
+import { assert, vscode } from "#deps";
+
+type DiagnosticDetails = {
+  message: string;
+  source: string | undefined;
+  code: vscode.Diagnostic["code"];
+  range: readonly [startLine: number, startCharacter: number, endLine: number, endCharacter: number];
+};
+
+/** 断言诊断的消息、来源、编号和完整范围。 */
+export function assertDiagnosticDetails(
+  diagnostic: vscode.Diagnostic,
+  expected: DiagnosticDetails,
+): void {
+  const [startLine, startCharacter, endLine, endCharacter] = expected.range;
+  assert.strictEqual(diagnostic.message, expected.message);
+  assert.strictEqual(diagnostic.source, expected.source);
+  assert.strictEqual(diagnostic.code, expected.code);
+  assert.strictEqual(diagnostic.range.start.line, startLine);
+  assert.strictEqual(diagnostic.range.start.character, startCharacter);
+  assert.strictEqual(diagnostic.range.end.line, endLine);
+  assert.strictEqual(diagnostic.range.end.character, endCharacter);
+}
 
 /**
  * 等待指定文档的诊断满足断言条件。
@@ -52,4 +74,22 @@ export function waitForDiagnosticUpdate(
       resolve(diagnostics);
     });
   });
+}
+
+/** 应用编辑、可选保存 fixture，并等待由该编辑触发的诊断更新。 */
+export async function applyEditAndWaitForDiagnostics(
+  uri: vscode.Uri,
+  edit: vscode.WorkspaceEdit,
+  predicate: (diagnostics: readonly vscode.Diagnostic[]) => boolean,
+  saveDocument = false,
+): Promise<readonly vscode.Diagnostic[]> {
+  const diagnosticsReady = waitForDiagnosticUpdate(uri, predicate);
+  assert.strictEqual(await vscode.workspace.applyEdit(edit), true);
+
+  if (saveDocument) {
+    const document = await vscode.workspace.openTextDocument(uri);
+    assert.strictEqual(await document.save(), true);
+  }
+
+  return diagnosticsReady;
 }
