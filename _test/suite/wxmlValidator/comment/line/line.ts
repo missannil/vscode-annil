@@ -1,17 +1,12 @@
 import { DefineComponent, RootComponent } from "annil";
 
 const rootComponent = RootComponent()({
-  properties: {
-    cid: {
-      type: String,
-      value: "commentTest",
-    },
-  },
+  properties: {},
   data: {},
 });
 
 DefineComponent({
-  name: "commentTest",
+  name: "line",
   rootComponent,
   subComponents: [],
 });

@@ -2,11 +2,6 @@
 
 存放针对 wxml文件中元素类型标签的验证逻辑的测试示例。
 
-#### annilComment 子目录
-
-存放 `annil注释元素`相关逻辑的测试示例。
-`annil注释元素`是指 wxml 中属于注释类型的标签,且注释内容已`annil disable`标记开头的注释元素，例如 <!-- annil disable invalid -->。
-
 #### nativeComponent 子目录
 
 `原生组件`是微信小程序官方定义的元素标签,

@@ -1,0 +1,2 @@
+<!-- annil disable line  line表示关闭下一个元素的诊断,当前下一个元素不关闭情况下会产生诊断,xxx -> 不是合法数据名-->
+<view>{{xxx}}</view>
