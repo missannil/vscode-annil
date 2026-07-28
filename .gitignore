@@ -2,6 +2,7 @@ out
 dist
 node_modules
 .vscode-test/
+.annil-test.lock
 *.vsix
 *.js
 *.d.ts

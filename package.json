@@ -179,6 +179,8 @@
     "fmt": "dprint fmt",
     "predev": "mkdir -p out && printf 'export { activate, deactivate } from \"./_src/extension.js\";\\n' > out/extension.js",
     "dev": "tsc --watch",
+    "compile:test": "tsc --pretty false",
+    "test:extension": "pnpm run predev && pnpm run compile:test && node scripts/run-extension-tests.mjs",
     "check": "tsc --noEmit &&  eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
   },
   "devDependencies": {
@@ -186,6 +188,7 @@
     "@types/mocha": "^10.0.0",
     "@types/node": "^24.13.2",
     "@types/vscode": "^1.98.0",
+    "@vscode/test-electron": "^3.1.0",
     "annil": "^1.18.2",
     "dprint": "^0.54.0",
     "esbuild": "^0.28.1",
@@ -196,8 +199,8 @@
     "miniprogram-api-typings": "^5.2.1",
     "mobx": "^6.16.1",
     "mocha": "^10.2.0",
-    "typescript-eslint": "^8.61.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
   },
   "dependencies": {
     "@babel/parser": "^8.0.0",

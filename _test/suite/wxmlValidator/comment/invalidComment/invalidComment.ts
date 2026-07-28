@@ -1,19 +1,12 @@
 import { DefineComponent, RootComponent } from "annil";
 
 const rootComponent = RootComponent()({
-  properties: {
-    cid: {
-      type: String,
-      value: "root",
-    },
-  },
-  data: {
-    list: [1, 2, 3],
-  },
+  properties: {},
+  data: {},
 });
 
 DefineComponent({
-  name: "duplicateId",
+  name: "textError",
   rootComponent,
   subComponents: [],
 });

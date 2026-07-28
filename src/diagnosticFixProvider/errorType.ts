@@ -234,7 +234,7 @@ export enum DiagnosticErrorType {
   unknownProperty = "未知配置属性",
   missingImport = " 缺少导入的组件",
   unknownImport = "未知的导入",
-  commentTextError = "注释内容错误",
+  commentTextError = "无效的注释",
   invalidCommentLocation = "注释应写在文件头部",
   repeatedComment = "重复的注释",
   shouldEndComment = "没有结束注释",

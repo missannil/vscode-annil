@@ -22,7 +22,7 @@ export function validateCommentText(
     diagnosticList.push(
       generateDiagnostic(
         [new RegExp(curCommentText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))],
-        "注释内容错误",
+        "无效的注释",
         textlines,
         startLine,
       ),

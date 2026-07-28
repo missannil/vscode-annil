@@ -38,9 +38,18 @@ project-root/
 ## 测试说明
 
 - _test: 存放测试代码。
-- _test/miniprogram: 模拟小程序工作目录。
+- **测试前置确认**：准备新增或修改测试时，先以文字说明该测试的目的、所覆盖的唯一逻辑与预期行为；在用户明确允许前，不得创建测试 fixture、测试文件或修改任何代码。
+- **增量编写流程**：一次只新增一个粒度尽可能小的测试示例；一个示例只验证一个明确行为，不混合验证无关逻辑。
+- 当待验证功能包含多个子逻辑时，先按主要逻辑建立总目录，再为各子逻辑建立子目录；目录与测试文件需通过名称或注释明确说明其验证目标。
+- 新增或调整单个测试后，将其相对于 `_test/suite` 的路径加入 `_test/index.ts` 的 `manuallyFocusedTests`，且只启用当前待验证的测试路径。
+- 完成单个测试示例后，使用 `pnpm test:extension` 运行当前聚焦测试并直接读取结果；失败时仅修正当前测试或相关实现后重试。测试通过后停止继续新增测试或修改实现，向用户报告结果并等待下一步指示。
+- 测试示例可参考旧版 `test`、`miniTest` 与 `src` 中的对应行为，但不得修改旧版目录；新测试仅写入 `_test`。
+- _test/miniprogram: 模拟共享小程序工作目录，仅用于 app、页面、共享组件、别名、项目配置和跨文件等项目级/基础逻辑测试；不用于承载一般规则的专属测试组件。
 - 测试用例应放在_test目录中，与_src目录中的代码对应。
-- 测试用例应写在小程序组件文件中。
+- WXML 规则测试必须在 `_test/suite/wxmlValidator/<规则目录>/` 内同目录创建最小真实 `.ts`、`.json`、`.wxml` 组件及 `*.test.ts`；不得将这些专属 fixture 放进 `_test/miniprogram`。
+- WXML 诊断测试必须通过 Extension Host 打开真实组件文件、等待插件发布诊断后断言消息、source、code 和 Range；不得在 `_test` 中直接调用 `_src` 的 parser、analyzer 或 validator 并传入虚拟源码。
+- 规则目录按主要业务归属建立：通用元素规则放在 `wxmlValidator/element/`，Chunk 标签规则放在 `element/chunkTag/`，根数据绑定放在 `dataBinding/`，`wx:for` 等控制指令作用域放在 `scope/`，自定义组件属性契约放在 `customComponent/`，注释放在 `comment/`。
+- 通用的 Extension Host 打开组件、等待诊断和清理能力放在 `wxmlValidator` 根目录的 helper 中；helper 不包含具体业务规则断言。
 
 ## WXML 验证设计理念
 
@@ -167,4 +176,4 @@ WXML 校验:
 - 理解旧代码逻辑,给出重构方案。
 - 等待用户确定重构方案后,再进行代码重构。
 - 先在_test目录中创建测试文件,并编写测试用例.
-- 重构逻辑后，运行 Run Annil Tests，等待用户告诉测试结果。
+- 重构逻辑后，运行 `pnpm test:extension` 并直接检查测试结果；测试失败时修正相关实现或当前测试，测试通过后向用户报告结果。

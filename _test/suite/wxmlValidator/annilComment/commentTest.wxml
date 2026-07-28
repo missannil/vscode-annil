@@ -1,0 +1,37 @@
+<!--
+  annil 注释规则测试 — 规则:
+  注释以 annil disable  开始的元素，注释内容为 disable 后的文本，支持 line、start、end、repeatTag、all。
+
+  诊断产生顺序（按 WXML 节点遍历顺序）：
+    0. "无效的注释"       — annil disable invalid
+    1. "还没有开始注释不可结束" — annil disable end（无 start）
+    2. "重复的注释"          — 连续两个 annil disable line
+    3. "重复的注释"          — 连续两个 annil disable start
+    4. "重复的注释"          — 连续两个 annil disable repeatTag
+    5. "注释应写在文件头部"    — annil disable all 不在文件头部
+
+-->
+
+<!-- 场景1: 无效注释文本 → 无效的注释 -->
+<!-- annil disable invalid -->
+
+<!-- 场景2: end 没有前置 start → 还没有开始注释不可结束 -->
+<!-- annil disable end -->
+
+<!-- 场景3: 重复 line 注释 -->
+<!-- annil disable line -->
+<!-- annil disable line -->
+<view></view>
+
+<!-- 场景4: 重复 start 注释（结束后用 end 恢复，避免影响后续场景） -->
+<!-- annil disable start -->
+<!-- annil disable start -->
+<!-- annil disable end -->
+<view></view>
+
+<!-- 场景5: 重复 repeatTag -->
+<!-- annil disable repeatTag -->
+<!-- annil disable repeatTag -->
+
+<!-- 场景6: all 不在文件头部（前面已有 <view>） -->
+<!-- annil disable all -->

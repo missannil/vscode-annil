@@ -1,19 +1,26 @@
-<!-- 第一个 aaa -->
+<!-- duplicateId 验证逻辑: 重复id验证时有效的id值为按 _ 分割后的最后一段,且 annil disable 注释不屏蔽此检测,动态id值全值比较 -->
+
+<!-- 第一个 aaa 不产生诊断 -->
 <view id="aaa"></view>
 <!-- 重复的 aaa — 产生诊断 -->
 <view id="aaa"></view>
-<!-- annil disable 对 id 重复检测无效 — 仍产生诊断 -->
-<!-- annil disable line -->
-<view id="aaa"></view>
+<!-- 后缀 aaa 产生诊断 -->
+<view id="xxx_aaa"></view>
+
+<!-- annil 注释 对 id 重复检测无效 -->
+<!-- annil disable line  这里仍产生重复诊断 -->
+<view id="xxx_aaa"></view>
 
 <block
-	wx:key="xxx"
 	wx:for="{{list}}"
+	wx:key="xxx"
+	wx:for-item="item"
+	wx:for-index="index"
 >
-	<!-- _aaa 与上面静态 aaa 重复 — 产生诊断 -->
-	<view id="{{fff}}_aaa"></view>
-
-	<view id="{{xxx}}_bbb"></view>
-	<!-- _bbb 重复 — 产生诊断 -->
-	<view id="{{xxx}}_bbb"></view>
+	<!-- {{index}}_aaa 与上面静态 aaa 重复 — 产生诊断 -->
+	<view id="{{index}}_aaa"></view>
+	<!-- 动态id值-->
+	<view id="{{index}}"></view>
+	<!-- 与上面重复 产生诊断 -->
+	<view id="{{ index }}"></view>
 </block>

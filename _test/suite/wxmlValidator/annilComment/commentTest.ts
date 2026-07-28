@@ -4,16 +4,14 @@ const rootComponent = RootComponent()({
   properties: {
     cid: {
       type: String,
-      value: "root",
+      value: "commentTest",
     },
   },
-  data: {
-    list: [1, 2, 3],
-  },
+  data: {},
 });
 
 DefineComponent({
-  name: "duplicateId",
+  name: "commentTest",
   rootComponent,
   subComponents: [],
 });

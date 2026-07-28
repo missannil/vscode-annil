@@ -33,6 +33,21 @@ class Linter {
     skippedCheckedDir: string[];
   };
 
+  /** 测试专用：直接执行守卫逻辑，不依赖 VS Code 文档打开事件。 */
+  public __testGuardCheck(uri: vscode.Uri): boolean {
+    return this.#guardCheck(uri);
+  }
+
+  /** 测试专用：清理已检查目录，避免测试用例相互污染。 */
+  public __testClearCheckedDirs(): void {
+    this.#checkedDirs.clear();
+  }
+
+  /** 测试专用：模拟组件首次检测完成后的目录记录。 */
+  public __testMarkCheckedDir(uri: vscode.Uri): void {
+    this.#checkedDirs.add(getComponentDir(uri));
+  }
+
   public init(context: vscode.ExtensionContext): void {
     // 注册诊断集合，确保在插件停用时清理
     context.subscriptions.push(this.#diagnosticCollection);

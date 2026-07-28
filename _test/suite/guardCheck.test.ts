@@ -9,9 +9,8 @@ import * as assert from "assert";
 import { describe as suite, it as test } from "mocha";
 import * as path from "path";
 import { fileURLToPath } from "url";
-import { Uri, window, workspace } from "vscode";
+import { Uri } from "vscode";
 
-import { vscode } from "#deps";
 import { linter } from "../../_src/linter/index.js";
 import { nonNullable } from "../../_src/utils/nonNullable.js";
 
@@ -22,22 +21,20 @@ const PROJECT_ROOT = path.resolve(__dirname, "../../..");
 
 suite("guardCheck", () => {
   beforeEach(() => {
-    // 激活测试钩子，每次测试前清空记录
+    // 激活测试钩子并清理目录状态，避免测试用例相互污染。
+    linter.__testClearCheckedDirs();
     linter.__test__ = { skippedNonComponent: [], skippedCheckedDir: [] };
   });
 
   afterEach(() => {
     // 清理钩子，避免影响后续测试
     delete linter.__test__;
+    linter.__testClearCheckedDirs();
   });
 
-  test("打开 app.ts（非组件文件）应被跳过", async () => {
+  test("打开 app.ts（非组件文件）应被跳过", () => {
     const uri = Uri.file(path.join(PROJECT_ROOT, "_test/miniprogram/app.ts"));
-    const doc = await workspace.openTextDocument(uri);
-    await window.showTextDocument(doc);
-
-    // 等待 linter 的异步守卫执行
-    await new Promise((r) => setTimeout(r, 500));
+    assert.strictEqual(linter.__testGuardCheck(uri), false);
 
     assert.ok(
       nonNullable(linter.__test__).skippedNonComponent.some((p) => p.endsWith("app.ts")),
@@ -47,20 +44,11 @@ suite("guardCheck", () => {
     assert.strictEqual(nonNullable(linter.__test__).skippedCheckedDir.length, 0);
   });
 
-  // 等待额外时间以让 linter 内部的 debounce / setTimeout 回调有机会执行完毕，
-  // 避免 Extension Host 过早关闭导致 "Channel has been closed" 错误。
-  after(async () => {
-    await new Promise((r) => setTimeout(r, 1000));
-  });
-
-  test("打开 subInline/index.ts（组件文件）不应被跳过", async () => {
+  test("打开 subInline/index.ts（组件文件）不应被跳过", () => {
     const uri = Uri.file(
       path.join(PROJECT_ROOT, "_test/miniprogram/components/subInline/index.ts"),
     );
-    const doc = await workspace.openTextDocument(uri);
-    await window.showTextDocument(doc);
-
-    await new Promise((r) => setTimeout(r, 500));
+    assert.strictEqual(linter.__testGuardCheck(uri), true);
 
     // 组件文件不应被记录为跳过
     assert.strictEqual(nonNullable(linter.__test__).skippedNonComponent.length, 0);
@@ -68,27 +56,21 @@ suite("guardCheck", () => {
     assert.strictEqual(nonNullable(linter.__test__).skippedCheckedDir.length, 0);
   });
 
-  test("再次打开同一组件文件应被 checkedDir 跳过", async () => {
+  test("已检查目录中的组件文件应被 checkedDir 跳过", () => {
     const uri = Uri.file(
       path.join(PROJECT_ROOT, "_test/miniprogram/components/subExternal/subExternal.ts"),
     );
 
-    // 第一次打开，触发首次检测
-    const doc = await workspace.openTextDocument(uri);
-    await window.showTextDocument(doc);
-    await new Promise((r) => setTimeout(r, 500));
+    // 模拟首次组件检测成功后的目录状态。
+    assert.strictEqual(linter.__testGuardCheck(uri), true);
+    linter.__testMarkCheckedDir(uri);
 
-    // 重置记录（第一次打开的守卫逻辑已执行完毕）
+    // 清空首次检查记录，验证第二次守卫的结果。
     linter.__test__ = { skippedNonComponent: [], skippedCheckedDir: [] };
-
-    // 关闭 active editor，再打开同目录的兄弟文件 – 目录已在 #checkedDirs 中
-    await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
     const siblingUri = Uri.file(
       path.join(PROJECT_ROOT, "_test/miniprogram/components/subExternal/subExternal.json"),
     );
-    const siblingDoc = await workspace.openTextDocument(siblingUri);
-    await window.showTextDocument(siblingDoc);
-    await new Promise((r) => setTimeout(r, 500));
+    assert.strictEqual(linter.__testGuardCheck(siblingUri), false);
 
     assert.strictEqual(
       linter.__test__.skippedCheckedDir.length,

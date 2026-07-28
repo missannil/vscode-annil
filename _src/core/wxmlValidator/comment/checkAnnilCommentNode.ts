@@ -34,7 +34,16 @@ export function checkAnnilCommentNode(
   const commentText = commentData.trim();
 
   // 1. 验证文本有效性
-  if (!validateCommentText(commentText, diagnosticList, textlines, startLine)) return null;
+  if (!validateCommentText(commentText, diagnosticList, textlines, startLine)) {
+    // 为 CodeAction 提供上下文：当前注释状态 + 是否在文件头部
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (diagnosticList[diagnosticList.length - 1] as any).info = {
+      commentStatus: commentManager.commentStatus,
+      isHeadLocation,
+    };
+
+    return null;
+  }
 
   const commentType = commentManager.getCommentType(commentText as CommentText);
 

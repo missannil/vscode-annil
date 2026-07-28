@@ -1,7 +1,8 @@
 import { assert, fileURLToPath, path } from "#deps";
 import { describe, it as test } from "mocha";
 import type { Diagnostic } from "vscode";
-import { languages, Uri, window, workspace } from "vscode";
+import { Uri, window, workspace } from "vscode";
+import { waitForDiagnostics } from "../../diagnosticHelper.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,9 +21,7 @@ describe("unknownTag", () => {
     const document = await workspace.openTextDocument(wxmlUri);
     await window.showTextDocument(document);
 
-    // 等待扩展的打开事件完成解析并发布诊断。
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    diagnostics = languages.getDiagnostics(wxmlUri);
+    diagnostics = [...await waitForDiagnostics(wxmlUri, (current) => current.length === 1)];
   });
 
   test("未注册的 unknownTag 标签产生未知标签诊断", () => {
