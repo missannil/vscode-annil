@@ -46,7 +46,8 @@ export function validateJson(
 
   // 5. componentPlaceholder 校验
   const componentPlaceholder = config.componentPlaceholder ?? {};
-  diagnosticList.push(...checkPlaceholder(componentPlaceholder, usingComponentsKeys, textlines));
+  // 未知 usingComponents 项已经有专属诊断，不应再级联为“缺少占位组件”。
+  diagnosticList.push(...checkPlaceholder(componentPlaceholder, unknownResult.validImportKeys, textlines));
 
   return diagnosticList;
 }

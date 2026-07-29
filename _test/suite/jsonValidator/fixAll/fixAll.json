@@ -1,0 +1,12 @@
+{
+  "unknownConfig": true,
+  "component": true,
+  "usingComponents": {
+    "pathComponent": "/wrong/path",
+    "unknownComponent": "/components/unknownComponent"
+  },
+  "componentPlaceholder": {
+    "pathComponent": "view",
+    "unknownPlaceholder": "view"
+  }
+}

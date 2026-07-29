@@ -10,6 +10,7 @@ import { describe as suite, it as test } from "mocha";
 // 直接从源码模块导入（dev 模式下 _src/ 按目录结构编译到 out/_src/）
 import { configuration } from "../../../_src/configuration/index.js";
 import { traverseAst } from "../../../_src/core/tsAnalyzer/index.js";
+import { resolveImportedSubComponentPaths } from "../../../_src/core/tsAnalyzer/resolveImportedSubComponentPaths.js";
 // 预期数据
 import { expectedChunkComponentInfoRecord } from "./expectedChunkComponentInfoRecord.js";
 import { expectedRootComponentInfo } from "./expectedRootComponentInfo.js";
@@ -29,7 +30,12 @@ suite("traverseAst", () => {
     "_test/miniprogram/pages/index/index.ts",
   );
   const tsText = fs.readFileSync(demoFsPath, "utf-8");
-  const { chunkComponentInfoRecord, customComponentInfoRecord, rootComponentInfo } = traverseAst(
+  const {
+    chunkComponentInfoRecord,
+    customComponentInfoRecord,
+    importedSubComponentSourceRecord,
+    rootComponentInfo,
+  } = traverseAst(
     demoFsPath,
     tsText,
     configuration.innerDataPrefix,
@@ -82,6 +88,21 @@ suite("traverseAst", () => {
       assert.deepStrictEqual(sorted(actual.boolTypeDatas), sorted(exp.boolTypeDatas), `${key}.boolTypeDatas 不匹配`);
       assert.deepStrictEqual(sorted(actual.events), sorted(exp.events), `${key}.events 不匹配`);
     }
+  });
+
+  test("只将类型来自外部 import 的 CustomComponent 收集为 JSON 导入候选", () => {
+    assert.deepStrictEqual(importedSubComponentSourceRecord, {
+      subInline: "~/subInline/index.js",
+    });
+  });
+
+  test("baseUrl 裸路径导入转换为以 / 开头的 usingComponents 路径", () => {
+    assert.deepStrictEqual(
+      resolveImportedSubComponentPaths(demoFsPath, {
+        subExternal: "components/subExternal/subExternal.js",
+      }),
+      { subExternal: "/components/subExternal/subExternal" },
+    );
   });
 
   test("解析 pages/index/index.ts 的 ChunkComponent 信息与预期一致", () => {

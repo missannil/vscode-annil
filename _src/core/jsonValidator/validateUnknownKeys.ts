@@ -24,13 +24,14 @@ export function validateUnknownKeys(
 
   for (const key of Object.keys(config)) {
     if (!legalConfigKeys.includes(key)) {
-      diagnosticList.push(
-        new vscode.Diagnostic(
-          findErrMsgRange(key, textlines),
-          "未知配置属性",
-          vscode.DiagnosticSeverity.Error,
-        ),
+      const diagnostic = new vscode.Diagnostic(
+        findErrMsgRange(key, textlines),
+        "未知配置属性",
+        vscode.DiagnosticSeverity.Error,
       );
+      diagnostic.source = "vscode-annil";
+      diagnostic.code = key;
+      diagnosticList.push(diagnostic);
     }
   }
 

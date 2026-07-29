@@ -15,6 +15,18 @@ export const DiagMsg = {
   invalidCommentLocation: "注释应写在文件头部",
   /** 重复的 id */
   duplicateId: "重复的id",
+  /** JSON usingComponents 中未被 TS 引用的组件 */
+  unknownImport: "未知的导入",
+  /** TS 已引用但 JSON usingComponents 中未声明的组件 */
+  missingImport: " 缺少导入的组件",
+  /** JSON componentPlaceholder 中未关联有效组件的键 */
+  unknownPlaceholder: "未知的占位组件",
+  /** JSON 有效组件缺少 componentPlaceholder 配置 */
+  missingPlaceholder: "缺少占位组件",
+  /** JSON usingComponents 路径与 TS 类型导入推导路径不一致 */
+  invalidPath: "无效的路径",
+  /** JSON 顶层不受支持的配置键 */
+  unknownConfigKey: "未知配置属性",
 } as const;
 
 /** 所有支持的诊断消息类型 */

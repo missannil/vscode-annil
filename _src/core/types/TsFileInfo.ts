@@ -78,6 +78,14 @@ export type CustomComponentInfo = {
 /** CustomComponent 信息映射表，以变量名为 key。 */
 export type CustomComponentInfoRecord = Record<ComponentName, CustomComponentInfo | undefined>;
 
+/**
+ * 已由 TypeScript 类型导入确认的外部子组件。
+ *
+ * key 是 `CustomComponent` 变量名，value 是其类型导入语句中的原始模块路径。
+ * JSON 校验器会在知道组件和项目根目录后将该路径转换为 `usingComponents` 路径。
+ */
+export type ImportedSubComponentSourceRecord = Record<ComponentName, string>;
+
 /** ------------------- ChunkComponentInfo----------------*/
 
 /**
@@ -108,4 +116,5 @@ export type TsFileInfo = {
   rootComponentInfo: RootComponentInfo;
   customComponentInfoRecord: CustomComponentInfoRecord;
   chunkComponentInfoRecord: ChunkComponentInfoRecord;
+  importedSubComponentSourceRecord: ImportedSubComponentSourceRecord;
 };

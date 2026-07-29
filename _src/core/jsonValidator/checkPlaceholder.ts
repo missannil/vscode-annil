@@ -6,17 +6,17 @@ import { findKeyline } from "./findKeyline.js";
 /**
  * 验证 componentPlaceholder 配置
  *
- * - 未知占位组件：placeholder 中有但 usingComponents 中不存在
- * - 缺少占位组件：usingComponents 中有但 placeholder 中不存在
+ * - 未知占位组件：placeholder 中有但有效 usingComponents 中不存在
+ * - 缺少占位组件：有效 usingComponents 中有但 placeholder 中不存在
  */
 export function checkPlaceholder(
   componentPlaceholder: ComponentPlaceholder,
-  usingComponentKeys: string[],
+  validUsingComponentKeys: string[],
   textlines: string[],
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
-  // 拷贝一份，用于追踪哪些 usingComponents key 还没有 placeholder
-  const remainingKeys = [...usingComponentKeys];
+  // 拷贝一份，用于追踪哪些有效 usingComponents key 还没有 placeholder。
+  const remainingKeys = [...validUsingComponentKeys];
 
   // 检查 componentPlaceholder 中的每个 key
   for (const key of Object.keys(componentPlaceholder)) {

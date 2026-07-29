@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "usingComponents": {
+    "validComponent": "/wrong/path"
+  },
+  "componentPlaceholder": {
+    "validComponent": "view"
+  }
+}

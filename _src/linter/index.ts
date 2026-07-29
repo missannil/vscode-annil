@@ -3,7 +3,8 @@ import { configuration } from "../configuration/index.js";
 import { jsonParser } from "../core/fileManager/jsonParser.js";
 import { tsParser } from "../core/fileManager/tsParser.js";
 import { wxmlParser } from "../core/fileManager/wxmlParser.js";
-// import { validateJson } from "../core/jsonValidator/index.js";
+import { validateJson } from "../core/jsonValidator/index.js";
+import { resolveImportedSubComponentPaths } from "../core/tsAnalyzer/resolveImportedSubComponentPaths.js";
 import { checkWxml } from "../core/wxmlValidator/wxmlChecker.js";
 import { debounce } from "../utils/debounce.js";
 import { nonNullable } from "../utils/nonNullable.js";
@@ -172,7 +173,10 @@ class Linter {
     const tsInfo = nonNullable(tsParser.getCached(tsUri.fsPath));
     const jsonInfo = nonNullable(jsonParser.getCached(jsonUri.fsPath));
     const wxmlInfo = nonNullable(wxmlParser.getCached(wxmlUri.fsPath));
-    void jsonInfo;
+    const importedSubCompInfo = resolveImportedSubComponentPaths(
+      tsUri.fsPath,
+      tsInfo.importedSubComponentSourceRecord,
+    );
 
     // WXML 诊断统一由校验入口编排，Linter 不感知具体规则。
     const wxmlDiagnostics = checkWxml(
@@ -181,9 +185,10 @@ class Linter {
       tsInfo,
       configuration.validDatas,
     );
+    const jsonDiagnostics = validateJson(jsonInfo, importedSubCompInfo);
 
     this.#diagnosticCollection.set(wxmlUri, wxmlDiagnostics);
-    // this.#diagnosticCollection.set(jsonUri, jsonDiagnostics);
+    this.#diagnosticCollection.set(jsonUri, jsonDiagnostics);
   }
 
   // ---------- 组件检查入口（首次打开）----------

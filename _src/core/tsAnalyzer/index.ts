@@ -1,15 +1,21 @@
 import { parse } from "@babel/parser";
 import traverse from "@babel/traverse";
-import type { CallExpression, Identifier } from "@babel/types";
+import type { CallExpression, Identifier, ImportDeclaration } from "@babel/types";
 import {
   isArrayExpression,
   isCallExpression,
   isIdentifier,
+  isImportSpecifier,
   isObjectExpression,
   isObjectProperty,
   isTSTypeReference,
 } from "@babel/types";
-import type { ChunkComponentInfoRecord, CustomComponentInfoRecord, RootComponentInfo } from "../types/index.js";
+import type {
+  ChunkComponentInfoRecord,
+  CustomComponentInfoRecord,
+  ImportedSubComponentSourceRecord,
+  RootComponentInfo,
+} from "../types/index.js";
 import { collectChunkComponentInfo } from "./chunkComponentCollector.js";
 import { collectCustomComponentInfo } from "./customComponentCollector.js";
 import { collectRootComponentInfo } from "./rootComponentCollector.js";
@@ -18,6 +24,7 @@ export type TraverseAstResult = {
   rootComponentInfo: RootComponentInfo;
   customComponentInfoRecord: CustomComponentInfoRecord;
   chunkComponentInfoRecord: ChunkComponentInfoRecord;
+  importedSubComponentSourceRecord: ImportedSubComponentSourceRecord;
 };
 
 /**
@@ -61,6 +68,36 @@ function handleCustomComponent(
   );
 }
 
+/** 收集 `import type` 声明的本地类型名与模块路径。 */
+function collectImportedTypeSources(
+  declaration: ImportDeclaration,
+  importedTypeSources: Record<string, string>,
+): void {
+  const declarationImportsTypes = declaration.importKind === "type";
+
+  for (const specifier of declaration.specifiers) {
+    if (!declarationImportsTypes && (!isImportSpecifier(specifier) || specifier.importKind !== "type")) continue;
+    importedTypeSources[specifier.local.name] = declaration.source.value;
+  }
+}
+
+/** 仅保留类型来自 `import type` 的 CustomComponent，作为 JSON usingComponents 候选。 */
+function collectImportedSubComponentSources(
+  customComponentInfoRecord: CustomComponentInfoRecord,
+  importedTypeSources: Record<string, string>,
+): ImportedSubComponentSourceRecord {
+  const importedSubComponentSourceRecord: ImportedSubComponentSourceRecord = {};
+
+  for (const [componentName, info] of Object.entries(customComponentInfoRecord)) {
+    const typeName = info?.componentTypeName;
+    if (typeName === undefined) continue;
+    const source = importedTypeSources[typeName];
+    if (source !== undefined) importedSubComponentSourceRecord[componentName] = source;
+  }
+
+  return importedSubComponentSourceRecord;
+}
+
 export function traverseAst(
   fsPath: string,
   text: string,
@@ -77,10 +114,15 @@ export function traverseAst(
 
   const customComponentInfoRecord: CustomComponentInfoRecord = {};
   const chunkComponentInfoRecord: ChunkComponentInfoRecord = {};
+  const importedTypeSources: Record<string, string> = {};
   // DefineComponent 中 subComponents 字段引用的子组件变量名集合
   const subComponentNames = new Set<string>();
 
   traverse(tsAST, {
+    ImportDeclaration(importPath) {
+      collectImportedTypeSources(importPath.node, importedTypeSources);
+    },
+
     // eslint-disable-next-line complexity
     CallExpression(callPath) {
       // 收集 DefineComponent({ subComponents: [a, b, ...] }) 中的子组件名
@@ -154,5 +196,10 @@ export function traverseAst(
     }
   }
 
-  return { rootComponentInfo, customComponentInfoRecord, chunkComponentInfoRecord };
+  const importedSubComponentSourceRecord = collectImportedSubComponentSources(
+    customComponentInfoRecord,
+    importedTypeSources,
+  );
+
+  return { rootComponentInfo, customComponentInfoRecord, chunkComponentInfoRecord, importedSubComponentSourceRecord };
 }
