@@ -26,6 +26,7 @@ const manuallyFocusedTests: readonly string[] = [
   // "jsonValidator/missingPlaceholder/missingPlaceholder.test.ts",
   // "jsonValidator/invalidPath/invalidPath.test.ts",
   // "jsonValidator/missingImports/missingImports.test.ts",
+  // "jsonValidator/validAlias/validAlias.test.ts",
   // "wxmlValidator/element/duplicateId/duplicateId.test.ts",
   // "wxmlValidator/element/unknownTag/unknownTag.test.ts",
   // "wxmlValidator/comment/all/all.test.ts",

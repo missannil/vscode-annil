@@ -96,11 +96,26 @@ suite("traverseAst", () => {
     });
   });
 
-  test("baseUrl 裸路径导入转换为以 / 开头的 usingComponents 路径", () => {
+  test("无 baseUrl 的 paths 别名导入转换为以 / 开头的 usingComponents 路径", () => {
     assert.deepStrictEqual(
       resolveImportedSubComponentPaths(demoFsPath, {
-        subExternal: "components/subExternal/subExternal.js",
+        subExternal: "~/subExternal/subExternal.js",
       }),
+      { subExternal: "/components/subExternal/subExternal" },
+    );
+  });
+
+  test("旧式 baseUrl + paths 别名导入仍转换为以 / 开头的 usingComponents 路径", () => {
+    const legacyFsPath = path.resolve(
+      __dirname,
+      "../../../..",
+      "_test/suite/tsAnalyzer/legacyPaths/legacyComponent.ts",
+    );
+    const legacyText = fs.readFileSync(legacyFsPath, "utf-8");
+    const legacyInfo = traverseAst(legacyFsPath, legacyText, configuration.innerDataPrefix);
+
+    assert.deepStrictEqual(
+      resolveImportedSubComponentPaths(legacyFsPath, legacyInfo.importedSubComponentSourceRecord),
       { subExternal: "/components/subExternal/subExternal" },
     );
   });

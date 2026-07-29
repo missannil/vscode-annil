@@ -7,13 +7,12 @@
     "skipLibCheck": true,
     "exactOptionalPropertyTypes": true, // 带有?标志的属性类型不再包含undefined类型
     "strict": true, /* enable all strict type-checking options */
-    "baseUrl": "./miniprogram",
     "paths": {
       "~/*": [
-        "components/*"
+        "./miniprogram/components/*"
       ],
       "@useCommon/*": [
-        "useCommon/*"
+        "./miniprogram/useCommon/*"
       ]
     },
     "types": [

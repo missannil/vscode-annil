@@ -61,6 +61,7 @@ function resolveModuleSource(source: string, tsConfigPath: string): string | und
     }
   }
 
+  // 无 paths 匹配时，仅兼容仍声明 baseUrl 的旧项目；TS 7 新配置应显式使用 paths。
   return compilerOptions.baseUrl === undefined ? undefined : path.resolve(resolutionBase, source);
 }
 
