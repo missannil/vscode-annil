@@ -1,0 +1,7 @@
+<!-- 测试目标：未在 TS data 中定义的变量应产生 unknownData 诊断 -->
+<view>
+	<!-- ① undefData 未在 TS 中定义，应产生未知数据诊断 -->
+	<view class="{{undefData}}"></view>
+	<!-- ② knownData 已在 TS data 中定义，不产生任何诊断 -->
+	<view class="{{knownData}}"></view>
+</view>

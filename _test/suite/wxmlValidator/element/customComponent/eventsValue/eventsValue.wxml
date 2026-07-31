@@ -1,0 +1,5 @@
+<!-- ① 正确：绑定 subInline_onTap → 无诊断 -->
+<subInline bind:onTap="subInline_onTap"></subInline>
+<!-- annil disable repeatTag -->
+<!-- ② 错误：绑定 wrong → 应绑定 "subInline_onTap" -->
+<subInline bind:onTap="wrong"></subInline>

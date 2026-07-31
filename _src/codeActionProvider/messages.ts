@@ -27,6 +27,12 @@ export const DiagMsg = {
   invalidPath: "无效的路径",
   /** JSON 顶层不受支持的配置键 */
   unknownConfigKey: "未知配置属性",
+  /** {{}} 表达式中的非法运算符 */
+  illegalOperator: "非法的运算符",
+  /** 非法的变量名（不符合 JS 标识符规范） */
+  invalidVariable: "无效的变量",
+  /** 未知标签 */
+  unknownTag: "未知标签",
 } as const;
 
 /** 所有支持的诊断消息类型 */

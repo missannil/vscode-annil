@@ -1,0 +1,11 @@
+<!-- ① chunk 自身属性用 chunk 数据 → 无诊断 -->
+<view
+	id="chunkInline"
+	class="{{chunkInline_visible}}"
+>
+	<!-- ② chunk 子节点可使用 chunk data + rootData -->
+	<view>{{chunkInline_visible}}</view>
+	<view>{{rootKnown}}</view>
+</view>
+<!-- ③ chunk 作用域外访问 chunk data → 未知数据 -->
+<view>{{chunkInline_visible}}</view>

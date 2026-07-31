@@ -93,3 +93,36 @@ export async function applyEditAndWaitForDiagnostics(
 
   return diagnosticsReady;
 }
+
+/**
+ * 等待文档诊断稳定：至少达到 minCount 条且 200ms 内无新发布事件。
+ *
+ * 适用于打开 fixture 后一次性获取完整诊断列表的场景，
+ * 避免因多次发布事件导致断言读到中间状态。
+ */
+export function waitForStableDiagnostics(
+  uri: vscode.Uri,
+  minCount: number,
+  timeoutMs = 3_000,
+): Promise<readonly vscode.Diagnostic[]> {
+  return new Promise<readonly vscode.Diagnostic[]>((resolve) => {
+    let stableTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const subscription = vscode.languages.onDidChangeDiagnostics((event) => {
+      if (!event.uris.some((u) => u.toString() === uri.toString())) return;
+      const current = vscode.languages.getDiagnostics(uri);
+      if (current.length < minCount) return;
+
+      if (stableTimer !== undefined) clearTimeout(stableTimer);
+      stableTimer = setTimeout(() => {
+        subscription.dispose();
+        resolve([...vscode.languages.getDiagnostics(uri)]);
+      }, 200);
+    });
+
+    setTimeout(() => {
+      subscription.dispose();
+      resolve([...vscode.languages.getDiagnostics(uri)]);
+    }, timeoutMs);
+  });
+}

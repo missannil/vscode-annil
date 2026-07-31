@@ -88,7 +88,13 @@ function validateCustomValue(
   for (const match of value.matchAll(/\{\{(.+?)\}\}/g)) {
     const topName = getTopName(match[1]);
     if (topName === "" || rootDataNames.has(topName)) continue;
-    addDiagnostic(diagnostics, startLine, match[0].length, `未知数据: "${topName}"`);
+    addDiagnostic(
+      diagnostics,
+      startLine,
+      match[0].length,
+      `未知数据: "${topName}"`,
+      vscode.DiagnosticSeverity.Error,
+    );
   }
 }
 
@@ -126,12 +132,13 @@ function addDiagnostic(
   startLine: number,
   length: number,
   message: string,
+  severity = vscode.DiagnosticSeverity.Warning,
 ): void {
   diagnostics.push(
     new vscode.Diagnostic(
       new vscode.Range(startLine, 0, startLine, length),
       message,
-      vscode.DiagnosticSeverity.Warning,
+      severity,
     ),
   );
 }

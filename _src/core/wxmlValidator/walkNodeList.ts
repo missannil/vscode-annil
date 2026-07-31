@@ -4,6 +4,12 @@ import type { WxmlValidationContext } from "./context.js";
 
 export type WxmlNodeHooks = {
   onElementNode?: (node: Domhandler.Element, startLine: number, context: WxmlValidationContext) => void;
+  /** 在元素自身属性校验完成后、递归子节点之前调用。用于建立 wx:for 等局部作用域。 */
+  onBeforeElementChildren?: (
+    node: Domhandler.Element,
+    startLine: number,
+    context: WxmlValidationContext,
+  ) => void;
   onTextNode?: (node: Domhandler.Text, startLine: number, context: WxmlValidationContext) => void;
   onCommentNode?: (
     node: Domhandler.Comment,
@@ -48,6 +54,9 @@ export function walkWxmlNodeList(
     if (isElementNode(childNode)) {
       // 元素规则是否执行由调用方决定；遍历器始终继续递归其子节点。
       hooks.onElementNode?.(childNode, startLine, context);
+
+      // 在递归子节点之前，通知调用方可建立 wx:for 等局部作用域。
+      hooks.onBeforeElementChildren?.(childNode, startLine, context);
 
       // 元素子节点使用同一个上下文递归处理，以共享调用方维护的状态。
       if (childNode.children.length > 0) {

@@ -1,0 +1,9 @@
+<!-- 测试目标：非法变量名语法校验 -->
+<view>
+	<!-- ① 以数字开头的变量名应产生 invalidVariable 诊断 -->
+	<view class="{{123invalid}}"></view>
+	<!-- ② 包含非法字符（-）的变量名应产生 invalidVariable 诊断 -->
+	<view class="{{a-b}}"></view>
+	<!-- ③ 合法变量名 a（已在 TS data 中定义）不产生任何诊断 -->
+	<view class="{{a}}"></view>
+</view>

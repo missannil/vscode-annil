@@ -1,12 +1,14 @@
-import { type Domhandler, vscode } from "#deps";
+import { type Domhandler, type vscode } from "#deps";
 import { configuration } from "../../configuration/index.js";
 import type { TsFileInfo } from "../types/TsFileInfo.js";
 import { checkAnnilCommentNode } from "./comment/checkAnnilCommentNode.js";
 import { WxmlValidationContext } from "./context.js";
+import { resolveChunkId, validateChunkComponent } from "./customComponent/validateChunkComponent.js";
 import { validateCustomComponent } from "./customComponent/validateCustomComponent.js";
 import { validateDuplicateId } from "./element/validateDuplicateId.js";
 import { validateRepeatSubComponentTag } from "./element/validateRepeatSubComponentTag.js";
 import { isNativeTag, validateUnknownTag } from "./element/validateUnknownTag.js";
+import { validateAttributeValues, validateMustacheText } from "./expression/validateMustache.js";
 import { walkWxmlNodeList } from "./walkNodeList.js";
 
 /**
@@ -24,22 +26,18 @@ export function checkWxml(
   const textlines = text.split("\n");
   const validNames = new Set([...tsFileInfo.rootComponentInfo.dataList, ...validDatas]);
   const context = new WxmlValidationContext(textlines);
-  // ID 重复不受 annil disable 影响，用独立集合追踪
   const existingIds = new Set<string>();
 
-  // 所有 WXML 规则复用同一套遍历和诊断上下文。
   walkWxmlNodeList(wxmlDocument.children, context, {
     onElementNode(node, startLine, currentContext) {
-      // ID 重复校验在所有注释屏蔽之前，annil disable 无法绕过
       validateDuplicateId(node, startLine, currentContext.textlines, existingIds, currentContext.diagnosticList);
 
-      // 第一个元素之后，`annil disable all` 不再允许出现。
       currentContext.traversal.isHeadLocation = false;
-      // 注释状态由本模块维护，生效时跳过当前元素的全部校验规则。
+
       if (currentContext.comment.isCommented()) return;
 
       const customComponentInfo = tsFileInfo.customComponentInfoRecord[node.name];
-      // 如果是自定义组件
+
       if (customComponentInfo) {
         validateRepeatSubComponentTag(
           node,
@@ -49,12 +47,12 @@ export function checkWxml(
           currentContext.comment.repeatTagStatus,
           currentContext.diagnosticList,
         );
-        // 自定义组件的普通属性必须按 configInfo 精确校验，不能当作根数据直接扫描。
-        // 当前先校验仍处于父级模板作用域的 wx:* 控制属性；普通属性校验将在此处接入。
-        checkRootDataAttributes(
+        // wx:* 控制属性在当前作用域中校验（不含本元素的 wx:for 作用域）
+        const effectiveNames = getEffectiveValidNames(validNames, currentContext, tsFileInfo);
+        validateAttributeValues(
           Object.entries(node.attribs).filter(([name]) => name.startsWith("wx:")),
           currentContext.textlines,
-          validNames,
+          effectiveNames,
           currentContext.diagnosticList,
         );
         validateCustomComponent(
@@ -74,20 +72,49 @@ export function checkWxml(
         return;
       }
 
-      // 非自定义组件的所有属性值都在 RootComponent 数据作用域中。
-      checkRootDataAttributes(
+      // ChunkComponent：原生元素 + id 命中 chunkComponentInfoRecord
+      const chunkId = resolveChunkId(node, tsFileInfo.chunkComponentInfoRecord);
+      if (chunkId !== undefined) {
+        currentContext.pushChunkMark(chunkId);
+        validateChunkComponent(
+          node,
+          startLine,
+          chunkId,
+          tsFileInfo,
+          validNames,
+          currentContext.diagnosticList,
+          currentContext.textlines,
+        );
+
+        return;
+      }
+
+      // 普通原生元素
+      validateAttributeValues(
         Object.entries(node.attribs),
         currentContext.textlines,
-        validNames,
+        getEffectiveValidNames(validNames, currentContext, tsFileInfo),
         currentContext.diagnosticList,
       );
     },
+    onBeforeElementChildren(node, _, currentContext) {
+      // wx:for 作用域在元素自身属性校验完成后、子节点递归前建立
+      if ("wx:for" in node.attribs) {
+        currentContext.pushWxForScope(
+          node.attribs["wx:for-item"] ?? "item",
+          node.attribs["wx:for-index"] ?? "index",
+        );
+      }
+    },
     onTextNode(node, _, currentContext) {
-      // 空白文本或被 Annil 注释屏蔽的文本不执行数据校验。
       if (node.data.trim() === "" || currentContext.comment.isCommented()) return;
 
-      // 文本插值不属于组件属性，始终按 RootComponent 数据作用域校验。
-      checkMustacheMatches(node.data, currentContext.textlines, validNames, currentContext.diagnosticList);
+      validateMustacheText(
+        node.data,
+        currentContext.textlines,
+        getEffectiveValidNames(validNames, currentContext, tsFileInfo),
+        currentContext.diagnosticList,
+      );
     },
     onCommentNode(node, startLine, nodeLevelMark, currentContext) {
       const commentData = node.data;
@@ -105,7 +132,15 @@ export function checkWxml(
         currentContext.comment.setStatus(commentType, nodeLevelMark);
       }
     },
-    onAfterElementNode(_, __, nodeLevelMark, currentContext) {
+    onAfterElementNode(node, _, nodeLevelMark, currentContext) {
+      if ("wx:for" in node.attribs) {
+        currentContext.popWxForScope();
+      }
+      // 离开 ChunkComponent 作用域
+      if (node.attribs.id !== undefined && tsFileInfo.chunkComponentInfoRecord[node.attribs.id] !== undefined) {
+        currentContext.popChunkMark();
+      }
+
       currentContext.comment.tryExpireStatus("afterElement", nodeLevelMark);
       currentContext.comment.disableRepeatTag();
     },
@@ -117,58 +152,31 @@ export function checkWxml(
   return context.diagnosticList;
 }
 
-const MUSTACHE_RE = /\{\{(.+?)\}\}/g;
+/**
+ * 合并当前作用域下所有有效变量名：
+ *   - rootData
+ *   - wx:for item/index 栈
+ *   - 外层 ChunkComponent 的 dataList
+ */
+function getEffectiveValidNames(
+  baseNames: ReadonlySet<string>,
+  context: WxmlValidationContext,
+  tsFileInfo: TsFileInfo,
+): Set<string> {
+  const { wxForItemNames, wxForIndexNames, outerChunkTagMarks } = context.scope;
+  let merged = new Set(baseNames);
 
-/** 校验处于 RootComponent 数据作用域中的一组元素属性。 */
-function checkRootDataAttributes(
-  attributes: Array<[string, string]>,
-  textlines: string[],
-  validNames: Set<string>,
-  diagnostics: vscode.Diagnostic[],
-): void {
-  for (const [, value] of attributes) {
-    checkMustacheMatches(value, textlines, validNames, diagnostics);
-  }
-}
-
-/** 扫描文本中的 {{...}}，逐个校验根组件数据引用。 */
-function checkMustacheMatches(
-  text: string,
-  textlines: string[],
-  validNames: Set<string>,
-  diagnostics: vscode.Diagnostic[],
-): void {
-  for (const match of text.matchAll(MUSTACHE_RE)) {
-    const expr = match[1].trim();
-
-    if (expr === "item" || expr === "index" || expr.startsWith("...")) continue;
-    if (expr.includes("(") || expr.includes("+") || expr.includes("?")) continue;
-
-    const topVar = expr.split(".")[0];
-    if (validNames.has(topVar)) continue;
-
-    const { line, col } = findMustachePosition(match, textlines);
-    diagnostics.push(
-      new vscode.Diagnostic(
-        new vscode.Range(line, col, line, col + match[0].length),
-        `未知数据: "${topVar}"`,
-        vscode.DiagnosticSeverity.Warning,
-      ),
-    );
-  }
-}
-
-/** 在源码行数组中定位指定 mustache 的位置。 */
-function findMustachePosition(
-  match: RegExpMatchArray,
-  textlines: string[],
-): { line: number; col: number } {
-  const needle = match[0];
-
-  for (let i = 0; i < textlines.length; i++) {
-    const col = textlines[i].indexOf(needle);
-    if (col >= 0) return { line: i, col };
+  if (wxForItemNames.length > 0 || wxForIndexNames.length > 0) {
+    merged = new Set([...merged, ...wxForItemNames, ...wxForIndexNames]);
   }
 
-  return { line: 0, col: 0 };
+  // 合并外层 chunk 的 dataList
+  for (const mark of outerChunkTagMarks) {
+    const chunkInfo = tsFileInfo.chunkComponentInfoRecord[mark];
+    if (chunkInfo !== undefined) {
+      for (const name of chunkInfo.dataList) merged.add(name);
+    }
+  }
+
+  return merged;
 }

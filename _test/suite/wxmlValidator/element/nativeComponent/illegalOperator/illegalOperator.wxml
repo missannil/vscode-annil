@@ -1,0 +1,9 @@
+<!-- 测试目标：非法运算符检测 -->
+<view>
+	<!-- ① 位与运算符 & 应产生 illegalOperator 诊断 -->
+	<view class="{{a & b}}"></view>
+	<!-- ② 赋值运算符 = 应产生 illegalOperator 诊断 -->
+	<view class="{{a = b}}"></view>
+	<!-- ③ 合法加法运算符 + 不应产生 illegalOperator，但 a,b 为合法数据，无诊断 -->
+	{{a}}
+</view>

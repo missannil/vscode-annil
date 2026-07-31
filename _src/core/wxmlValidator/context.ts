@@ -68,4 +68,27 @@ export class WxmlValidationContext {
     this.textlines = textlines;
     this.diagnosticList = diagnosticList;
   }
+
+  /** 进入 wx:for 作用域，压入自定义 item / index 变量名。 */
+  public pushWxForScope(itemName: string, indexName: string): void {
+    this.scope.wxForItemNames.push(itemName);
+    this.scope.wxForIndexNames.push(indexName);
+  }
+
+  /** 离开 wx:for 作用域，弹出最近一次压入的变量名。 */
+  public popWxForScope(): void {
+    // 始终保证成对 pop；若外部调用异常也不抛出
+    if (this.scope.wxForItemNames.length > 0) this.scope.wxForItemNames.pop();
+    if (this.scope.wxForIndexNames.length > 0) this.scope.wxForIndexNames.pop();
+  }
+
+  /** 进入 ChunkComponent 作用域，压入 chunk 标记（即变量名/id）。 */
+  public pushChunkMark(mark: string): void {
+    this.scope.outerChunkTagMarks.push(mark);
+  }
+
+  /** 离开 ChunkComponent 作用域，弹出最近一次压入的标记。 */
+  public popChunkMark(): void {
+    if (this.scope.outerChunkTagMarks.length > 0) this.scope.outerChunkTagMarks.pop();
+  }
 }

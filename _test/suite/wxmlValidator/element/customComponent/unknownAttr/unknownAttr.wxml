@@ -1,0 +1,5 @@
+<!-- ① 正确：只写合法属性 → 无诊断 -->
+<subInline subInline_inheritBool="{{propRequiredBool}}"></subInline>
+<!-- annil disable repeatTag -->
+<!-- ② 错误：多了 unknown → 未知属性诊断 -->
+<subInline subInline_inheritBool="{{propRequiredBool}}" unknown="{{propRequiredBool}}"></subInline>

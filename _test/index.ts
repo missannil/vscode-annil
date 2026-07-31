@@ -15,6 +15,25 @@ const __dirname = path.dirname(__filename);
  * `.test.ts` 后缀即可。目录会包含其下全部测试文件。
  */
 const manuallyFocusedTests: readonly string[] = [
+  // ── element/chunkComponent ──
+  // "wxmlValidator/element/chunkComponent/chunkData/chunkData.test.ts",
+  // ── element/customComponent ──
+  // "wxmlValidator/element/customComponent/missingAttr/missingAttr.test.ts",
+  // "wxmlValidator/element/customComponent/unknownAttr/unknownAttr.test.ts",
+  // "wxmlValidator/element/customComponent/rootValue/rootValue.test.ts",
+  // "wxmlValidator/element/customComponent/selfValue/selfValue.test.ts",
+  // "wxmlValidator/element/customComponent/customValue/customValue.test.ts",
+  // "wxmlValidator/element/customComponent/eventsValue/eventsValue.test.ts",
+  // "wxmlValidator/element/customComponent/ternaryValue/ternaryValue.test.ts",
+  // ── element/nativeComponent ──
+  // "wxmlValidator/element/nativeComponent/illegalOperator/illegalOperator.test.ts",
+  // "wxmlValidator/element/nativeComponent/invalidVariable/invalidVariable.test.ts",
+  // "wxmlValidator/element/nativeComponent/notRootData/notRootData.test.ts",
+  // "wxmlValidator/element/nativeComponent/wxForScope/wxForScope.test.ts",
+  // ── element ──
+  // "wxmlValidator/element/duplicateId/duplicateId.test.ts",
+  // "wxmlValidator/element/unknownTag/unknownTag.test.ts",
+  // ── 以下为早期已通过测试 ──
   // "testSelection.test.ts",
   // "tsAnalyzer/traverseAst.test.ts",
   // "guardCheck.test.ts",
@@ -27,8 +46,7 @@ const manuallyFocusedTests: readonly string[] = [
   // "jsonValidator/invalidPath/invalidPath.test.ts",
   // "jsonValidator/missingImports/missingImports.test.ts",
   // "jsonValidator/validAlias/validAlias.test.ts",
-  // "wxmlValidator/element/duplicateId/duplicateId.test.ts",
-  // "wxmlValidator/element/unknownTag/unknownTag.test.ts",
+  // ── 注释相关 ──
   // "wxmlValidator/comment/all/all.test.ts",
   // "wxmlValidator/comment/invalidComment/invalidComment.test.ts",
   // "wxmlValidator/comment/invalidComment/invalidComment.codeAction.test.ts",
