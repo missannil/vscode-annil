@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "../../../../../");
 const JSON_PATH = path.join(projectRoot, "_test/suite/jsonValidator/unknownPlaceholder/unknownPlaceholder.json");
-const UNKNOWN_PLACEHOLDER = "unknownPlaceholder";
 const ORIGINAL_JSON = [
   "{",
   "  \"component\": true,",
@@ -31,7 +30,7 @@ describe("annil JSON 校验：unknownPlaceholder", () => {
     assertDiagnosticDetails(diagnostic, {
       message: "未知的占位组件",
       source: "vscode-annil",
-      code: UNKNOWN_PLACEHOLDER,
+      code: "annil.json.unknownPlaceholder",
       range: [4, 5, 4, 23],
     });
     await applyUnknownPlaceholderQuickFix(uri, diagnostic);

@@ -1,0 +1,12 @@
+<!-- wx:for-item/index 没有 wx:for -->
+<block
+	wx:for-item="itemA"
+	wx:for-index="indexA"
+></block>
+<!-- 有 wx:for 但没有 wx:key -->
+<block wx:for="{{items}}"></block>
+<!-- 合法：wx:for 和 wx:key 同时存在 -->
+<block
+	wx:for="{{items}}"
+	wx:key="*this"
+></block>

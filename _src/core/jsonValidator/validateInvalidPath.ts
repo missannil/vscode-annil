@@ -1,5 +1,7 @@
 import { vscode } from "#deps";
 import type { UsingComponents } from "../types/JsonFileInfo.js";
+import { JsonDiagnosticCode } from "./diagnosticCodes.js";
+import { setJsonDiagnosticInfo } from "./diagnosticInfo.js";
 import { findErrMsgRange } from "./findErrMsgRange.js";
 import { findKeyline } from "./findKeyline.js";
 
@@ -26,11 +28,8 @@ export function validateInvalidPath(
         vscode.DiagnosticSeverity.Error,
       );
       diagnostic.source = "vscode-annil";
-      diagnostic.code = currentPath;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (diagnostic as any).info = {
-        correctPath: correctPath as string,
-      };
+      diagnostic.code = JsonDiagnosticCode.invalidPath;
+      if (typeof correctPath === "string") setJsonDiagnosticInfo(diagnostic, { correctPath });
       diagnosticList.push(diagnostic);
     }
   }

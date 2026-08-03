@@ -28,15 +28,15 @@ describe("annil 注释：line", () => {
   test("插入 line 注释前，两个元素分别产生未知数据诊断", () => {
     assertDiagnosticDetails(initialDiagnostics[0], {
       message: "未知数据: \"xxx\"",
-      source: undefined,
-      code: undefined,
-      range: [2, 6, 2, 13],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [2, 8, 2, 11],
     });
     assertDiagnosticDetails(initialDiagnostics[1], {
       message: "未知数据: \"yyy\"",
-      source: undefined,
-      code: undefined,
-      range: [4, 6, 4, 13],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [4, 8, 4, 11],
     });
   });
 
@@ -48,9 +48,9 @@ describe("annil 注释：line", () => {
       (await applyEditAndWaitForDiagnostics(wxmlUri, edit, (current) => current.length === 1))[0],
       {
         message: "未知数据: \"yyy\"",
-        source: undefined,
-        code: undefined,
-        range: [5, 6, 5, 13],
+        source: "vscode-annil",
+        code: "annil.expression.unknownData",
+        range: [5, 8, 5, 11],
       },
     );
   });

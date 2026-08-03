@@ -28,11 +28,15 @@ describe("illegalOperator", () => {
     operatorDiags.sort((a, b) => a.range.start.line - b.range.start.line);
 
     assert.strictEqual(operatorDiags[0].message, `非法的运算符: "&"`);
+    assert.strictEqual(operatorDiags[0].source, "vscode-annil");
+    assert.strictEqual(operatorDiags[0].code, "annil.expression.illegalOperator");
     assert.strictEqual(operatorDiags[0].severity, vscode.DiagnosticSeverity.Error);
     // 确保诊断范围覆盖 mustache 区域
     assert.ok(operatorDiags[0].range.start.character >= 10);
 
     assert.strictEqual(operatorDiags[1].message, `非法的运算符: "="`);
+    assert.strictEqual(operatorDiags[1].source, "vscode-annil");
+    assert.strictEqual(operatorDiags[1].code, "annil.expression.illegalOperator");
     assert.strictEqual(operatorDiags[1].severity, vscode.DiagnosticSeverity.Error);
     assert.ok(operatorDiags[1].range.start.character >= 10);
   });

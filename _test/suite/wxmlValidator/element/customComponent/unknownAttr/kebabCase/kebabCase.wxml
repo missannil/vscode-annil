@@ -1,0 +1,8 @@
+<!-- ① 正确：kebab-case 属性名规范化后匹配契约 → 无诊断 -->
+<subInline subInline_inherit-bool="{{propRequiredBool}}"></subInline>
+<!-- annil disable repeatTag -->
+<!-- ② 错误：kebab-case 未知属性 → 未知属性诊断 -->
+<subInline
+	subInline_inherit-bool="{{propRequiredBool}}"
+	unknown-attr="{{propRequiredBool}}"
+></subInline>

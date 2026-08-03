@@ -29,6 +29,10 @@ describe("duplicateId", () => {
       diagnostics.map((diagnostic) => diagnostic.message),
       ["重复的id", "重复的id", "重复的id", "重复的id", "重复的id"],
     );
+    diagnostics.forEach((diagnostic) => {
+      assert.strictEqual(diagnostic.source, "vscode-annil");
+      assert.strictEqual(diagnostic.code, "annil.element.duplicateId");
+    });
     // 第一个重复 id="aaa" — 在第 6 行，id=" 位于 col 6，comparableId "aaa" 从 col 10 开始
     assert.strictEqual(diagnostics[0].range.start.line, 5);
     assert.strictEqual(diagnostics[0].range.start.character, 10);

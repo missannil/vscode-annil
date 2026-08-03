@@ -1,5 +1,7 @@
 import { type Domhandler, vscode } from "#deps";
 
+export const UnknownTagDiagnosticCode = "annil.element.unknownTag";
+
 /** 微信小程序 WXML 原生标签集合。 */
 const nativeTagNames = new Set([
   "ad",
@@ -69,11 +71,12 @@ export function validateUnknownTag(
   const tagStart = lineText.indexOf("<" + node.name);
   const col = tagStart >= 0 ? tagStart + 1 : 0; // +1 跳过 <
 
-  diagnostics.push(
-    new vscode.Diagnostic(
-      new vscode.Range(startLine, col, startLine, col + node.name.length),
-      "未知标签",
-      vscode.DiagnosticSeverity.Error,
-    ),
+  const diagnostic = new vscode.Diagnostic(
+    new vscode.Range(startLine, col, startLine, col + node.name.length),
+    "未知标签",
+    vscode.DiagnosticSeverity.Error,
   );
+  diagnostic.source = "vscode-annil";
+  diagnostic.code = UnknownTagDiagnosticCode;
+  diagnostics.push(diagnostic);
 }

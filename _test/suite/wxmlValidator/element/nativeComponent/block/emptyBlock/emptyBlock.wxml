@@ -1,0 +1,8 @@
+<!-- 非法：block 必须声明条件或循环控制属性。 -->
+<block></block>
+<block></block>
+<!-- 合法：带循环控制属性的 block。 -->
+<block
+	wx:for="{{items}}"
+	wx:key="*this"
+></block>

@@ -1,0 +1,7 @@
+<!-- 成员表达式和下标表达式。 -->
+<view class="{{profile.enabled}}"></view>
+<view class="{{items[0]}}"></view>
+<!-- 函数调用、加法和三元表达式应保留为合法复杂表达式。 -->
+<view class="{{isReady()}}"></view>
+<view class="{{enabled + count}}"></view>
+<view class="{{enabled ? profile.enabled : false}}"></view>

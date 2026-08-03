@@ -1,0 +1,6 @@
+<!-- 非法：空条件表达式。 -->
+<block wx:if="{{ }}"></block>
+<!-- 非法：条件表达式包含赋值运算符。 -->
+<block wx:if="{{ enabled = false }}"></block>
+<!-- 合法：普通布尔条件。 -->
+<block wx:if="{{enabled}}"></block>

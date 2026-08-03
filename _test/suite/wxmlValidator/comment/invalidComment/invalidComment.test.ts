@@ -28,8 +28,8 @@ describe("annil 注释：invalidComment", () => {
   test("插入无效注释前保留原有的未知标签诊断", () => {
     assertDiagnosticDetails(initialDiagnostics[0], {
       message: "未知标签",
-      source: undefined,
-      code: undefined,
+      source: "vscode-annil",
+      code: "annil.element.unknownTag",
       range: [2, 1, 2, 11],
     });
   });
@@ -47,13 +47,13 @@ describe("annil 注释：invalidComment", () => {
     assertDiagnosticDetails(diagnostics[0], {
       message: "无效的注释",
       source: "vscode-annil",
-      code: undefined,
+      code: "annil.comment.invalidText",
       range: [1, 5, 1, 26],
     });
     assertDiagnosticDetails(diagnostics[1], {
       message: "未知标签",
-      source: undefined,
-      code: undefined,
+      source: "vscode-annil",
+      code: "annil.element.unknownTag",
       range: [3, 1, 3, 11],
     });
   });

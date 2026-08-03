@@ -56,6 +56,8 @@ class Linter {
     this.#onDidOpenTextDocument();
     this.#onDidChangeTextDocument();
     this.#onDidDeleteFiles();
+    this.#onDidCreateFiles();
+    this.#onDidRenameFiles();
     void this.#checkVisibleEditors();
   }
 
@@ -103,14 +105,47 @@ class Linter {
   #onDidDeleteFiles(): void {
     this.#disposables.push(vscode.workspace.onDidDeleteFiles((event) => {
       for (const uri of event.files) {
-        const dir = getComponentDir(uri);
-        this.#checkedDirs.delete(dir);
-        this.#diagnosticCollection.delete(uri);
-        tsParser.invalidate(uri.fsPath);
-        wxmlParser.invalidate(uri.fsPath);
-        jsonParser.invalidate(uri.fsPath);
+        this.#invalidateComponent(uri);
       }
     }));
+  }
+
+  #onDidCreateFiles(): void {
+    this.#disposables.push(vscode.workspace.onDidCreateFiles((event) => {
+      for (const uri of event.files) this.#refreshComponent(uri);
+    }));
+  }
+
+  #onDidRenameFiles(): void {
+    this.#disposables.push(vscode.workspace.onDidRenameFiles((event) => {
+      for (const { oldUri, newUri } of event.files) {
+        this.#invalidateComponent(oldUri);
+        this.#refreshComponent(newUri);
+      }
+    }));
+  }
+
+  #invalidateComponent(uri: vscode.Uri): void {
+    const dir = getComponentDir(uri);
+    this.#checkedDirs.delete(dir);
+
+    for (
+      const sibling of [
+        getSiblingUri(uri, ".ts"),
+        getSiblingUri(uri, ".json"),
+        getSiblingUri(uri, ".wxml"),
+      ]
+    ) {
+      this.#diagnosticCollection.delete(sibling);
+      tsParser.invalidate(sibling.fsPath);
+      wxmlParser.invalidate(sibling.fsPath);
+      jsonParser.invalidate(sibling.fsPath);
+    }
+  }
+
+  #refreshComponent(uri: vscode.Uri): void {
+    if (!isComponentUri(uri)) return;
+    void this.#checkComponent(uri);
   }
 
   async #checkVisibleEditors(): Promise<void> {
@@ -199,13 +234,15 @@ class Linter {
   async #checkComponent(uri: vscode.Uri): Promise<void> {
     const dir = getComponentDir(uri);
 
+    let checked = false;
     try {
       await this.#fetchComponentInfo(uri);
       this.#diagnoseComponent(uri);
+      checked = true;
     } catch {
-      // 文件不存在等异常，跳过（不清空诊断，保留旧结果）
-    } finally {
-      // 无论成功失败都标记为已检查，避免重复触发
+      // 文件不存在或解析失败时不标记目录，待文件恢复后允许重新检查。
+    }
+    if (checked) {
       this.#checkedDirs.add(dir);
     }
   }

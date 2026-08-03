@@ -9,7 +9,8 @@ await esbuild.build({
   bundle: true,
   platform: 'node',
   format: 'esm',
-  packages: 'external',
+  mainFields: ['module', 'main'],
+  external: ["vscode"],
   alias: {
     '#deps': './_src/utils/deps.ts',
   },

@@ -29,15 +29,15 @@ describe("annil 注释：startEnd", () => {
   test("插入 start/end 前，两个未知数据分别产生诊断", () => {
     assertDiagnosticDetails(initialDiagnostics[0], {
       message: "未知数据: \"disabledByStart\"",
-      source: undefined,
-      code: undefined,
-      range: [2, 6, 2, 25],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [2, 8, 2, 23],
     });
     assertDiagnosticDetails(initialDiagnostics[1], {
       message: "未知数据: \"enabledAfterEnd\"",
-      source: undefined,
-      code: undefined,
-      range: [4, 6, 4, 25],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [4, 8, 4, 23],
     });
   });
 
@@ -50,9 +50,9 @@ describe("annil 注释：startEnd", () => {
 
     assertDiagnosticDetails(diagnostic, {
       message: "未知数据: \"enabledAfterEnd\"",
-      source: undefined,
-      code: undefined,
-      range: [6, 6, 6, 25],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [6, 8, 6, 23],
     });
   });
 

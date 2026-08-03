@@ -1,5 +1,7 @@
 import { type Domhandler, vscode } from "#deps";
 
+export const DuplicateIdDiagnosticCode = "annil.element.duplicateId";
+
 /**
  * 提取元素的比对 ID：按 _ 分割后取最后一段（不经规范化）。
  * 用于在 rawId 中定位 column —— 必须是原文中的真实子串。
@@ -77,13 +79,14 @@ export function validateDuplicateId(
     const { offset: innerOffset, length: innerLen } = getDiagnosticRangeInComparableId(rawComparableId);
     const col = attrStart + 4 + suffixStartInValue + innerOffset; // +4 跳过 id="
 
-    diagnostics.push(
-      new vscode.Diagnostic(
-        new vscode.Range(startLine, col, startLine, col + innerLen),
-        "重复的id",
-        vscode.DiagnosticSeverity.Error,
-      ),
+    const diagnostic = new vscode.Diagnostic(
+      new vscode.Range(startLine, col, startLine, col + innerLen),
+      "重复的id",
+      vscode.DiagnosticSeverity.Error,
     );
+    diagnostic.source = "vscode-annil";
+    diagnostic.code = DuplicateIdDiagnosticCode;
+    diagnostics.push(diagnostic);
   } else {
     existingIds.add(comparableId);
   }

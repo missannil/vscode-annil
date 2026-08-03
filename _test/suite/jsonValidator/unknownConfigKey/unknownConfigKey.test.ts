@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "../../../../../");
 const JSON_PATH = path.join(projectRoot, "_test/suite/jsonValidator/unknownConfigKey/unknownConfigKey.json");
-const UNKNOWN_CONFIG_KEY = "unknownConfig";
 const ORIGINAL_JSON = [
   "{",
   "  \"unknownConfig\": true,",
@@ -30,7 +29,7 @@ describe("annil JSON 校验：unknownConfigKey", () => {
     assertDiagnosticDetails(diagnostic, {
       message: "未知配置属性",
       source: "vscode-annil",
-      code: UNKNOWN_CONFIG_KEY,
+      code: "annil.json.unknownConfigKey",
       range: [1, 3, 1, 16],
     });
     await applyUnknownConfigKeyQuickFix(uri, diagnostic);

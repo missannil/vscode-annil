@@ -1,4 +1,6 @@
 import { vscode } from "#deps";
+import { JsonDiagnosticCode } from "./diagnosticCodes.js";
+import { setJsonDiagnosticInfo } from "./diagnosticInfo.js";
 import { findErrMsgRange } from "./findErrMsgRange.js";
 import { findKeyline } from "./findKeyline.js";
 
@@ -29,11 +31,11 @@ export function validateUnknownImports(
         vscode.DiagnosticSeverity.Error,
       );
       diagnostic.source = "vscode-annil";
-      diagnostic.code = key;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (diagnostic as any).info = {
+      diagnostic.code = JsonDiagnosticCode.unknownImport;
+      setJsonDiagnosticInfo(diagnostic, {
+        componentName: key,
         expectImport: importedSubCompInfo,
-      };
+      });
       diagnosticList.push(diagnostic);
     }
   }

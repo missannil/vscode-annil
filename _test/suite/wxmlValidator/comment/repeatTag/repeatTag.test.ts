@@ -24,7 +24,7 @@ describe("annil 注释：repeatTag", () => {
     assertDiagnosticDetails(initialDiagnostics[0], {
       message: "重复的子组件",
       source: "vscode-annil",
-      code: undefined,
+      code: "annil.customComponent.repeatedTag",
       range: [4, 1, 4, 5],
     });
   });

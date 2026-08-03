@@ -29,7 +29,7 @@ describe("annil JSON 校验：missingImports", () => {
     assertDiagnosticDetails(diagnostic, {
       message: " 缺少导入的组件",
       source: "vscode-annil",
-      code: "validComponent",
+      code: "annil.json.missingImport",
       range: [2, 3, 2, 18],
     });
     await applyMissingImportQuickFix(uri, diagnostic);

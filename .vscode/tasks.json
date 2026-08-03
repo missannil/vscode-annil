@@ -18,7 +18,6 @@
       "type": "npm",
       "script": "dev",
       "label": "dev",
-      "dependsOn": ["clean"],
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
       "presentation": {

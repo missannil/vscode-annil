@@ -31,7 +31,7 @@ describe("annil 注释：invalidLocation", () => {
     assertDiagnosticDetails((await applyEditAndWaitForDiagnostics(uri, edit, (current) => current.length === 1))[0], {
       message: "注释应写在文件头部",
       source: "vscode-annil",
-      code: undefined,
+      code: "annil.comment.invalidLocation",
       range: [3, 5, 3, 22],
     });
   });

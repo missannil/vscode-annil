@@ -1,0 +1,4 @@
+<!-- ① 正确：绑定 subInline_cid → 无诊断 -->
+<subInline subInline_cid="{{subInline_cid}}"></subInline>
+<!-- annil disable repeatTag -->
+<subInline subInline_cid="{{wrong}}"></subInline>

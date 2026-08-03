@@ -3,6 +3,16 @@
 .husky/**
 src/**
 test/**
+_src/**
+_test/**
+miniTest/**
+scripts/**
+xxx/**
+.github/**
+esbuild.config.js
+eslint.config.js
+pnpm-lock.yaml
+pnpm-workspace.yaml
 .gitignore
 .eslintrc.cjs
 .yarnrc

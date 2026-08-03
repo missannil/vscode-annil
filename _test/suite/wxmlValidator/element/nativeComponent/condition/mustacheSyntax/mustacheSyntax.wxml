@@ -1,0 +1,9 @@
+<block wx:if="enabled"></block>
+<view></view>
+<block wx:if="{{enabled}}"></block>
+<block wx:elif="enabled"></block>
+<block wx:else></block>
+<view></view>
+<block wx:if="{{enabled}}"></block>
+<block wx:elif="{{enabled}}"></block>
+<block wx:else></block>

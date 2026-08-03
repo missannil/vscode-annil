@@ -37,7 +37,7 @@ describe("annil 注释：repeatedStart", () => {
     assertDiagnosticDetails((await applyEditAndWaitForDiagnostics(uri, edit, (current) => current.length === 1))[0], {
       message: "重复的注释",
       source: "vscode-annil",
-      code: undefined,
+      code: "annil.comment.repeatedComment",
       range: [3, 5, 3, 24],
     });
   });

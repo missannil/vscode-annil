@@ -5,19 +5,17 @@ import { CommentManager } from "./comment/CommentManager.js";
 /**
  * WXML 验证时需要保留的通用作用域信息。
  *
- * 现在先把旧代码里的“可扩展状态”拆成独立区域，后续再逐步接入具体校验逻辑。
+ * 仅保留当前遍历和诊断流程实际使用的状态，避免作用域对象与校验逻辑脱节。
  */
 export type WxmlScopeState = {
   /** 当前生效的 wx:for-item 名称栈 */
   wxForItemNames: string[];
   /** 当前生效的 wx:for-index 名称栈 */
   wxForIndexNames: string[];
-  /** 待处理的条件表达式信息 */
-  pendingConditionBlockInfo: null;
+  /** 当前各节点列表的条件链状态栈 */
+  conditionChainStates: Array<"wx:if" | "wx:elif" | "wx:else" | null>;
   /** 外层 chunk 标记栈 */
   outerChunkTagMarks: string[];
-  /** 已出现的 id 列表 */
-  existingIdList: string[];
   /** 已确认处理过的自定义组件标签 */
   checkedSubComponentTags: Set<string>;
 };
@@ -58,9 +56,8 @@ export class WxmlValidationContext {
   public readonly scope: WxmlScopeState = {
     wxForItemNames: [],
     wxForIndexNames: [],
-    pendingConditionBlockInfo: null,
+    conditionChainStates: [],
     outerChunkTagMarks: [],
-    existingIdList: [],
     checkedSubComponentTags: new Set<string>(),
   };
 
@@ -80,6 +77,27 @@ export class WxmlValidationContext {
     // 始终保证成对 pop；若外部调用异常也不抛出
     if (this.scope.wxForItemNames.length > 0) this.scope.wxForItemNames.pop();
     if (this.scope.wxForIndexNames.length > 0) this.scope.wxForIndexNames.pop();
+  }
+
+  /** 进入一个节点列表，建立与父节点列表隔离的条件链。 */
+  public pushConditionScope(): void {
+    this.scope.conditionChainStates.push(null);
+  }
+
+  /** 离开一个节点列表，丢弃该层的条件链。 */
+  public popConditionScope(): void {
+    this.scope.conditionChainStates.pop();
+  }
+
+  /** 读取当前节点列表中的前一个条件属性。 */
+  public getPreviousConditionAttribute(): "wx:if" | "wx:elif" | "wx:else" | null {
+    return this.scope.conditionChainStates.at(-1) ?? null;
+  }
+
+  /** 更新当前节点列表的条件链；普通元素会中断条件链。 */
+  public setPreviousConditionAttribute(attribute: "wx:if" | "wx:elif" | "wx:else" | null): void {
+    if (this.scope.conditionChainStates.length === 0) this.pushConditionScope();
+    this.scope.conditionChainStates[this.scope.conditionChainStates.length - 1] = attribute;
   }
 
   /** 进入 ChunkComponent 作用域，压入 chunk 标记（即变量名/id）。 */

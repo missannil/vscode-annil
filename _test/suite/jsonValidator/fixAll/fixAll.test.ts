@@ -35,31 +35,31 @@ describe("annil JSON 集成：fixAll", () => {
     assertDiagnosticDetails(diagnostics[0], {
       message: "未知配置属性",
       source: "vscode-annil",
-      code: "unknownConfig",
+      code: "annil.json.unknownConfigKey",
       range: [1, 3, 1, 16],
     });
     assertDiagnosticDetails(diagnostics[1], {
       message: " 缺少导入的组件",
       source: "vscode-annil",
-      code: "missingComponent",
+      code: "annil.json.missingImport",
       range: [3, 3, 3, 18],
     });
     assertDiagnosticDetails(diagnostics[2], {
       message: "未知的导入",
       source: "vscode-annil",
-      code: "unknownComponent",
+      code: "annil.json.unknownImport",
       range: [5, 5, 5, 21],
     });
     assertDiagnosticDetails(diagnostics[3], {
       message: "无效的路径",
       source: "vscode-annil",
-      code: "/wrong/path",
+      code: "annil.json.invalidPath",
       range: [4, 22, 4, 33],
     });
     assertDiagnosticDetails(diagnostics[4], {
       message: "未知的占位组件",
       source: "vscode-annil",
-      code: "unknownPlaceholder",
+      code: "annil.json.unknownPlaceholder",
       range: [9, 5, 9, 23],
     });
 
@@ -70,7 +70,7 @@ describe("annil JSON 集成：fixAll", () => {
     assertDiagnosticDetails(firstPassDiagnostics[0], {
       message: "缺少占位组件",
       source: "vscode-annil",
-      code: "missingComponent",
+      code: "annil.json.missingPlaceholder",
       range: [6, 3, 6, 23],
     });
 

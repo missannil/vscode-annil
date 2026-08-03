@@ -1,0 +1,5 @@
+<!-- ① 正确：事件属性存在 → 无诊断 -->
+<subInline bind:onTap="subInline_onTap"></subInline>
+<!-- annil disable repeatTag -->
+<!-- ② 错误：缺少事件属性 → 缺少属性诊断 -->
+<subInline></subInline>

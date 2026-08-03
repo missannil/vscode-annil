@@ -5,9 +5,16 @@ import { checkAnnilCommentNode } from "./comment/checkAnnilCommentNode.js";
 import { WxmlValidationContext } from "./context.js";
 import { resolveChunkId, validateChunkComponent } from "./customComponent/validateChunkComponent.js";
 import { validateCustomComponent } from "./customComponent/validateCustomComponent.js";
+import { validateConditionStructure } from "./element/condition/validateConditionStructure.js";
+import { findOpeningTagAttributeValueRange, positionAt } from "./element/openingTag.js";
+import { validateBlockAttributes } from "./element/validateBlockAttributes.js";
 import { validateDuplicateId } from "./element/validateDuplicateId.js";
+import { validateEmptyBlock } from "./element/validateEmptyBlock.js";
+import { validateNativeEvents } from "./element/validateNativeEvent.js";
 import { validateRepeatSubComponentTag } from "./element/validateRepeatSubComponentTag.js";
 import { isNativeTag, validateUnknownTag } from "./element/validateUnknownTag.js";
+import { validateWxForAttributes } from "./element/validateWxForAttributes.js";
+import { validateWxForStructure } from "./element/validateWxForStructure.js";
 import { validateAttributeValues, validateMustacheText } from "./expression/validateMustache.js";
 import { walkWxmlNodeList } from "./walkNodeList.js";
 
@@ -29,12 +36,24 @@ export function checkWxml(
   const existingIds = new Set<string>();
 
   walkWxmlNodeList(wxmlDocument.children, context, {
+    onEnterNodeList(currentContext) {
+      currentContext.pushConditionScope();
+    },
     onElementNode(node, startLine, currentContext) {
       validateDuplicateId(node, startLine, currentContext.textlines, existingIds, currentContext.diagnosticList);
 
       currentContext.traversal.isHeadLocation = false;
 
       if (currentContext.comment.isCommented()) return;
+
+      validateConditionStructure(
+        node,
+        startLine,
+        currentContext,
+        getEffectiveValidNames(validNames, currentContext, tsFileInfo),
+        getEffectiveBooleanNames(currentContext, tsFileInfo),
+        node.startIndex ?? undefined,
+      );
 
       const customComponentInfo = tsFileInfo.customComponentInfoRecord[node.name];
 
@@ -51,15 +70,16 @@ export function checkWxml(
         const effectiveNames = getEffectiveValidNames(validNames, currentContext, tsFileInfo);
         validateAttributeValues(
           Object.entries(node.attribs).filter(([name]) => name.startsWith("wx:")),
-          currentContext.textlines,
           effectiveNames,
           currentContext.diagnosticList,
+          (name, value) => findOpeningTagAttributeValueRange(currentContext.textlines, startLine, name, value).start,
         );
         validateCustomComponent(
           node,
           startLine,
           customComponentInfo,
-          validNames,
+          effectiveNames,
+          currentContext.textlines,
           currentContext.diagnosticList,
         );
 
@@ -71,6 +91,17 @@ export function checkWxml(
 
         return;
       }
+
+      validateBlockAttributes(node, startLine, currentContext.textlines, currentContext.diagnosticList);
+      validateEmptyBlock(node, startLine, currentContext.textlines, currentContext.diagnosticList);
+      validateWxForStructure(
+        node,
+        startLine,
+        currentContext.textlines,
+        currentContext.diagnosticList,
+        node.startIndex ?? undefined,
+      );
+      validateWxForAttributes(node, startLine, currentContext, tsFileInfo);
 
       // ChunkComponent：原生元素 + id 命中 chunkComponentInfoRecord
       const chunkId = resolveChunkId(node, tsFileInfo.chunkComponentInfoRecord);
@@ -90,11 +121,22 @@ export function checkWxml(
       }
 
       // 普通原生元素
-      validateAttributeValues(
-        Object.entries(node.attribs),
+      validateNativeEvents(
+        node,
+        startLine,
         currentContext.textlines,
+        tsFileInfo.rootComponentInfo.events,
+        currentContext.diagnosticList,
+      );
+      validateAttributeValues(
+        Object.entries(node.attribs).filter(([name]) => {
+          const isConditionAttribute = name === "wx:if" || name === "wx:elif" || name === "wx:else";
+
+          return !name.startsWith("wx:for") && name !== "wx:key" && !(node.name === "block" && isConditionAttribute);
+        }),
         getEffectiveValidNames(validNames, currentContext, tsFileInfo),
         currentContext.diagnosticList,
+        (name, value) => findOpeningTagAttributeValueRange(currentContext.textlines, startLine, name, value).start,
       );
     },
     onBeforeElementChildren(node, _, currentContext) {
@@ -106,14 +148,14 @@ export function checkWxml(
         );
       }
     },
-    onTextNode(node, _, currentContext) {
+    onTextNode(node, startLine, currentContext) {
       if (node.data.trim() === "" || currentContext.comment.isCommented()) return;
 
       validateMustacheText(
         node.data,
-        currentContext.textlines,
         getEffectiveValidNames(validNames, currentContext, tsFileInfo),
         currentContext.diagnosticList,
+        positionAt(currentContext.textlines, node.startIndex ?? 0),
       );
     },
     onCommentNode(node, startLine, nodeLevelMark, currentContext) {
@@ -145,6 +187,7 @@ export function checkWxml(
       currentContext.comment.disableRepeatTag();
     },
     onLeaveNodeList(nodeLevelMark, currentContext) {
+      currentContext.popConditionScope();
       currentContext.comment.tryExpireStatus("afterNodeList", nodeLevelMark);
     },
   });
@@ -179,4 +222,24 @@ function getEffectiveValidNames(
   }
 
   return merged;
+}
+
+/** 合并当前作用域中可作为简单条件使用的布尔变量名。 */
+function getEffectiveBooleanNames(
+  context: WxmlValidationContext,
+  tsFileInfo: TsFileInfo,
+): Set<string> {
+  const booleanNames = new Set([
+    ...tsFileInfo.rootComponentInfo.boolTypeDatas,
+    ...context.scope.wxForItemNames,
+  ]);
+
+  for (const mark of context.scope.outerChunkTagMarks) {
+    const chunkInfo = tsFileInfo.chunkComponentInfoRecord[mark];
+    if (chunkInfo !== undefined) {
+      for (const name of chunkInfo.boolTypeDatas) booleanNames.add(name);
+    }
+  }
+
+  return booleanNames;
 }

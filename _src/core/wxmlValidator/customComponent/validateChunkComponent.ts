@@ -1,5 +1,6 @@
 import { type Domhandler, vscode } from "#deps";
 import type { ChunkComponentInfo, ChunkComponentInfoRecord, TsFileInfo } from "../../types/TsFileInfo.js";
+import { findOpeningTagAttributeValueRange } from "../element/openingTag.js";
 import { validateAttributeValues } from "../expression/validateMustache.js";
 
 /**
@@ -34,7 +35,7 @@ export function validateChunkComponent(
     if (name === "id" || name.startsWith("wx:")) continue;
 
     if (isEventAttr(name)) {
-      validateChunkEvent(name, value, chunkInfo, startLine, diagnostics);
+      validateChunkEvent(name, value, chunkInfo, startLine, textlines, diagnostics);
 
       continue;
     }
@@ -42,7 +43,12 @@ export function validateChunkComponent(
     normalAttrs.push([name, value]);
   }
 
-  validateAttributeValues(normalAttrs, textlines, chunkValidNames, diagnostics);
+  validateAttributeValues(
+    normalAttrs,
+    chunkValidNames,
+    diagnostics,
+    (name, value) => findOpeningTagAttributeValueRange(textlines, startLine, name, value).start,
+  );
 }
 
 /**
@@ -69,15 +75,17 @@ function validateChunkEvent(
   value: string,
   chunkInfo: ChunkComponentInfo,
   startLine: number,
+  textlines: string[],
   diagnostics: vscode.Diagnostic[],
 ): void {
   if (chunkInfo.events.includes(value)) return;
 
-  diagnostics.push(
-    new vscode.Diagnostic(
-      new vscode.Range(startLine, 0, startLine, 0),
-      `事件 "${name}" 未在 ChunkComponent 中定义: "${value}"`,
-      vscode.DiagnosticSeverity.Error,
-    ),
+  const diagnostic = new vscode.Diagnostic(
+    findOpeningTagAttributeValueRange(textlines, startLine, name, value),
+    `事件 "${name}" 未在 ChunkComponent 中定义: "${value}"`,
+    vscode.DiagnosticSeverity.Error,
   );
+  diagnostic.source = "vscode-annil";
+  diagnostic.code = "annil.chunkEvent.unknown";
+  diagnostics.push(diagnostic);
 }

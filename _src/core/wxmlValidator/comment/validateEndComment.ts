@@ -1,5 +1,6 @@
 import { vscode } from "#deps";
 import type { CommentManager } from "./CommentManager.js";
+import { CommentDiagnosticCode } from "./diagnosticCodes.js";
 import { generateDiagnostic } from "./generateDiagnostic.js";
 import type { CommentType } from "./types.js";
 
@@ -23,6 +24,8 @@ export function validateEndComment(
         "还没有开始注释不可结束",
         textlines,
         startLine,
+        {},
+        CommentDiagnosticCode.noStartedComment,
       ),
     );
 

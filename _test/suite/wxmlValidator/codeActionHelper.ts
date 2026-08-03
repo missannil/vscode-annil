@@ -1,5 +1,5 @@
 import { assert, vscode } from "#deps";
-import { applyEditAndWaitForDiagnostics } from "./diagnosticHelper.js";
+import { applyEditAndWaitForDiagnostics, waitForDiagnostics, waitForDiagnosticUpdate } from "./diagnosticHelper.js";
 
 /** 通过 VS Code 已注册的 Provider 请求指定诊断位置的 Quick Fix。 */
 export async function getQuickFixes(
@@ -56,4 +56,67 @@ export async function applyCodeActionAndWaitForDiagnostics(
   assert.ok(action.edit, `Code Action “${action.title}”未提供编辑`);
 
   return applyEditAndWaitForDiagnostics(uri, action.edit, predicate);
+}
+
+/**
+ * 在会编辑 fixture 的用例中执行断言，并始终恢复原始文本及目标诊断。
+ *
+ * 同一 fixture 被多个用例复用时，恢复后必须等待诊断重新发布，避免后续用例
+ * 读取到上一次修复遗留的空诊断列表。
+ */
+export async function withRestoredFixture(
+  uri: vscode.Uri,
+  hasTargetDiagnostic: (diagnostics: readonly vscode.Diagnostic[]) => boolean,
+  run: () => Promise<void>,
+): Promise<void> {
+  const document = await vscode.workspace.openTextDocument(uri);
+  const originalText = document.getText();
+
+  try {
+    await run();
+  } finally {
+    if (await restoreFixtureText(uri, originalText)) {
+      await waitForDiagnostics(uri, hasTargetDiagnostic);
+    }
+  }
+}
+
+/** 验证单项 Quick Fix 和组件级 annil.fix-all，并在结束时恢复 fixture。 */
+export async function verifyQuickFixAndFixAll(
+  uri: vscode.Uri,
+  diagnostic: vscode.Diagnostic,
+  actionTitle: string,
+  hasTargetDiagnostic: (diagnostics: readonly vscode.Diagnostic[]) => boolean,
+): Promise<void> {
+  await withRestoredFixture(uri, hasTargetDiagnostic, async () => {
+    const document = await vscode.workspace.openTextDocument(uri);
+    const originalText = document.getText();
+    await vscode.window.showTextDocument(document);
+
+    const action = await waitForQuickFix(uri, diagnostic, actionTitle);
+    await applyCodeActionAndWaitForDiagnostics(uri, action, (current) => !hasTargetDiagnostic(current));
+
+    if (await restoreFixtureText(uri, originalText)) {
+      await waitForDiagnostics(uri, hasTargetDiagnostic);
+    }
+
+    const diagnosticsReady = waitForDiagnosticUpdate(uri, (current) => !hasTargetDiagnostic(current));
+    await vscode.commands.executeCommand("annil.fix-all");
+    await diagnosticsReady;
+  });
+}
+
+async function restoreFixtureText(uri: vscode.Uri, originalText: string): Promise<boolean> {
+  const currentDocument = await vscode.workspace.openTextDocument(uri);
+  if (currentDocument.getText() === originalText) return false;
+
+  const restore = new vscode.WorkspaceEdit();
+  restore.replace(
+    uri,
+    new vscode.Range(new vscode.Position(0, 0), currentDocument.positionAt(currentDocument.getText().length)),
+    originalText,
+  );
+  assert.strictEqual(await vscode.workspace.applyEdit(restore), true);
+
+  return true;
 }

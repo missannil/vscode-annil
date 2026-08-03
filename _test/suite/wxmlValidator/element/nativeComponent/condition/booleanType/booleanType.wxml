@@ -1,0 +1,5 @@
+<block wx:if="{{count}}"></block>
+<view></view>
+<block wx:if="{{enabled}}"></block>
+<block wx:elif="{{count}}"></block>
+<block wx:else></block>

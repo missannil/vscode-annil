@@ -1,0 +1,13 @@
+<!-- Root 数据可用于 CustomComponent 外层条件。 -->
+<block wx:if="{{rootVisible}}">
+	<subInline></subInline>
+</block>
+<!-- Chunk 数据只在 ChunkComponent 作用域内有效。 -->
+<view id="chunkInline">
+	<block wx:if="{{chunkInline_visible}}"></block>
+</view>
+<block wx:if="{{chunkInline_visible}}"></block>
+<!-- CustomComponent 的局部 data 不并入父 WXML 条件作用域。 -->
+<block wx:if="{{subInline_dataBool}}">
+	<subInline></subInline>
+</block>

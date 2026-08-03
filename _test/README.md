@@ -33,6 +33,46 @@
 
 如果一个场景涉及多项规则，按主要断言的业务所有者放置；另一个规则仅作为 fixture 前置条件。
 
+## CustomComponent 示例目录规范
+
+`customComponent/` 下的目录应与 `wxmlChecker` 对自定义组件的校验阶段保持一一对应，先按规则阶段归类，再按属性契约类型拆分场景：
+
+```text
+customComponent/
+├─ missingAttr/
+│  ├─ missingAttrRoot/      # Root 属性缺失
+│  ├─ missingAttrEvents/    # Events 属性缺失
+│  ├─ missingAttrSelf/      # Self 属性缺失
+│  ├─ missingAttrCustom/    # Custom 属性缺失
+│  └─ missingAttrTernary/   # Ternary 属性缺失
+├─ invalidValue/
+│  ├─ eventsValue/          # Events 值错误
+│  ├─ rootValue/            # Root 值错误
+│  ├─ selfValue/            # Self 值错误
+│  ├─ customValue/          # Custom 值错误（后续新增）
+│  └─ ternaryValue/         # Ternary 值错误（后续新增）
+└─ unknownAttr/
+  ├─ plainName/            # 普通属性名形式的未知属性
+  └─ kebabCase/            # 连字符属性名的规范化校验
+```
+
+当前实现中的校验顺序如下，测试示例应优先覆盖对应阶段，而不要仅按诊断消息随意命名目录：
+
+1. 通过 `customComponentInfoRecord[node.name]` 判断当前标签是否为已识别的 `CustomComponent`；当前实现没有单独的 `isComponentElement` 函数。
+2. 检查重复组件标签。
+3. 校验组件上的 `wx:*` 属性；该校验使用当前 WXML 作用域。
+4. 根据 `configInfo` 检查缺失属性，示例放入 `missingAttr/`。
+5. 检查实际属性名是否未知，示例放入 `unknownAttr/`。
+6. 对已识别的属性值按 `AttrValue` 类型校验：`Events`、`Root`、`Self`、`Custom`、`Ternary`，错误值示例放入 `invalidValue/`。
+
+CustomComponent 的 Custom 值表示由 WXML 调用上下文提供，不能因为它不是 Root 或 Self 数据就直接视为错误。属性值中的表达式应使用当前有效作用域校验，包括 Root 数据、`wx:for-item`、`wx:for-index` 和外层 Chunk 数据；因此 `missingAttr/missingAttrCustom/` 应保留 `wx:for` 场景作为正向覆盖。
+
+Annil 组件控制流的 WXML 约定是：`wx:if`、`wx:for` 等控制属性写在外层 `block` 上，由 `block` 包裹 `CustomComponent`；不要直接把这些属性写在自定义组件标签上。涉及循环变量的 fixture 应使用 `<block wx:for="{{list}}"><subInline ... /></block>` 形式。
+
+每个叶子示例目录继续使用同名的 `.ts`、`.json`、`.wxml` 和 `.test.ts` 文件。若某一规则出现并列的属性契约类型，应先建立规则总目录，再在其下建立类型子目录；不要将同一规则的并列示例继续放在 `customComponent/` 根目录。
+
+迁移、拆分或删除 fixture 时，必须同步迁移、更新或删除所有引用旧 fixture 路径的 `*.test.ts`。测试入口按源测试文件发现测试，不会因为同目录 `.ts`、`.json` 或 `.wxml` 已删除而自动排除遗留测试。
+
 ## 聚焦运行单个测试
 
 未指定 CLI 筛选参数时，测试入口运行 `_test/index.ts` 的
@@ -52,13 +92,13 @@ const manuallyFocusedTests: readonly string[] = [
 
 `pnpm test:extension` 会在独立的 Extension Host 中运行测试，不会关闭或修改当前打开的 VS Code。运行器优先使用本机已安装的 VS Code；仅在未找到本机可执行文件时下载测试版本。测试用户数据和扩展缓存隔离在临时 profile 中，测试结束后自动删除。
 
-可在命令后提供一个相对于 `_test/suite` 的测试文件或目录，避免编辑 `manuallyFocusedTests`：
+通过 `ANNIL_TEST_FILTER` 指定相对于 `_test/suite` 的测试文件或目录，避免编辑 `manuallyFocusedTests`：
 
 ```text
-pnpm test:extension -- wxmlValidator/comment/textError/textError.test.ts
+ANNIL_TEST_FILTER=wxmlValidator/comment/textError/textError.test.ts pnpm test:extension
 ```
 
-不提供路径时，CLI 使用 `manuallyFocusedTests`；该数组为空时才运行全部测试。提供路径时，该路径会覆盖手动聚焦配置。CLI 不执行 `clean`，并会在运行期间创建临时锁文件以阻止两个 CLI 测试进程并发。测试成功时仅输出一行 `PASS`；失败时才输出 Extension Host 的完整日志。自动化代理应自行运行 CLI 并读取结果，无需用户手动执行或反馈。
+不设置该变量时，CLI 使用 `manuallyFocusedTests`；该数组为空时才运行全部测试。设置变量后，该路径会覆盖手动聚焦配置。不要使用命令行 `--` 传递路径，当前运行器会将其作为路径的一部分。CLI 不执行 `clean`，并会在运行期间创建临时锁文件以阻止两个 CLI 测试进程并发。测试成功时仅输出一行 `PASS`；失败时才输出 Extension Host 的完整日志。自动化代理应自行运行 CLI 并读取结果，无需用户手动执行或反馈。
 
 ## Extension Host 测试运行流程
 

@@ -1,0 +1,5 @@
+<block wx:if="{{missing.enabled}}"></block>
+<view></view>
+<block wx:if="{{profile.enabled}}"></block>
+<block wx:elif="{{missing[0].enabled}}"></block>
+<block wx:else></block>

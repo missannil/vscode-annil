@@ -1,0 +1,14 @@
+<block
+	wx:for="{{items}}"
+	wx:key="*this"
+	wx:for-item
+></block>
+<block
+	wx:for="{{items}}"
+	wx:key="*this"
+	wx:for-index
+></block>
+<block
+	wx:for="{{items}}"
+	wx:key
+></block>

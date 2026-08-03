@@ -2,7 +2,6 @@ import { vscode } from "#deps";
 import { configuration } from "../../configuration/index.js";
 import { traverseAst, type TraverseAstResult } from "../tsAnalyzer/index.js";
 import { FileCache } from "./fileCache.js";
-
 /**
  * TS 文件解析器
  * 读取 TS 文件 → AST 遍历 → 组件配置信息

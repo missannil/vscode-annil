@@ -29,10 +29,14 @@ describe("invalidVariable", () => {
 
     // ① 123invalid：以数字开头
     assert.strictEqual(invalidDiags[0].message, `无效的变量: "123invalid"`);
+    assert.strictEqual(invalidDiags[0].source, "vscode-annil");
+    assert.strictEqual(invalidDiags[0].code, "annil.expression.invalidVariable");
     assert.strictEqual(invalidDiags[0].severity, vscode.DiagnosticSeverity.Error);
 
     // ② a-b：包含非法连接符（非 JS 标识符）
     assert.strictEqual(invalidDiags[1].message, `无效的变量: "a-b"`);
+    assert.strictEqual(invalidDiags[1].source, "vscode-annil");
+    assert.strictEqual(invalidDiags[1].code, "annil.expression.invalidVariable");
     assert.strictEqual(invalidDiags[1].severity, vscode.DiagnosticSeverity.Error);
   });
 });

@@ -1,0 +1,12 @@
+import { CustomComponent, DefineComponent, RootComponent } from "annil";
+import type { $SubInline } from "~/subInline/index.js";
+
+const rootComponent = RootComponent()({ data: { condition: true } });
+type Root = typeof rootComponent;
+const subInline = CustomComponent<Root, $SubInline>()({
+  // @ts-expect-error fixture attribute is intentionally outside the imported component type
+  inherit: { subInline_mode: ["on", "off"] },
+});
+
+// @ts-expect-error fixture only needs a subset of $SubInline fields
+DefineComponent({ name: "missingAttrTernary", rootComponent, subComponents: [subInline] });

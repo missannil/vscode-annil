@@ -1,0 +1,11 @@
+<!-- ① 错误：item 不在当前 wx:for 作用域 → 未知数据诊断 -->
+<subInline subInline_customValue="{{item}}"></subInline>
+<block
+	wx:for="{{list}}"
+	wx:for-item="item"
+	wx:for-index="index"
+>
+	<!-- ② 正确：item 来自当前 wx:for 作用域 → 无诊断 -->
+	<!-- annil disable repeatTag -->
+	<subInline subInline_customValue="{{item}}"></subInline>
+</block>

@@ -1,4 +1,6 @@
 import { vscode } from "#deps";
+import { JsonDiagnosticCode } from "./diagnosticCodes.js";
+import { setJsonDiagnosticInfo } from "./diagnosticInfo.js";
 import { findErrMsgRange } from "./findErrMsgRange.js";
 
 /** 合法 JSON 配置键白名单 */
@@ -30,7 +32,8 @@ export function validateUnknownKeys(
         vscode.DiagnosticSeverity.Error,
       );
       diagnostic.source = "vscode-annil";
-      diagnostic.code = key;
+      diagnostic.code = JsonDiagnosticCode.unknownConfigKey;
+      setJsonDiagnosticInfo(diagnostic, { configKey: key });
       diagnosticList.push(diagnostic);
     }
   }

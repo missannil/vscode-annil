@@ -23,15 +23,15 @@ describe("annil 注释：startScope", () => {
   test("插入 start 注释前，嵌套元素与外层同级元素分别产生诊断", () => {
     assertDiagnosticDetails(initialDiagnostics[0], {
       message: "未知数据: \"nestedData\"",
-      source: undefined,
-      code: undefined,
-      range: [3, 7, 3, 21],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [3, 9, 3, 19],
     });
     assertDiagnosticDetails(initialDiagnostics[1], {
       message: "未知数据: \"siblingData\"",
-      source: undefined,
-      code: undefined,
-      range: [6, 6, 6, 21],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [6, 8, 6, 19],
     });
   });
 
@@ -41,9 +41,9 @@ describe("annil 注释：startScope", () => {
 
     assertDiagnosticDetails((await applyEditAndWaitForDiagnostics(uri, edit, (current) => current.length === 1))[0], {
       message: "未知数据: \"siblingData\"",
-      source: undefined,
-      code: undefined,
-      range: [7, 6, 7, 21],
+      source: "vscode-annil",
+      code: "annil.expression.unknownData",
+      range: [7, 8, 7, 19],
     });
   });
 

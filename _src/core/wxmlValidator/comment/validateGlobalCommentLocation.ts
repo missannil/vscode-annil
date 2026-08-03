@@ -1,4 +1,5 @@
 import { vscode } from "#deps";
+import { CommentDiagnosticCode } from "./diagnosticCodes.js";
 import { generateDiagnostic } from "./generateDiagnostic.js";
 import type { CommentType } from "./types.js";
 
@@ -23,6 +24,8 @@ export function validateGlobalCommentLocation(
         "注释应写在文件头部",
         textlines,
         startLine,
+        {},
+        CommentDiagnosticCode.invalidLocation,
       ),
     );
 

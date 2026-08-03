@@ -1,0 +1,4 @@
+<view
+	id="chunkInline"
+	bind:tap="missingHandler"
+></view>

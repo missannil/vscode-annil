@@ -1,5 +1,7 @@
 import { vscode } from "#deps";
 import type { ComponentPlaceholder } from "../types/JsonFileInfo.js";
+import { JsonDiagnosticCode } from "./diagnosticCodes.js";
+import { setJsonDiagnosticInfo } from "./diagnosticInfo.js";
 import { findErrMsgRange } from "./findErrMsgRange.js";
 import { findKeyline } from "./findKeyline.js";
 
@@ -34,7 +36,8 @@ export function checkPlaceholder(
       vscode.DiagnosticSeverity.Error,
     );
     diagnostic.source = "vscode-annil";
-    diagnostic.code = key;
+    diagnostic.code = JsonDiagnosticCode.unknownPlaceholder;
+    setJsonDiagnosticInfo(diagnostic, { componentName: key });
     diagnosticList.push(diagnostic);
   }
 
@@ -46,7 +49,8 @@ export function checkPlaceholder(
       vscode.DiagnosticSeverity.Error,
     );
     diagnostic.source = "vscode-annil";
-    diagnostic.code = key;
+    diagnostic.code = JsonDiagnosticCode.missingPlaceholder;
+    setJsonDiagnosticInfo(diagnostic, { componentName: key });
     diagnosticList.push(diagnostic);
   }
 

@@ -1,5 +1,7 @@
 import { type Domhandler, vscode } from "#deps";
 
+export const RepeatSubComponentDiagnosticCode = "annil.customComponent.repeatedTag";
+
 /**
  * 校验自定义组件标签是否重复出现。
  *
@@ -25,6 +27,7 @@ export function validateRepeatSubComponentTag(
       vscode.DiagnosticSeverity.Error,
     );
     diagnostic.source = "vscode-annil";
+    diagnostic.code = RepeatSubComponentDiagnosticCode;
     diagnostics.push(diagnostic);
   }
 

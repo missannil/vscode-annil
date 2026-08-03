@@ -1,24 +1,6 @@
 import { vscode } from "#deps";
+import { CommentDiagnosticCode } from "../core/wxmlValidator/comment/diagnosticCodes.js";
 import { CommentTextList } from "../core/wxmlValidator/comment/types.js";
-import { DiagMsg, type DiagnosticMessage } from "./messages.js";
-
-// ---------- 类型守卫 ----------
-
-function isCommentTextError(msg: DiagnosticMessage): msg is typeof DiagMsg.invalidCommentText {
-  return msg === DiagMsg.invalidCommentText;
-}
-
-function isNoStartedComment(msg: DiagnosticMessage): msg is typeof DiagMsg.noStartedComment {
-  return msg === DiagMsg.noStartedComment;
-}
-
-function isRepeatedComment(msg: DiagnosticMessage): msg is typeof DiagMsg.repeatedComment {
-  return msg === DiagMsg.repeatedComment;
-}
-
-function isInvalidCommentLocation(msg: DiagnosticMessage): msg is typeof DiagMsg.invalidCommentLocation {
-  return msg === DiagMsg.invalidCommentLocation;
-}
 
 // ---------- 原子编辑操作 ----------
 
@@ -126,24 +108,22 @@ function fixInvalidCommentLocation(
 // ---------- 入口 ----------
 
 /**
- * 根据注释类诊断消息生成 CodeAction
+ * 根据稳定注释诊断代码生成 CodeAction。
  */
 export function generateCommentCodeActions(
   wxmlUri: vscode.Uri,
   diagnostic: vscode.Diagnostic,
 ): vscode.CodeAction[] {
-  const msg = diagnostic.message as DiagnosticMessage;
-
-  if (isCommentTextError(msg)) {
+  if (diagnostic.code === CommentDiagnosticCode.invalidText) {
     return fixCommentTextError(wxmlUri, diagnostic);
   }
-  if (isNoStartedComment(msg)) {
+  if (diagnostic.code === CommentDiagnosticCode.noStartedComment) {
     return fixNoStartedComment(wxmlUri, diagnostic);
   }
-  if (isRepeatedComment(msg)) {
+  if (diagnostic.code === CommentDiagnosticCode.repeatedComment) {
     return fixRepeatedComment(wxmlUri, diagnostic);
   }
-  if (isInvalidCommentLocation(msg)) {
+  if (diagnostic.code === CommentDiagnosticCode.invalidLocation) {
     return fixInvalidCommentLocation(wxmlUri, diagnostic);
   }
 

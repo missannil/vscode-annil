@@ -28,20 +28,20 @@ describe("annil 注释：all", () => {
   test("未添加 all 注释时两个未知组件和重复 id 分别产生诊断", () => {
     assertDiagnosticDetails(diagnostics[0], {
       message: "重复的id",
-      source: undefined,
-      code: undefined,
+      source: "vscode-annil",
+      code: "annil.element.duplicateId",
       range: [4, 11, 4, 17],
     });
     assertDiagnosticDetails(diagnostics[1], {
       message: "未知标签",
-      source: undefined,
-      code: undefined,
+      source: "vscode-annil",
+      code: "annil.element.unknownTag",
       range: [7, 2, 7, 13],
     });
     assertDiagnosticDetails(diagnostics[2], {
       message: "未知标签",
-      source: undefined,
-      code: undefined,
+      source: "vscode-annil",
+      code: "annil.element.unknownTag",
       range: [9, 2, 9, 13],
     });
   });
@@ -54,8 +54,8 @@ describe("annil 注释：all", () => {
       (await applyEditAndWaitForDiagnostics(wxmlUri, edit, (current) => current.length === 1))[0],
       {
         message: "重复的id",
-        source: undefined,
-        code: undefined,
+        source: "vscode-annil",
+        code: "annil.element.duplicateId",
         range: [5, 11, 5, 17],
       },
     );

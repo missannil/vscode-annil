@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "../../../../../");
 const JSON_PATH = path.join(projectRoot, "_test/suite/jsonValidator/unknownImports/unknownImports.json");
-const UNKNOWN_COMPONENT = "unknownComponent";
 const ORIGINAL_JSON = [
   "{",
   "  \"component\": true,",
@@ -31,7 +30,7 @@ describe("annil JSON 校验：unknownImports", () => {
     assertDiagnosticDetails(diagnostic, {
       message: "未知的导入",
       source: "vscode-annil",
-      code: UNKNOWN_COMPONENT,
+      code: "annil.json.unknownImport",
       range: [3, 5, 3, 21],
     });
     await applyUnknownImportQuickFix(uri, diagnostic);

@@ -1,5 +1,0 @@
-<!-- ① 正确：写了 subInline_inheritBool → 无诊断 -->
-<subInline subInline_inheritBool="{{propRequiredBool}}"></subInline>
-<!-- annil disable repeatTag -->
-<!-- ② 错误：缺少 → 缺少属性诊断 -->
-<subInline></subInline>

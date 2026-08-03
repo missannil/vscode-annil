@@ -1,4 +1,5 @@
 import { vscode } from "#deps";
+import { getJsonDiagnosticInfo } from "../core/jsonValidator/diagnosticInfo.js";
 
 function findObjectClosingLine(document: vscode.TextDocument, openingLine: number): number | undefined {
   let depth = 0;
@@ -116,8 +117,9 @@ function generateDeletePropertyCodeAction(
 export function generateUnknownImportCodeAction(
   document: vscode.TextDocument,
   diagnostic: vscode.Diagnostic,
-): vscode.CodeAction {
-  const importName = String(diagnostic.code);
+): vscode.CodeAction | undefined {
+  const importName = getJsonDiagnosticInfo(diagnostic).componentName;
+  if (importName === undefined) return undefined;
 
   return generateDeletePropertyCodeAction(document, diagnostic, `移除 “${importName}”`);
 }
@@ -126,8 +128,9 @@ export function generateUnknownImportCodeAction(
 export function generateUnknownPlaceholderCodeAction(
   document: vscode.TextDocument,
   diagnostic: vscode.Diagnostic,
-): vscode.CodeAction {
-  const placeholderName = String(diagnostic.code);
+): vscode.CodeAction | undefined {
+  const placeholderName = getJsonDiagnosticInfo(diagnostic).componentName;
+  if (placeholderName === undefined) return undefined;
 
   return generateDeletePropertyCodeAction(document, diagnostic, `移除未知占位组件 “${placeholderName}”`);
 }
@@ -136,16 +139,37 @@ export function generateUnknownPlaceholderCodeAction(
 export function generateMissingPlaceholderCodeAction(
   document: vscode.TextDocument,
   diagnostic: vscode.Diagnostic,
-): vscode.CodeAction {
-  const componentName = String(diagnostic.code);
-  // const line = document.lineAt(diagnostic.range.start.line);
+): vscode.CodeAction | undefined {
+  const componentName = getJsonDiagnosticInfo(diagnostic).componentName;
+  if (componentName === undefined) return undefined;
   const action = new vscode.CodeAction(
-    `添加缺失占位组件 “${componentName}”`,
+    `添加缺失占位组件 "${componentName}"`,
     vscode.CodeActionKind.QuickFix,
   );
   action.diagnostics = [diagnostic];
   action.edit = new vscode.WorkspaceEdit();
-  insertJsonProperty(document, action.edit, diagnostic.range.start.line, `"${componentName}": "view"`);
+
+  // 查找 componentPlaceholder 是否已存在
+  let placeholderLine: number | undefined;
+  for (let i = 0; i < document.lineCount; i++) {
+    if (document.lineAt(i).text.includes("\"componentPlaceholder\"")) {
+      placeholderLine = i;
+      break;
+    }
+  }
+
+  if (placeholderLine !== undefined) {
+    // componentPlaceholder 已存在，直接在其中插入占位属性
+    insertJsonProperty(document, action.edit, placeholderLine, `"${componentName}": "view"`);
+  } else {
+    // componentPlaceholder 不存在，先创建该字段再包含占位属性；保持对象内容分行显示。
+    insertJsonProperty(
+      document,
+      action.edit,
+      0,
+      `"componentPlaceholder": {\n    "${componentName}": "view"\n  }`,
+    );
+  }
 
   return action;
 }
@@ -155,11 +179,10 @@ export function generateMissingImportCodeAction(
   document: vscode.TextDocument,
   diagnostic: vscode.Diagnostic,
 ): vscode.CodeAction | undefined {
-  const componentName = String(diagnostic.code);
-  const diagnosticInfo = diagnostic as vscode.Diagnostic & {
-    info?: { expectImport?: Record<string, string | undefined> };
-  };
-  const componentPath = diagnosticInfo.info?.expectImport?.[componentName];
+  const { componentName, expectImport } = getJsonDiagnosticInfo(diagnostic);
+  if (componentName === undefined) return undefined;
+
+  const componentPath = expectImport?.[componentName];
   if (typeof componentPath !== "string") return undefined;
 
   const action = new vscode.CodeAction(`添加缺失导入 “${componentName}”`, vscode.CodeActionKind.QuickFix);
@@ -175,9 +198,8 @@ export function generateInvalidPathCodeAction(
   document: vscode.TextDocument,
   diagnostic: vscode.Diagnostic,
 ): vscode.CodeAction | undefined {
-  const diagnosticInfo = diagnostic as vscode.Diagnostic & { info?: { correctPath?: unknown } };
-  const correctPath = diagnosticInfo.info?.correctPath;
-  if (typeof correctPath !== "string") return undefined;
+  const correctPath = getJsonDiagnosticInfo(diagnostic).correctPath;
+  if (correctPath === undefined) return undefined;
 
   const action = new vscode.CodeAction(`修正导入路径为 “${correctPath}”`, vscode.CodeActionKind.QuickFix);
   action.diagnostics = [diagnostic];
@@ -191,8 +213,9 @@ export function generateInvalidPathCodeAction(
 export function generateUnknownConfigKeyCodeAction(
   document: vscode.TextDocument,
   diagnostic: vscode.Diagnostic,
-): vscode.CodeAction {
-  const key = String(diagnostic.code);
+): vscode.CodeAction | undefined {
+  const key = getJsonDiagnosticInfo(diagnostic).configKey;
+  if (key === undefined) return undefined;
 
   return generateDeletePropertyCodeAction(document, diagnostic, `移除未知配置项 “${key}”`);
 }

@@ -3,6 +3,7 @@ import { type Domhandler } from "#deps";
 import type { WxmlValidationContext } from "./context.js";
 
 export type WxmlNodeHooks = {
+  onEnterNodeList?: (context: WxmlValidationContext) => void;
   onElementNode?: (node: Domhandler.Element, startLine: number, context: WxmlValidationContext) => void;
   /** 在元素自身属性校验完成后、递归子节点之前调用。用于建立 wx:for 等局部作用域。 */
   onBeforeElementChildren?: (
@@ -46,6 +47,7 @@ export function walkWxmlNodeList(
 ): void {
   // 为当前递归层分配唯一标记，供外部 hook 识别同一节点列表的生命周期。
   const nodeLevelMark = ++nodeLevelMarkSeed;
+  hooks.onEnterNodeList?.(context);
 
   for (const childNode of childNodes) {
     // DOM 的 startIndex 是全文偏移，将其转换为 VS Code 使用的 0 基行号。

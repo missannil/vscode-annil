@@ -1,5 +1,6 @@
 import { vscode } from "#deps";
 import type { CommentManager } from "./CommentManager.js";
+import { CommentDiagnosticCode } from "./diagnosticCodes.js";
 import { generateDiagnostic } from "./generateDiagnostic.js";
 import type { CommentStatus, CommentType } from "./types.js";
 
@@ -41,6 +42,8 @@ export function validateRepeatComment(
         "重复的注释",
         textlines,
         startLine,
+        {},
+        CommentDiagnosticCode.repeatedComment,
       ),
     );
 

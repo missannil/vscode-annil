@@ -1,0 +1,5 @@
+<!-- ① 正确：三元属性存在 → 无诊断 -->
+<subInline subInline_mode="{{condition ? on : off}}"></subInline>
+<!-- annil disable repeatTag -->
+<!-- ② 缺少三元属性 → 缺少属性诊断 -->
+<subInline></subInline>

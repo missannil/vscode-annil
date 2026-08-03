@@ -31,7 +31,7 @@ describe("annil 注释：noStart", () => {
     assertDiagnosticDetails((await applyEditAndWaitForDiagnostics(uri, edit, (current) => current.length === 1))[0], {
       message: "还没有开始注释不可结束",
       source: "vscode-annil",
-      code: undefined,
+      code: "annil.comment.noStartedComment",
       range: [2, 5, 2, 22],
     });
   });

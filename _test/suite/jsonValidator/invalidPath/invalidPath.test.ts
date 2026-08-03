@@ -33,7 +33,7 @@ describe("annil JSON 校验：invalidPath", () => {
     assertDiagnosticDetails(diagnostic, {
       message: "无效的路径",
       source: "vscode-annil",
-      code: "/wrong/path",
+      code: "annil.json.invalidPath",
       range: [3, 23, 3, 34],
     });
     assert.strictEqual(

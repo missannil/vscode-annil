@@ -1,0 +1,10 @@
+<!-- 非法：wx:for 值不是单变量或成员表达式。 -->
+<block
+	wx:for="{{items + other}}"
+	wx:key="*this"
+></block>
+<!-- 合法：成员表达式。 -->
+<block
+	wx:for="{{items[0].children}}"
+	wx:key="*this"
+></block>

@@ -9,7 +9,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "../../../../../");
 const JSON_PATH = path.join(projectRoot, "_test/suite/jsonValidator/missingPlaceholder/missingPlaceholder.json");
-const COMPONENT_NAME = "validComponent";
 const ORIGINAL_JSON = [
   "{",
   "  \"component\": true,",
@@ -33,7 +32,7 @@ describe("annil JSON 校验：missingPlaceholder", () => {
     assertDiagnosticDetails(diagnostic, {
       message: "缺少占位组件",
       source: "vscode-annil",
-      code: COMPONENT_NAME,
+      code: "annil.json.missingPlaceholder",
       range: [5, 3, 5, 23],
     });
     await applyMissingPlaceholderQuickFix(uri, diagnostic);

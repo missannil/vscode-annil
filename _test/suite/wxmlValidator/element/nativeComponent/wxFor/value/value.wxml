@@ -1,0 +1,28 @@
+<block
+	wx:for="{{items}}"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{items}}"
+	wx:key="itemKey"
+></block>
+<block
+	wx:for="{{itemList[0].children}}"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{notArray}}"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{missing}}"
+	wx:key="*this"
+></block>
+<block
+	wx:for="items"
+	wx:key="*this"
+></block>
+<block
+	wx:for="{{items}}"
+	wx:key="123"
+></block>

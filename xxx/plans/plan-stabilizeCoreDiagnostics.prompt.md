@@ -1,45 +1,24 @@
-## 当前评估
+## 当前状态（2026-08-01）
 
-静态类型检查目前没有发现错误，但核心链路仍有以下问题：
+本轮 WXML 核心诊断迁移和回归已完成，以下旧评估项已经不再适用：
 
-### 高优先级
+- `Root`、`wx:for` 局部变量和外层 `ChunkComponent` 数据已合并到有效表达式作用域。
+- `wx:for`、`wx:for-item`、`wx:for-index`、`wx:key` 的结构、缺值、表达式、变量和定位测试已补齐。
+- condition 的前置关系、互斥、缺值、Mustache、非法表达式、未知数据、布尔类型和定位测试已补齐。
+- `CustomComponent` 与 `ChunkComponent` 的 condition 作用域语义已有专项测试：Chunk 数据不泄漏到外部，CustomComponent 局部数据不并入父作用域。
+- WXML 诊断已使用稳定的 `source`、`code` 和属性级 `Range` 契约；同一行或多行 opening tag 的重复节点已有回归覆盖。
+- WXML Quick Fix、fix-all 和 JSON 诊断已接入当前迁移链路，并有 Extension Host 测试覆盖。
 
-2. **WXML 合法数据集合不完整**
-   - `validNames` 目前只有 Root 数据和用户配置。
-   - 没有合并 CustomComponent `configInfo` 中 `Root`、`Self` 类型的数据。
-   - 位置见 `_src/core/wxmlValidator/wxmlChecker.ts` 第 23 行。
+本轮收尾已完成：
 
-3. **ChunkComponent 尚未进入 WXML 校验**
-   - TS 分析已经生成 `chunkComponentInfoRecord`，但 WXML 入口完全没有消费它。
-   - `WxmlValidationContext` 虽预留 chunk 作用域，当前仍为空壳。
-   - 相关位置：`_src/core/types/TsFileInfo.ts` 第 90–114 行、`_src/core/wxmlValidator/context.ts` 第 20–30 行。
+- 清理迁移过程中遗留的无用 context 字段、重复 helper 和过时测试入口。
+- 完成复杂表达式、Linter 生命周期、JSON、Code Action 和 fix-all 的专项回归。
+- 删除五个仍引用已迁移 fixture 的旧根级 CustomComponent 测试，保留对应细分测试目录。
+- `pnpm check`、`pnpm compile` 和完整 Extension Host 测试均已通过。
 
-4. **循环作用域未实现**
-   - 当前直接永久放过 `item` 和 `index`。
-   - 不支持 `wx:for-item`、`wx:for-index` 自定义名称，也不能判断变量是否已经离开循环作用域。
-   - 位置见 `_src/core/wxmlValidator/wxmlChecker.ts` 的 `checkMustacheMatches()`。
+后续如继续扩展功能，应另立计划，不再将本轮计划视为未完成状态。
 
-5. **大部分 WXML Quick Fix 实际无法触发**
-   - Code Action 只处理 `source === "vscode-annil"` 的诊断。
-   - 除注释诊断外，大部分 WXML 诊断没有设置 `source`。
-   - 过滤位置见 `_src/codeActionProvider/index.ts` 的 `WxmlCodeActionProvider`。
-
-6. **JSON 校验尚未接入**
-   - JSON 校验代码已经存在，但 Linter 中被注释。
-   - 不能简单解除注释，因为当前 TS 分析还没有提供可靠的“组件标签 → import 路径”映射。
-   - 相关位置：`_src/linter/index.ts`、`_src/core/jsonValidator/index.ts`。
-
-### 中优先级
-
-- 重复 mustache 会被定位到第一次出现的位置：`_src/core/wxmlValidator/wxmlChecker.ts` 的 `findMustachePosition()`。
-- CustomComponent 诊断范围固定从行首开始：`_src/core/wxmlValidator/customComponent/validateCustomComponent.ts` 的 `addDiagnostic()`。
-- `allowUnknownAttributes` 配置尚未用于属性验证。
-- 加法、函数调用、三元表达式被直接跳过，存在明显漏报。
-- 首次读取兄弟文件失败后仍会将目录加入 `#checkedDirs`，后续可能无法恢复。
-- 配置变化只更新内存值，不会清缓存或重新诊断。
-- `package.json` 暴露了多个尚未注册的命令。
-
-## 后续计划：稳定核心诊断
+## 历史计划：稳定核心诊断（已完成）
 
 ### 阶段一：建立可信测试基线
 
@@ -118,4 +97,20 @@
 - miniTest 生成
 - 通用 TypeScript 跨文件类型求值
 
-旧目录 `src`、`test` 和 `miniTest` 仅作为参考，不作修改。完整计划已保存，可在确认后交接执行。
+旧目录 `src`、`test` 和 `miniTest` 仅作为参考，不作修改。完整计划已保存，作为本轮完成记录。
+
+## 后续建议（待确认后另立计划）
+
+1. **Linter 文件生命周期**：以删除、重命名、恢复组件文件为单独业务规则，先固定 VS Code 文件事件与缓存失效的可重复测试，再实现诊断清理与恢复；不和 WXML 规则改动混做。
+2. **命令与发布核查**：逐项核对 `package.json` 的命令贡献、实际注册和 `annil.check-all` 行为；通过后执行 VSIX 打包烟测，但不发布扩展。
+3. **迁移维护清理**：盘点空模块、过期注释和遗留测试入口；每次目录迁移保持 fixture 与测试文件原子移动，并完成全量门禁。
+
+### 后续计划执行记录（2026-08-01）
+
+- 已为 Linter 增加组件文件创建、删除、重命名时的目录状态清理、兄弟 parser 缓存失效和重新检查入口。
+- 已修正解析失败后仍写入 `#checkedDirs` 的问题：只有完整检查成功才标记目录。
+- 已保留并验证 JSON 编辑/保存后的诊断刷新测试；全量 Extension Host 回归通过。
+- `workspace.fs.delete()` 在当前 Extension Host 环境中未稳定触发可观察的删除诊断事件，因此删除/恢复测试暂不纳入稳定回归，后续需先确定可靠的文件事件触发方式再补测。
+- 已核对命令贡献与实际注册，仅保留已注册的 `annil.fix-all`；移除未迁移的 `annil.check-all`、创建组件/页面、miniTest 和旧注释命令贡献。
+- 已收紧 `.vscodeignore`，VSIX 从 161 个文件缩减为 8 个运行时/发布文件；`vscode-annil-0.10.20.vsix` 打包成功。
+- 发布前 `pnpm check`、`pnpm compile` 和完整 Extension Host 测试均通过。

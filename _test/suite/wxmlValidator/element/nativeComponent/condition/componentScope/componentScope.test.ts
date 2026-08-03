@@ -1,0 +1,38 @@
+import { assert, fileURLToPath, path, vscode } from "#deps";
+import { describe, it as test } from "mocha";
+import { Uri, window, workspace } from "vscode";
+import { waitForStableDiagnostics } from "../../../../diagnosticHelper.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, "../../../../../../../../");
+
+describe("conditionComponentScope", () => {
+  test("按 CustomComponent 和 ChunkComponent 作用域校验条件数据", async () => {
+    const wxmlUri = Uri.file(
+      path.join(
+        projectRoot,
+        "_test/suite/wxmlValidator/element/nativeComponent/condition/componentScope/componentScope.wxml",
+      ),
+    );
+    const document = await workspace.openTextDocument(wxmlUri);
+    await window.showTextDocument(document);
+
+    const diagnostics = await waitForStableDiagnostics(wxmlUri, 2);
+    const unknownValues = diagnostics.filter((item) => item.code === "annil.condition.unknownValue");
+    assert.strictEqual(unknownValues.length, 2);
+    for (const name of ["chunkInline_visible", "subInline_dataBool"] as const) {
+      const diagnostic = unknownValues.find((item) => item.message === `未知数据: "${name}"`);
+      assert.ok(diagnostic);
+      const line = diagnostic.range.start.line;
+      const lineText = document.lineAt(line).text;
+      const start = lineText.indexOf("wx:if");
+      assert.strictEqual(diagnostic.message, `未知数据: "${name}"`);
+      assert.strictEqual(diagnostic.source, "vscode-annil");
+      assert.strictEqual(diagnostic.range.start.line, line);
+      assert.strictEqual(diagnostic.range.start.character, start);
+      assert.strictEqual(diagnostic.range.end.character, start + "wx:if".length);
+      assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
+    }
+  });
+});

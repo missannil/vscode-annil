@@ -7,12 +7,17 @@
 		wx:for="{{items}}"
 		wx:for-item="myItem"
 		wx:for-index="idx"
+		wx:key="*this"
 	>
 		<view>{{myItem}}</view>
+		<view>{{myItem.length}}</view>
+		<view>{{myItem[0].length}}</view>
 		<view>{{idx}}</view>
 		<!-- ③ 作用域内的 rootData 仍然有效 -->
 		<view>{{outerData}}</view>
 	</block>
 	<!-- ④ myItem 作用域已离开 → 未知数据 -->
 	<view>{{myItem}}</view>
+	<view>{{myItem.name}}</view>
+	<view>{{myItem[0].name}}</view>
 </view>

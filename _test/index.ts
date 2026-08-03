@@ -7,7 +7,6 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 // ESM 中手动推导 __dirname
 const __dirname = path.dirname(__filename);
-
 /**
  * 本地开发时只运行指定测试文件或目录；保持为空即运行全部测试。
  *
@@ -18,13 +17,18 @@ const manuallyFocusedTests: readonly string[] = [
   // ── element/chunkComponent ──
   // "wxmlValidator/element/chunkComponent/chunkData/chunkData.test.ts",
   // ── element/customComponent ──
-  // "wxmlValidator/element/customComponent/missingAttr/missingAttr.test.ts",
-  // "wxmlValidator/element/customComponent/unknownAttr/unknownAttr.test.ts",
-  // "wxmlValidator/element/customComponent/rootValue/rootValue.test.ts",
-  // "wxmlValidator/element/customComponent/selfValue/selfValue.test.ts",
-  // "wxmlValidator/element/customComponent/customValue/customValue.test.ts",
-  // "wxmlValidator/element/customComponent/eventsValue/eventsValue.test.ts",
-  // "wxmlValidator/element/customComponent/ternaryValue/ternaryValue.test.ts",
+  // ── element/customComponent/invalidValue ──
+  // "wxmlValidator/element/customComponent/invalidValue/eventsValue/eventsValue.test.ts",
+  // "wxmlValidator/element/customComponent/invalidValue/customValue/customValue.test.ts",
+  // "wxmlValidator/element/customComponent/missingAttr/missingAttrRoot/missingAttrRoot.test.ts",
+  // "wxmlValidator/element/customComponent/missingAttr/missingAttrEvents/missingAttrEvents.test.ts",
+  // "wxmlValidator/element/customComponent/missingAttr/missingAttrSelf/missingAttrSelf.test.ts",
+  // "wxmlValidator/element/customComponent/missingAttr/missingAttrCustom/missingAttrCustom.test.ts",
+  // "wxmlValidator/element/customComponent/missingAttr/missingAttrTernary/missingAttrTernary.test.ts",
+  // "wxmlValidator/element/customComponent/invalidValue/rootValue/rootValue.test.ts",
+  // "wxmlValidator/element/customComponent/invalidValue/selfValue/selfValue.test.ts",
+  // "wxmlValidator/element/customComponent/unknownAttr/camelCase/camelCase.test.ts",
+  // "wxmlValidator/element/customComponent/unknownAttr/kebabCase/kebabCase.test.ts",
   // ── element/nativeComponent ──
   // "wxmlValidator/element/nativeComponent/illegalOperator/illegalOperator.test.ts",
   // "wxmlValidator/element/nativeComponent/invalidVariable/invalidVariable.test.ts",
@@ -43,6 +47,8 @@ const manuallyFocusedTests: readonly string[] = [
   // "jsonValidator/fixAll/fixAll.test.ts",
   // "jsonValidator/unknownConfigKey/unknownConfigKey.test.ts",
   // "jsonValidator/missingPlaceholder/missingPlaceholder.test.ts",
+  // "jsonValidator/missingPlaceholderField/missingPlaceholderField.test.ts",
+  // "jsonValidator/missingPlaceholders/missingPlaceholders.test.ts",
   // "jsonValidator/invalidPath/invalidPath.test.ts",
   // "jsonValidator/missingImports/missingImports.test.ts",
   // "jsonValidator/validAlias/validAlias.test.ts",

@@ -1,0 +1,23 @@
+<block
+	wx:for="{{items}}"
+	wx:key="*this"
+	wx:for-item="outer"
+	wx:for-index="outerIndex"
+>
+	<block
+		wx:for="{{items}}"
+		wx:key="*this"
+		wx:for-item="outer"
+		wx:for-index="outerIndex"
+	></block>
+	<block
+		wx:for="{{items}}"
+		wx:key="*this"
+		wx:for-item="1bad"
+		wx:for-index="innerIndex"
+	></block>
+</block>
+<block
+	wx:for
+	wx:key="*this"
+></block>

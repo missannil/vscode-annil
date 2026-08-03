@@ -1,0 +1,10 @@
+<!-- 非法：block 仅允许条件和循环控制属性。 -->
+<block
+	unknownAttr
+	anotherUnknownAttr
+></block>
+<!-- 合法：标准循环属性不应触发未知属性诊断。 -->
+<block
+	wx:for="{{items}}"
+	wx:key="*this"
+></block>

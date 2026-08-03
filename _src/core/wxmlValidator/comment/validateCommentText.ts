@@ -1,4 +1,5 @@
 import { vscode } from "#deps";
+import { CommentDiagnosticCode } from "./diagnosticCodes.js";
 import { generateDiagnostic } from "./generateDiagnostic.js";
 import { CommentTextList } from "./types.js";
 
@@ -25,6 +26,8 @@ export function validateCommentText(
         "无效的注释",
         textlines,
         startLine,
+        {},
+        CommentDiagnosticCode.invalidText,
       ),
     );
 

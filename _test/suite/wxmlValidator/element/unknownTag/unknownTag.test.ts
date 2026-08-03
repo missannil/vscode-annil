@@ -29,6 +29,8 @@ describe("unknownTag", () => {
       diagnostics.map((diagnostic) => diagnostic.message),
       ["未知标签"],
     );
+    assert.strictEqual(diagnostics[0].source, "vscode-annil");
+    assert.strictEqual(diagnostics[0].code, "annil.element.unknownTag");
     const range = diagnostics[0].range;
     assert.strictEqual(range.start.line, 8);
     assert.strictEqual(range.start.character, 2); // <unknownTag />标签前面的制表符/t 算一个字符,错误从u位置开始,所以 range.start.character = 2

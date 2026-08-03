@@ -10,9 +10,11 @@ import { vscode } from "#deps";
 export function findErrMsgRange(key: string, textlines: string[], startLine = 0): vscode.Range {
   const line = textlines.slice(startLine).findIndex((item) => item.includes(key)) + startLine;
 
-  // 找不到 key，返回第一行
+  // 找不到 key，返回第一行的有效空范围。
+  // 不能使用 endCharacter 小于 startCharacter 的范围，VS Code 会将其规范化，
+  // 导致调用方无法稳定地断言诊断位置。
   if (line === -1) {
-    return new vscode.Range(0, 5, 0, 0);
+    return new vscode.Range(0, 0, 0, 0);
   }
   const start = textlines[line].indexOf(key);
   const end = start + key.length;

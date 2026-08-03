@@ -1,5 +1,0 @@
-<!-- ① 正确：绑定 propRequiredBool → 无诊断 -->
-<subInline subInline_inheritBool="{{propRequiredBool}}"></subInline>
-<!-- annil disable repeatTag -->
-<!-- ② 错误：绑定 wrong → 应绑定 "{{propRequiredBool}}" -->
-<subInline subInline_inheritBool="{{wrong}}"></subInline>
