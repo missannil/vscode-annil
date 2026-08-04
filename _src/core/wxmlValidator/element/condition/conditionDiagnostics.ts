@@ -19,8 +19,9 @@ export function createConditionDiagnostic(
   attribute: ConditionAttribute,
   message: string,
   code: ConditionDiagnosticCode,
+  range: vscode.Range | undefined = attribute.range,
 ): vscode.Diagnostic {
-  const diagnostic = new vscode.Diagnostic(attribute.range, message, vscode.DiagnosticSeverity.Error);
+  const diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Error);
   diagnostic.source = "vscode-annil";
   diagnostic.code = code;
 

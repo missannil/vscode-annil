@@ -26,12 +26,13 @@ describe("conditionComponentScope", () => {
       assert.ok(diagnostic);
       const line = diagnostic.range.start.line;
       const lineText = document.lineAt(line).text;
-      const start = lineText.indexOf("wx:if");
+      const value = name;
+      const start = lineText.indexOf(value);
       assert.strictEqual(diagnostic.message, `未知数据: "${name}"`);
       assert.strictEqual(diagnostic.source, "vscode-annil");
       assert.strictEqual(diagnostic.range.start.line, line);
       assert.strictEqual(diagnostic.range.start.character, start);
-      assert.strictEqual(diagnostic.range.end.character, start + "wx:if".length);
+      assert.strictEqual(diagnostic.range.end.character, start + value.length);
       assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
     }
   });

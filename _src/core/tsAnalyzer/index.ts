@@ -107,8 +107,8 @@ export function traverseAst(
 
   const rootComponentInfo: RootComponentInfo = {
     arrTypeDatas: [],
-    boolTypeDatas: [],
-    dataList: [],
+    boolTypeDatas: ["attached"],
+    dataList: ["attached"],
     events: [],
   };
 

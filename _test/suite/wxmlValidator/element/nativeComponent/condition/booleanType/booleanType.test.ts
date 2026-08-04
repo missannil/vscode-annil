@@ -24,15 +24,15 @@ describe("conditionBooleanType", () => {
       ["条件数据必须是布尔类型: \"count\"", "条件数据必须是布尔类型: \"count\""],
     );
 
-    const expectedAttributes = ["wx:if", "wx:elif"];
+    const expectedValues = ["count", "count"];
     diagnostics.forEach((diagnostic, index) => {
-      const attribute = expectedAttributes[index];
-      const start = document.lineAt(diagnostic.range.start.line).text.indexOf(attribute);
+      const value = expectedValues[index];
+      const start = document.lineAt(diagnostic.range.start.line).text.indexOf(value);
       assert.strictEqual(diagnostic.source, "vscode-annil");
       assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
       assert.strictEqual(diagnostic.code, "annil.condition.nonBooleanValue");
       assert.strictEqual(diagnostic.range.start.character, start);
-      assert.strictEqual(diagnostic.range.end.character, start + attribute.length);
+      assert.strictEqual(diagnostic.range.end.character, start + value.length);
     });
   });
 });

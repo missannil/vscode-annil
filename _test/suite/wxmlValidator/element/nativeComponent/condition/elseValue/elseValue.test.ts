@@ -25,17 +25,17 @@ describe("conditionElseValue", () => {
       ["不应有值"],
     );
 
-    const expectedLocations = [{ line: 1, attribute: "wx:else" }];
+    const expectedLocations = [{ line: 1, value: "unexpected" }];
     diagnostics.forEach((diagnostic, index) => {
-      const { line, attribute } = expectedLocations[index];
-      const start = document.lineAt(line).text.indexOf(attribute);
+      const { line, value } = expectedLocations[index];
+      const start = document.lineAt(line).text.indexOf(value);
       assert.strictEqual(diagnostic.source, "vscode-annil");
       assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
       assert.strictEqual(diagnostic.code, "annil.condition.elseHasValue");
       assert.strictEqual(diagnostic.range.start.line, line);
       assert.strictEqual(diagnostic.range.start.character, start);
       assert.strictEqual(diagnostic.range.end.line, line);
-      assert.strictEqual(diagnostic.range.end.character, start + attribute.length);
+      assert.strictEqual(diagnostic.range.end.character, start + value.length);
     });
   });
 

@@ -22,7 +22,8 @@ describe("conditionSameLineLocation", () => {
     const [diagnostic] = diagnostics;
     const line = 1;
     const lineText = document.lineAt(line).text;
-    const secondAttributeStart = lineText.indexOf("wx:if");
+    const secondValue = "{{ }}";
+    const secondAttributeStart = lineText.indexOf(secondValue);
 
     assert.strictEqual(diagnostic.message, "条件表达式无效");
     assert.strictEqual(diagnostic.source, "vscode-annil");
@@ -30,7 +31,7 @@ describe("conditionSameLineLocation", () => {
     assert.strictEqual(diagnostic.range.start.line, line);
     assert.strictEqual(diagnostic.range.start.character, secondAttributeStart);
     assert.strictEqual(diagnostic.range.end.line, line);
-    assert.strictEqual(diagnostic.range.end.character, secondAttributeStart + "wx:if".length);
+    assert.strictEqual(diagnostic.range.end.character, secondAttributeStart + secondValue.length);
     assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
   });
 });

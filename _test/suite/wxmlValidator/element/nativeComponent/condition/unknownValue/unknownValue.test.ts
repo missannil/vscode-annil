@@ -24,15 +24,15 @@ describe("conditionUnknownValue", () => {
       ["未知数据: \"missing\"", "未知数据: \"missing\""],
     );
 
-    const expectedAttributes = ["wx:if", "wx:elif"];
+    const expectedValues = ["missing", "missing"];
     diagnostics.forEach((diagnostic, index) => {
-      const attribute = expectedAttributes[index];
-      const start = document.lineAt(diagnostic.range.start.line).text.indexOf(attribute);
+      const value = expectedValues[index];
+      const start = document.lineAt(diagnostic.range.start.line).text.indexOf(value);
       assert.strictEqual(diagnostic.source, "vscode-annil");
       assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
       assert.strictEqual(diagnostic.code, "annil.condition.unknownValue");
       assert.strictEqual(diagnostic.range.start.character, start);
-      assert.strictEqual(diagnostic.range.end.character, start + attribute.length);
+      assert.strictEqual(diagnostic.range.end.character, start + value.length);
     });
   });
 });

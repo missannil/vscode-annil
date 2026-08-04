@@ -3,8 +3,9 @@
  */
 export const expectedRootComponentInfo = {
   arrTypeDatas: ["propRequiredList", "propOptionalList", "computedList", "dataList", "storeList"],
-  boolTypeDatas: ["propRequiredBool", "propOptionalBool", "computedBool", "dataBool", "storeBool"],
+  boolTypeDatas: ["attached", "propRequiredBool", "propOptionalBool", "computedBool", "dataBool", "storeBool"],
   dataList: [
+    "attached",
     "propRequiredList",
     "propOptionalList",
     "propRequiredBool",

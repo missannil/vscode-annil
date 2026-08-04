@@ -21,7 +21,15 @@ export function generateConditionCodeActions(
 
   if (diagnostic.code !== ConditionDiagnosticCode.elseHasValue) return [];
 
-  const attributeEnd = findAttributeEnd(document, diagnostic.range);
+  const attributeStart = findAttributeStart(document, diagnostic.range);
+  if (attributeStart === undefined) return [];
+  const attributeEnd = findAttributeEnd(
+    document,
+    new vscode.Range(
+      attributeStart,
+      new vscode.Position(attributeStart.line, attributeStart.character + "wx:else".length),
+    ),
+  );
   if (attributeEnd === undefined) return [];
 
   const action = new vscode.CodeAction("移除 wx:else 的值", vscode.CodeActionKind.QuickFix);
@@ -29,11 +37,22 @@ export function generateConditionCodeActions(
   action.edit = new vscode.WorkspaceEdit();
   action.edit.replace(
     document.uri,
-    new vscode.Range(diagnostic.range.start, attributeEnd),
+    new vscode.Range(attributeStart, attributeEnd),
     "wx:else",
   );
 
   return [action];
+}
+
+function findAttributeStart(
+  document: vscode.TextDocument,
+  range: vscode.Range,
+): vscode.Position | undefined {
+  const lineText = document.lineAt(range.start.line).text;
+  const attributeStart = lineText.lastIndexOf("wx:else", range.start.character);
+  if (attributeStart < 0) return undefined;
+
+  return new vscode.Position(range.start.line, attributeStart);
 }
 
 // eslint-disable-next-line complexity -- 兼容引号和非引号属性值

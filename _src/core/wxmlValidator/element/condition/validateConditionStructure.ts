@@ -50,7 +50,12 @@ export function validateConditionStructure(
   }
   if (conditionAttribute.name === "wx:else" && conditionAttribute.hasValue) {
     context.diagnosticList.push(
-      createConditionDiagnostic(conditionAttribute, "不应有值", ConditionDiagnosticCode.elseHasValue),
+      createConditionDiagnostic(
+        conditionAttribute,
+        "不应有值",
+        ConditionDiagnosticCode.elseHasValue,
+        conditionAttribute.valueRange,
+      ),
     );
   }
   if (
@@ -75,6 +80,7 @@ export function validateConditionStructure(
         conditionAttribute,
         "不符合'{{}}'语法",
         ConditionDiagnosticCode.mustacheSyntax,
+        conditionAttribute.valueRange,
       ),
     );
   }
@@ -89,6 +95,7 @@ export function validateConditionStructure(
         conditionAttribute,
         "条件表达式无效",
         ConditionDiagnosticCode.invalidExpression,
+        conditionAttribute.valueRange,
       ),
     );
   }
@@ -105,6 +112,7 @@ export function validateConditionStructure(
         conditionAttribute,
         `未知数据: "${conditionRoot}"`,
         ConditionDiagnosticCode.unknownValue,
+        conditionAttribute.expressionRange ?? conditionAttribute.valueRange,
       ),
     );
   } else if (simpleConditionRoot !== undefined && !booleanNames.has(simpleConditionRoot)) {
@@ -113,6 +121,7 @@ export function validateConditionStructure(
         conditionAttribute,
         `条件数据必须是布尔类型: "${simpleConditionRoot}"`,
         ConditionDiagnosticCode.nonBooleanValue,
+        conditionAttribute.expressionRange ?? conditionAttribute.valueRange,
       ),
     );
   }
