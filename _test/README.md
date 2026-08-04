@@ -102,37 +102,30 @@ ANNIL_TEST_FILTER=wxmlValidator/comment/textError/textError.test.ts pnpm test:ex
 
 ## Extension Host 测试运行流程
 
-执行 **Run Annil Tests** 时，VS Code 会先执行默认构建任务，将 `_src/` 和 `_test/`
+执行 **Run Annil (调试)** 时，VS Code 会先执行 `tsc-watch` 任务，将 `_src/` 和 `_test/`
 编译到 `out/`。随后启动新的 Extension Host，并传入：
 
 ```text
+<workspace>/_test
 --extensionDevelopmentPath=<workspace>
---extensionTestsPath=<workspace>/out/_test/index.js
 ```
 
-Extension Host 按以下顺序运行：
+Extension Host 手动调试时按以下顺序启动：
 
 1. 加载 `out/extension.js`，激活 Annil 扩展。
-2. 扩展初始化配置、Linter、诊断集合和 Code Action Provider。
-3. 加载 `out/_test/index.js`，调用其导出的 `run()`。
-4. 测试入口递归扫描 `out/_test/suite/**/*.test.js`，再按 CLI 路径或 `manuallyFocusedTests` 过滤。
-5. Mocha 加载选中的测试文件，注册并执行 `describe`、`before`、`it`、`after`。
-6. WXML 测试通过 Extension Host 打开同目录的真实 `.wxml` 组件文件。
-7. Linter 读取组件的 `.ts`、`.json`、`.wxml`，发布诊断；测试等待并断言诊断结果。
-8. Mocha 汇总结果：全部通过时 `run()` 成功返回，存在失败时拒绝并结束测试会话。
+2. 以 `<workspace>/_test` 作为 Extension Host 的初始工作区。
+
+自动测试通过 `pnpm test:extension` 运行：它额外编译测试入口、加载 `out/_test/index.js`，再递归扫描 `out/_test/suite/**/*.test.js` 并执行 Mocha 测试。
 
 测试运行的是 `out/` 中的 JavaScript，而不是直接运行 `_test/` 中的 TypeScript。
 
-## 两种启动配置
+## 启动与测试配置
 
-`.vscode/launch.json` 中的两个配置都会以当前工作区作为开发扩展启动，并在启动前执行默认构建任务。
+`.vscode/launch.json` 当前提供一个配置，以 `_test` 目录作为 Extension Host 的初始工作区，并在启动前执行 `tsc-watch`。
 
-| 配置                 | 额外参数                                  | 用途                                                           |
-| -------------------- | ----------------------------------------- | -------------------------------------------------------------- |
-| **Run Annil (调试)** | 无 `--extensionTestsPath`                 | 打开普通开发 Extension Host，用于手工操作插件和调试扩展功能。  |
-| **Run Annil Tests**  | `--extensionTestsPath=out/_test/index.js` | 用于断点调试测试；日常自动验证优先使用 `pnpm test:extension`。 |
-
-因此，二者的核心差异确实源于 `--extensionTestsPath`：它要求 VS Code 在扩展激活后加载测试入口并等待其结果。
+| 配置                 | 额外参数                  | 用途                                                          |
+| -------------------- | ------------------------- | ------------------------------------------------------------- |
+| **Run Annil (调试)** | 无 `--extensionTestsPath` | 打开普通开发 Extension Host，用于手工操作插件和调试扩展功能。 |
 
 ## tasks.json 与 launch.json 的关系
 
@@ -142,18 +135,16 @@ Extension Host 按以下顺序运行：
 当前任务关系如下：
 
 ```text
-clean
-  └─ 删除旧的 out/ 和遗留编译文件
+create:extension-entry
+  └─ 生成开发入口 out/extension.js
 
-dev（默认 build 任务）
-  └─ dependsOn: clean
-  └─ 执行 npm run dev，即 tsc --watch
+tsc-watch（默认 build 任务）
+  └─ dependsOn: create:extension-entry
+  └─ 执行 pnpm exec tsc --watch
   └─ 持续将 _src/、_test/ 编译到 out/
 
-Run Annil / Run Annil Tests
-  └─ preLaunchTask: ${defaultBuildTask}
-  └─ 解析为 dev
-  └─ dev 先执行 clean，再启动 tsc --watch
+Run Annil (调试)
+  └─ preLaunchTask: tsc-watch
   └─ TypeScript 编译就绪后启动 Extension Host
 ```
 
@@ -166,41 +157,29 @@ Run Annil / Run Annil Tests
 }
 ```
 
-所以 [launch.json](../.vscode/launch.json) 中的：
-
-```jsonc
-"preLaunchTask": "${defaultBuildTask}"
-```
-
-会自动选择 `dev`。而 `dev` 的：
-
-```jsonc
-"dependsOn": ["clean"]
-```
-
-会保证每次启动构建流程时先执行 `clean`。因此 `clean` 不是默认任务，但并不是没有作用；它是 `dev` 的依赖任务，也可以通过 **Tasks: Run Task** 手动执行。
+`launch.json` 直接指定 `preLaunchTask: "tsc-watch"`，不依赖 VS Code 推断默认任务。
 
 ### 两个任务的作用
 
-| 任务    | 对应 npm script | 作用                                                  |
-| ------- | --------------- | ----------------------------------------------------- |
-| `clean` | `npm run clean` | 删除 `out/` 以及 `_src/`、`_test/` 中遗留的编译文件。 |
-| `dev`   | `npm run dev`   | 先清理，再运行 `tsc --watch`，持续编译源码和测试。    |
+| 任务                     | 对应 npm script         | 作用                              |
+| ------------------------ | ----------------------- | --------------------------------- |
+| `create:extension-entry` | shell 命令              | 生成开发入口 `out/extension.js`。 |
+| `tsc-watch`              | `pnpm exec tsc --watch` | 持续编译源码和测试。              |
 
-`dev` 是后台任务，因为 `tsc --watch` 会持续运行；`$tsc-watch` problem matcher 用于通知 VS Code 编译是否已经就绪以及是否存在 TypeScript 错误。
+`tsc-watch` 是后台任务，因为 `tsc --watch` 会持续运行；`$tsc-watch` problem matcher 用于通知 VS Code 编译是否已经就绪以及是否存在 TypeScript 错误。
 
-### Run Annil Tests 的完整顺序
+### Run Annil (调试) 的完整顺序
 
-1. VS Code 读取 **Run Annil Tests** 的 `launch.json` 配置。
-2. 执行 `preLaunchTask: ${defaultBuildTask}`，找到默认任务 `dev`。
-3. `dev` 先执行依赖任务 `clean`。
-4. `dev` 执行 npm 的 `predev` 生命周期脚本，准备 `out/extension.js` 的开发入口。
-5. 执行 `tsc --watch`，编译 `_src/` 和 `_test/` 到 `out/`。
-6. 编译任务通过 `$tsc-watch` 报告就绪后，VS Code 启动 Extension Host。
-7. Extension Host 加载扩展，并根据 `--extensionTestsPath` 加载 `out/_test/index.js`。
-8. 测试入口筛选测试文件，交给 Mocha 执行。
+1. VS Code 读取 **Run Annil (调试)** 的 `launch.json` 配置。
+2. 执行 `preLaunchTask: tsc-watch`。
+3. `tsc-watch` 先执行 `create:extension-entry`，准备 `out/extension.js` 的开发入口。
+4. 执行 `tsc --watch`，编译 `_src/` 和 `_test/` 到 `out/`。
+5. 编译任务通过 `$tsc-watch` 报告就绪后，VS Code 启动 Extension Host。
+6. Extension Host 加载扩展，并以 `<workspace>/_test` 作为初始工作区。
 
-如果只是想手动编译并持续监听，可以在 **Tasks: Run Task** 中选择 `dev`；如果只想删除旧产物，可以单独选择 `clean`。通常不需要手动先运行 `clean` 再运行 `dev`，因为 `dev` 已经通过 `dependsOn` 自动依赖了它。
+自动测试不使用该 F5 配置，直接运行 `pnpm test:extension`。
+
+如果只是想手动编译并持续监听，可以在 **Tasks: Run Task** 中选择 `tsc-watch`。生产构建使用 `pnpm run build`，完整 Extension Host 测试使用 `pnpm test:extension`。
 
 ## 失败时调试
 
@@ -210,7 +189,7 @@ Run Annil / Run Annil Tests
 
 1. 在 `manuallyFocusedTests` 中只保留目标测试文件。
 2. 在目标 `*.test.ts`、对应 fixture，或 `_src/` 规则实现中设置断点。
-3. 使用 **Run Annil Tests** 启动；Extension Host 调试器会在断点处暂停，可检查诊断、缓存和当前编辑器状态。
+3. 使用 **Run Annil (调试)** 启动；自动化测试使用 `pnpm test:extension`，需要断点调试测试时应临时增加带 `--extensionTestsPath` 的专用配置。
 4. 也可以启用 VS Code 的 _Caught Exceptions_ / _Uncaught Exceptions_ 异常断点，定位断言失败或插件异常。
 
 如果确实需要在失败位置暂停而不是立即结束，应额外创建一个仅供本地使用的“测试调试”启动配置：用环境变量控制测试入口在失败后执行 `debugger`，检查完成后继续执行并让测试仍以失败状态结束。不要通过永不 resolve 的 Promise 阻塞默认测试，否则会使 CI 和正常回归测试挂起。

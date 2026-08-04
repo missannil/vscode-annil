@@ -3,7 +3,7 @@
   "publisher": "missannil",
   "displayName": "annil",
   "description": "微信小程序原生插件——`annil`的vscode拓展",
-  "version": "0.11.8",
+  "version": "0.10.20",
   "engines": {
     "vscode": "^1.123.0"
   },
@@ -47,33 +47,44 @@
         "title": "检测所有组件的错误"
       },
       {
+        "command": "commentConsole.toggleConsoleComments",
+        "title": "Toggle Console Comments"
+      },
+      {
         "command": "annil.createComponent",
-        "title": "新建annil组件"
+        "title": "新建自定义组件"
       },
       {
         "command": "annil.createPage",
-        "title": "新建annil页面"
+        "title": "新建页面组件"
+      },
+      {
+        "command": "annil.generateMiniTestClass",
+        "title": "生成miniTest类"
       }
     ],
-    "menus": {
-      "explorer/context": [
-        {
-          "command": "annil.createComponent",
-          "when": "explorerResourceIsFolder",
-          "group": "navigation"
-        },
-        {
-          "command": "annil.createPage",
-          "when": "explorerResourceIsFolder",
-          "group": "navigation"
-        }
-      ]
-    },
     "keybindings": [
       {
         "command": "annil.fix-all",
         "key": "alt+s",
         "mac": "ctrl+s",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "annil.check-all",
+        "key": "alt+z",
+        "mac": "ctrl+z",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "commentConsole.toggleConsoleComments",
+        "key": "ctrl+q",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "annil.generateMiniTestClass",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
         "when": "editorTextFocus"
       }
     ],
@@ -142,21 +153,33 @@
           "description": "生成的测试类时,要生成的属性列表,逗号分隔,例如: [\"mode\",\"src\",\"hidden\",\"value\",\"placeholder\",\"scroll-into-view\"]"
         }
       }
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "annil.createComponent",
+          "group": "navigation",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "annil.createPage",
+          "group": "navigation",
+          "when": "explorerResourceIsFolder"
+        }
+      ]
     }
   },
   "scripts": {
     "prepare": "husky",
     "clean": "rm -rf ./out && find ./src ./_src ./_test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
-    "compile": "node esbuild.config.js",
-    "compile:test": "tsc --pretty false",
-    "vscode:prepublish": "pnpm run clean && pnpm run compile",
-    "vsix": "vsce package --no-dependencies",
-    "publish": "vsce publish",
+    "build": "node esbuild.config.js",
+    "build:test": "tsc --pretty false",
+    "test:extension": "pnpm run clean && pnpm run build && pnpm run build:test && node scripts/run-extension-tests.mjs",
+    "vscode:prepublish": "pnpm run clean && pnpm run build",
     "fmt": "dprint fmt",
-    "dev:entry": "mkdir -p out && printf 'export { activate, deactivate } from \"./_src/extension.js\";\\n' > out/extension.js",
-    "dev": "pnpm run clean && pnpm run dev:entry && tsc --watch",
-    "test:extension": "pnpm run clean && pnpm run compile && pnpm run compile:test && node scripts/run-extension-tests.mjs",
-    "check": "tsc --noEmit && eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))"
+    "check": "tsc --noEmit && eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))",
+    "vsix": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
     "@types/babel__traverse": "^7.28.0",
@@ -164,7 +187,6 @@
     "@types/node": "^24.13.2",
     "@types/vscode": "^1.98.0",
     "@vscode/test-electron": "^3.1.0",
-    "@vscode/vsce": "^3.9.2",
     "annil": "^1.18.2",
     "dprint": "^0.54.0",
     "esbuild": "^0.28.1",

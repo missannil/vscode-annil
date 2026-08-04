@@ -1,42 +1,23 @@
-// See https://go.microsoft.com/fwlink/?LinkId=733558
-// for the documentation about the tasks.json format
 {
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "clean",
-      "label": "clean",
-      "problemMatcher": [],
-      "presentation": {
-        "reveal": "never",
-        "clear": true
-      },
-      "group": "build"
+      "label": "create:extension-entry",
+      "type": "shell",
+      "command": "mkdir -p out && echo 'export { activate, deactivate } from \"./_src/extension.js\";' > out/extension.js ",
+      "problemMatcher": []
     },
     {
-      "type": "npm",
-      "script": "dev",
-      "label": "dev",
+      "label": "tsc-watch",
+      "type": "shell",
+      "command": "pnpm exec tsc --watch",
+      "dependsOn": "create:extension-entry",
+      "dependsOrder": "sequence",
       "problemMatcher": "$tsc-watch",
       "isBackground": true,
-      "presentation": {
-        "reveal": "always"
-      },
       "group": {
         "kind": "build",
         "isDefault": true
-      }
-    },
-    {
-      "label": "test:extension",
-      "type": "shell",
-      "command": "pnpm test:extension",
-      "problemMatcher": [],
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "clear": true
       }
     }
   ]

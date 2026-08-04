@@ -16,6 +16,13 @@
 - 优先读取目标实现、直接调用方和对应测试，不扫描整个旧目录。
 - 遵循现有 TypeScript、ESLint 和 dprint 风格；只为非显然约束或复杂算法添加注释。
 
+## 构建与调试事实
+
+- 生产 bundle 使用 `pnpm build`（esbuild），测试编译使用 `pnpm build:test`；完整 Extension Host 测试使用 `pnpm test:extension`。
+- `pnpm test:extension` 会加载生产 bundle，并额外编译 `out/_test` 测试入口；不要把它与仅用于 F5 手动调试的 `tsc-watch` 任务混为一谈。
+- 当前 `.vscode/launch.json` 只有 `Run Annil (调试)`；测试日常通过 `pnpm test:extension`，不要假设存在 `Run Annil Tests` 配置。
+- 修改构建脚本、`launch.json`、`tasks.json` 或发布入口后，必须同步检查 `description.md` 和 `_test/README.md` 中的流程说明。
+
 ## 按需说明
 
 - 涉及 Annil 组件收集、CustomComponent、ChunkComponent 或 WXML 作用域时，读取 `instructions/glossary.instructions.md`。

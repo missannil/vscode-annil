@@ -38,5 +38,5 @@ description: "Use when creating or changing tests, fixtures, diagnostics, Quick 
 - 除非用户明确要求“不运行”，代理可以自行运行当前规则的聚焦测试。
 - 对已打开且当前可能已有诊断的 fixture，使用 `waitForDiagnostics()` 轮询当前状态；`waitForStableDiagnostics()` 仅用于预期后续诊断发布的聚合场景，避免其稳定等待超过 Mocha 默认用例超时。
 - 全量测试和 `pnpm run check` 仅在用户明确要求或完成一个迁移阶段时运行。
-- 阶段收尾依次运行 `pnpm check`、`pnpm compile` 和 `env -u ANNIL_TEST_FILTER pnpm test:extension`；Extension Host 测试有进程锁，不要并行启动第二个测试进程。
+- 阶段收尾依次运行 `pnpm check`、`pnpm build` 和 `env -u ANNIL_TEST_FILTER pnpm test:extension`；Extension Host 测试有进程锁，不要并行启动第二个测试进程。
 - 成功只报告所运行的命令和结果；失败只报告失败用例、关键错误和相关堆栈。

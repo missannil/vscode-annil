@@ -40,9 +40,12 @@ VS Code 核心代码迁移到 ESM：v1.94 版本（2024年9月）
 
 - dprint 支持 npm 包（不是 Deno 专属），被 pnpm 正常管理
 
-## 测试
+## 测试与调试
 
-开发模式下 `npm run dev` 运行 `tsc --watch` 编译 TS 源码到 `out/` 目录，然后在 VS Code 中 F5 运行调试。
+当前生产构建使用 `pnpm run build` 执行 esbuild，生成 `out/extension.js`；测试代码和测试直接引用的 `_src` 模块使用 `pnpm run build:test` 编译到 `out/`。
 
-- Run Annil (调试) -> 不运行测试 不会自动关闭host
-- Run Annil Tests (调试) -> 运行测试 运行完会关闭host
+`pnpm test:extension` 会先清理输出目录，再执行 `build` 和 `build:test`，最后在独立 Extension Host 中加载生产 bundle 并运行测试。这样可以验证 VSIX 使用的 esbuild bundle，而不是仅验证 TypeScript 多文件开发产物。
+
+`.vscode/launch.json` 当前提供一个 `Run Annil (调试)` 配置：启动前执行 `tsc-watch`，并以 `${workspaceFolder}/_test` 作为开发宿主打开的工作区。测试运行使用 `pnpm test:extension`，不通过 F5 配置运行测试。
+
+发布前使用 `pnpm run vsix`；该命令由 `vsce package` 读取当前 package 配置生成 VSIX。

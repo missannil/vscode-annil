@@ -1,6 +1,3 @@
-
-//@ts-check
-// 生产发布专用：将扩展打包为单一 bundle
 import * as esbuild from 'esbuild';
 
 await esbuild.build({
