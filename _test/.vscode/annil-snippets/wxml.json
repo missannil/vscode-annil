@@ -1,0 +1,9 @@
+{
+  "customSnippet": {
+    "prefix": "customSnippet",
+    "body": [
+      "<view data-custom-snippet=\\\"true\\\"></view>"
+    ],
+    "description": "Annil test custom snippet"
+  }
+}

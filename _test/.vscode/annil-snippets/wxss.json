@@ -1,0 +1,9 @@
+{
+  "customSnippet": {
+    "prefix": "customSnippet",
+    "body": [
+      ".custom-snippet {}"
+    ],
+    "description": "Annil test custom snippet"
+  }
+}

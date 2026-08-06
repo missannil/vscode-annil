@@ -22,6 +22,7 @@
   "editor.wordWrap": "on",
   "eslint.useFlatConfig": true,
   "json.schemaDownload.enable": true,
+  "editor.snippetSuggestions": "top",
   "json.schemas": [
     {
       "fileMatch": [

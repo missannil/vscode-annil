@@ -170,6 +170,7 @@ async function runExtensionTests() {
     `--extensions-dir=${path.join(profileRoot, "extensions")}`,
     `--user-data-dir=${path.join(profileRoot, "user-data")}`,
   ];
+  const testSnippetsPath = path.join(workspaceRoot, "_test", ".vscode", "annil-snippets");
   // 当前终端可能自身由 Rosetta 启动。对通用 VS Code 显式选择 arm64，
   // 避免测试窗口以 Intel 模拟模式运行并显著拖慢 Extension Host 启动。
   const useNativeArm64 = isArm64Mac() && isUniversalArm64Executable(vscodeExecutablePath);
@@ -179,6 +180,7 @@ async function runExtensionTests() {
     detached: process.platform !== "win32",
     env: {
       ...process.env,
+      ANNIL_TEST_SNIPPETS_PATH: testSnippetsPath,
       ...(testFilter === "" ? {} : { ANNIL_TEST_FILTER: testFilter }),
     },
     stdio: ["ignore", "pipe", "pipe"],

@@ -59,6 +59,10 @@
         "title": "新建页面组件"
       },
       {
+        "command": "annil.insertDefaultSnippet",
+        "title": "恢复 Annil 默认代码片段"
+      },
+      {
         "command": "annil.generateMiniTestClass",
         "title": "生成miniTest类"
       }
@@ -79,6 +83,12 @@
       {
         "command": "commentConsole.toggleConsoleComments",
         "key": "ctrl+q",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "annil.insertDefaultSnippet",
+        "key": "ctrl+r ctrl+i",
+        "mac": "cmd+r cmd+i",
         "when": "editorTextFocus"
       },
       {
@@ -158,12 +168,12 @@
       "explorer/context": [
         {
           "command": "annil.createComponent",
-          "group": "navigation",
+          "group": "navigation@1",
           "when": "explorerResourceIsFolder"
         },
         {
           "command": "annil.createPage",
-          "group": "navigation",
+          "group": "navigation@2",
           "when": "explorerResourceIsFolder"
         }
       ]
@@ -174,10 +184,11 @@
     "clean": "rm -rf ./out && find ./src ./_src ./_test -type f \\( -name '*.d.ts' -o -name '*.js' \\) -delete",
     "build": "node esbuild.config.js",
     "build:test": "tsc --pretty false",
-    "test:extension": "pnpm run clean && pnpm run build && pnpm run build:test && node scripts/run-extension-tests.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:extension": "pnpm run typecheck && pnpm run clean && pnpm run build && pnpm run build:test && node scripts/run-extension-tests.mjs",
     "vscode:prepublish": "pnpm run clean && pnpm run build",
     "fmt": "dprint fmt",
-    "check": "tsc --noEmit && eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))",
+    "check": "pnpm run typecheck && eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))",
     "vsix": "vsce package",
     "publish": "vsce publish"
   },

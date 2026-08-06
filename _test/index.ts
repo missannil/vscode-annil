@@ -70,6 +70,16 @@ const manuallyFocusedTests: readonly string[] = [
   // "wxmlValidator/comment/repeatedRepeatTag/repeatedRepeatTag.test.ts",
   // "wxmlValidator/comment/startScope/startScope.test.ts",
   // "wxmlValidator/comment/repeatTag/repeatTag.test.ts",
+  // ── snippets ──
+  "snippets/initSnippet.test.ts",
+  "snippets/resetSnippet.test.ts",
+  // ── rightClickManager 基础生成逻辑 ──
+  "rightClickManager/snippet/createComponent.test.ts",
+  "rightClickManager/snippet/createPage.test.ts",
+  // ── rightClickManager command ──
+  "rightClickManager/command/insertDefaultSnippet.test.ts",
+  "rightClickManager/command/createComponent.test.ts",
+  "rightClickManager/command/createPage.test.ts",
 ];
 
 function getFocusedTests(): readonly string[] {

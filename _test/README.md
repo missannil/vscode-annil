@@ -115,7 +115,7 @@ Extension Host 手动调试时按以下顺序启动：
 1. 加载 `out/extension.js`，激活 Annil 扩展。
 2. 以 `<workspace>/_test` 作为 Extension Host 的初始工作区。
 
-自动测试通过 `pnpm test:extension` 运行：它额外编译测试入口、加载 `out/_test/index.js`，再递归扫描 `out/_test/suite/**/*.test.js` 并执行 Mocha 测试。
+自动测试通过 `pnpm test:extension` 运行：命令会先执行 `pnpm run typecheck` 验证类型，再编译测试入口、加载 `out/_test/index.js`，递归扫描 `out/_test/suite/**/*.test.js` 并执行 Mocha 测试。仅验证类型时使用 `pnpm run typecheck`；`pnpm check` 用于提交前的完整类型、Lint 和格式检查。
 
 测试运行的是 `out/` 中的 JavaScript，而不是直接运行 `_test/` 中的 TypeScript。
 
@@ -179,7 +179,7 @@ Run Annil (调试)
 
 自动测试不使用该 F5 配置，直接运行 `pnpm test:extension`。
 
-如果只是想手动编译并持续监听，可以在 **Tasks: Run Task** 中选择 `tsc-watch`。生产构建使用 `pnpm run build`，完整 Extension Host 测试使用 `pnpm test:extension`。
+如果只是想手动编译并持续监听，可以在 **Tasks: Run Task** 中选择 `tsc-watch`。仅验证类型使用 `pnpm run typecheck`，生产构建使用 `pnpm run build`，完整 Extension Host 测试使用 `pnpm test:extension`。
 
 ## 失败时调试
 

@@ -1,21 +1,26 @@
 import type { DefaultSnippets } from "./types.js";
 
+export const snippetNames = {
+  component: "ancomp",
+  page: "anpage",
+} as const;
+
 export const defaultSnippets: DefaultSnippets = {
   "json": {
-    "annil-component-default": {
-      "prefix": "annil-component-default",
+    [snippetNames.component]: {
+      "prefix": snippetNames.component,
       "body": ["{", "  \"component\": true,", "  \"usingComponents\": {},", "  \"componentPlaceholder\": {}", "}", ""],
       "description": "Annil component default snippet",
     },
-    "annil-page-default": {
-      "prefix": "annil-page-default",
+    [snippetNames.page]: {
+      "prefix": snippetNames.page,
       "body": ["{", "  \"usingComponents\": {},", "  \"componentPlaceholder\": {}", "}", ""],
       "description": "Annil page default snippet",
     },
   },
   "typescript": {
-    "annil-component-default": {
-      "prefix": "annil-component-default",
+    [snippetNames.component]: {
+      "prefix": snippetNames.component,
       "body": [
         "import { DefineComponent, RootComponent, typeEqual } from \"annil\";",
         "",
@@ -31,13 +36,15 @@ export const defaultSnippets: DefaultSnippets = {
         "  rootComponent,",
         "  subComponents: [],",
         "})",
-        "export type $$2 = {}",
-        "typeEqual<$$2, typeof $1>();",
+        "",
+        "export type \\$${1/(.*)/${1:/pascalcase}/} = {}",
+        "typeEqual<\\$${1/(.*)/${1:/pascalcase}/}>()($1);",
+        "$0",
       ],
       "description": "Annil component default snippet",
     },
-    "annil-page-default": {
-      "prefix": "annil-page-default",
+    [snippetNames.page]: {
+      "prefix": snippetNames.page,
       "body": [
         "import { DefineComponent, RootComponent, typeEqual } from \"annil\";",
         "",
@@ -49,38 +56,40 @@ export const defaultSnippets: DefaultSnippets = {
         "  properties: {},",
         "})",
         "const $1 = DefineComponent({",
-        "  path: \"/$3\",",
+        "  path: \"/$2\",",
         "  rootComponent,",
         "  subComponents: [],",
         "})",
-        "export type $$2 = {",
-        "  path: \"/$3\",",
+        "",
+        "export type \\$${1/(.*)/${1:/pascalcase}/} = {",
+        "  path: \"/$2\",",
         "}",
-        "typeEqual<$$2, typeof $1>();",
+        "typeEqual<\\$${1/(.*)/${1:/pascalcase}/}>()($1);",
+        "$0",
       ],
       "description": "Annil page default snippet",
     },
   },
   "wxml": {
-    "annil-component-default": {
-      "prefix": "annil-wxml-default",
+    [snippetNames.component]: {
+      "prefix": snippetNames.component,
       "body": ["<block wx:if=\"{{attached}}\">", " ", "</block>"],
       "description": "Annil component default snippet",
     },
-    "annil-page-default": {
-      "prefix": "annil-page-default",
+    [snippetNames.page]: {
+      "prefix": snippetNames.page,
       "body": ["<block wx:if=\"{{attached}}\">", " ", "</block>"],
       "description": "Annil page default snippet",
     },
   },
   "wxss": {
-    "annil-component-default": {
-      "prefix": "annil-comp-wxss-default",
+    [snippetNames.component]: {
+      "prefix": snippetNames.component,
       "body": [],
       "description": "Annil component default snippet",
     },
-    "annil-page-default": {
-      "prefix": "annil-page-wxss-default",
+    [snippetNames.page]: {
+      "prefix": snippetNames.page,
       "body": [],
       "description": "Annil page default snippet",
     },

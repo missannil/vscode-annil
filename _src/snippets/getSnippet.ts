@@ -1,14 +1,16 @@
-import { fs, path } from "#deps";
-import { defaultSnippets } from "./defaultSnippets.js";
+import { fs, jsonc, path } from "#deps";
+import { defaultSnippets, snippetNames } from "./defaultSnippets.js";
 import { getUserSnippetsPath } from "./getUserSnippetsPath.js";
 import type { SnippetDefinition, SnippetFileType } from "./types.js";
 
 export function getSnippet(fileType: SnippetFileType, isPage: boolean): string {
-  const snippetName = isPage ? "annil-page-default" : "annil-component-default";
+  const snippetName = isPage ? snippetNames.page : snippetNames.component;
   try {
     const snippetsFilePath = path.join(getUserSnippetsPath(), `${fileType}.json`);
     if (fs.existsSync(snippetsFilePath)) {
-      const snippets = JSON.parse(fs.readFileSync(snippetsFilePath, "utf8")) as SnippetDefinition;
+      const snippets = jsonc.parse(fs.readFileSync(snippetsFilePath, "utf8"), [], {
+        allowTrailingComma: true,
+      }) as SnippetDefinition;
       const body = snippets[snippetName]?.body;
 
       if (body !== undefined) return body.join("\n");

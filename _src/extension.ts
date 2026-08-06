@@ -22,11 +22,11 @@ export async function activate(
 ): Promise<void> {
   console.log("Annil 插件已激活", context.extensionPath);
   void vscode.window.showInformationMessage("Annil 插件已激活");
+  initSnippet();
   rightClickManager(context);
   configuration.init(context);
   linter.init(context);
   registerCodeActionProvider(context);
-  initSnippet();
   registerCheckAllCommand(context);
 }
 

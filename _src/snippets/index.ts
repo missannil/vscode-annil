@@ -1,12 +1,34 @@
-import { fs, path } from "#deps";
-import { defaultSnippets } from "./defaultSnippets.js";
+import { fs, jsonc, path } from "#deps";
+import { defaultSnippets, snippetNames } from "./defaultSnippets.js";
 import { getSnippet } from "./getSnippet.js";
 import { getUserSnippetsPath } from "./getUserSnippetsPath.js";
-import type { SnippetFileType } from "./types.js";
+import type { SnippetDefinition, SnippetFileType } from "./types.js";
 
-export { defaultSnippets, getSnippet, getUserSnippetsPath };
+export { defaultSnippets, getSnippet, getUserSnippetsPath, snippetNames };
 
 export type * from "./types.js";
+
+export function resetSnippet(fileType: SnippetFileType, isPage: boolean): string {
+  const snippetName = isPage ? snippetNames.page : snippetNames.component;
+  const defaultSnippet = defaultSnippets[fileType][snippetName];
+  if (defaultSnippet === undefined) return "";
+
+  const snippetsPath = getUserSnippetsPath();
+  if (!fs.existsSync(snippetsPath)) fs.mkdirSync(snippetsPath, { recursive: true });
+  const snippetFilePath = path.join(snippetsPath, `${fileType}.json`);
+  let snippets: SnippetDefinition = {};
+  if (fs.existsSync(snippetFilePath)) {
+    snippets = jsonc.parse(fs.readFileSync(snippetFilePath, "utf8"), [], {
+      allowTrailingComma: true,
+    }) as SnippetDefinition;
+  }
+
+  snippets[snippetName] = defaultSnippet;
+
+  fs.writeFileSync(snippetFilePath, JSON.stringify(snippets, null, 2), "utf8");
+
+  return defaultSnippet.body.join("\n");
+}
 
 export function initSnippet(): void {
   try {
@@ -18,12 +40,15 @@ export function initSnippet(): void {
         fs.writeFileSync(snippetFilePath, JSON.stringify(snippetDefs, null, 2), "utf8");
         continue;
       }
-      let existingSnippets: Record<string, object>;
-      try {
-        existingSnippets = JSON.parse(fs.readFileSync(snippetFilePath, "utf8")) as Record<string, object>;
-      } catch (error) {
-        console.error(`解析代码片段文件失败: ${snippetFilePath}`, error);
-        existingSnippets = {};
+      const parseErrors: { error: number; offset: number; length: number }[] = [];
+      const existingSnippets = jsonc.parse(
+        fs.readFileSync(snippetFilePath, "utf8"),
+        parseErrors,
+        { allowTrailingComma: true },
+      ) as Record<string, object>;
+      if (parseErrors.length > 0) {
+        console.error(`解析代码片段文件失败: ${snippetFilePath}`, parseErrors);
+        continue;
       }
       let updated = false;
       for (const [key, value] of Object.entries(snippetDefs)) {
