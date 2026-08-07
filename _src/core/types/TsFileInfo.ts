@@ -86,6 +86,9 @@ export type CustomComponentInfoRecord = Record<ComponentName, CustomComponentInf
  */
 export type ImportedSubComponentSourceRecord = Record<ComponentName, string>;
 
+/** DefineComponent.subComponents 中来自值导入的组件变量与模块路径。 */
+export type ImportedComponentSourceRecord = Record<ComponentName, string>;
+
 /** ------------------- ChunkComponentInfo----------------*/
 
 /**
@@ -117,4 +120,5 @@ export type TsFileInfo = {
   customComponentInfoRecord: CustomComponentInfoRecord;
   chunkComponentInfoRecord: ChunkComponentInfoRecord;
   importedSubComponentSourceRecord: ImportedSubComponentSourceRecord;
+  importedComponentSourceRecord: ImportedComponentSourceRecord;
 };

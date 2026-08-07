@@ -13,6 +13,7 @@ import {
 import type {
   ChunkComponentInfoRecord,
   CustomComponentInfoRecord,
+  ImportedComponentSourceRecord,
   ImportedSubComponentSourceRecord,
   RootComponentInfo,
 } from "../types/index.js";
@@ -25,6 +26,7 @@ export type TraverseAstResult = {
   customComponentInfoRecord: CustomComponentInfoRecord;
   chunkComponentInfoRecord: ChunkComponentInfoRecord;
   importedSubComponentSourceRecord: ImportedSubComponentSourceRecord;
+  importedComponentSourceRecord: ImportedComponentSourceRecord;
 };
 
 /**
@@ -115,12 +117,18 @@ export function traverseAst(
   const customComponentInfoRecord: CustomComponentInfoRecord = {};
   const chunkComponentInfoRecord: ChunkComponentInfoRecord = {};
   const importedTypeSources: Record<string, string> = {};
+  const importedValueSources: Record<string, string> = {};
   // DefineComponent 中 subComponents 字段引用的子组件变量名集合
   const subComponentNames = new Set<string>();
 
   traverse(tsAST, {
     ImportDeclaration(importPath) {
       collectImportedTypeSources(importPath.node, importedTypeSources);
+      for (const specifier of importPath.node.specifiers) {
+        if (specifier.type === "ImportSpecifier" && specifier.importKind !== "type") {
+          importedValueSources[specifier.local.name] = importPath.node.source.value;
+        }
+      }
     },
 
     // eslint-disable-next-line complexity
@@ -200,6 +208,17 @@ export function traverseAst(
     customComponentInfoRecord,
     importedTypeSources,
   );
+  const importedComponentSourceRecord: ImportedComponentSourceRecord = {};
+  for (const name of subComponentNames) {
+    const source = importedValueSources[name];
+    if (source !== undefined) importedComponentSourceRecord[name] = source;
+  }
 
-  return { rootComponentInfo, customComponentInfoRecord, chunkComponentInfoRecord, importedSubComponentSourceRecord };
+  return {
+    rootComponentInfo,
+    customComponentInfoRecord,
+    chunkComponentInfoRecord,
+    importedSubComponentSourceRecord,
+    importedComponentSourceRecord,
+  };
 }

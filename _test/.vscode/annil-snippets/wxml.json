@@ -5,5 +5,23 @@
       "<view data-custom-snippet=\\\"true\\\"></view>"
     ],
     "description": "Annil test custom snippet"
+  },
+  "ancomp": {
+    "prefix": "ancomp",
+    "body": [
+      "<block wx:if=\"{{attached}}\">",
+      " ",
+      "</block>"
+    ],
+    "description": "Annil component default snippet"
+  },
+  "anpage": {
+    "prefix": "anpage",
+    "body": [
+      "<block wx:if=\"{{attached}}\">",
+      " ",
+      "</block>"
+    ],
+    "description": "Annil page default snippet"
   }
 }

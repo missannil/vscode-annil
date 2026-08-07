@@ -5,5 +5,55 @@
       "const customSnippet = true;"
     ],
     "description": "Annil test custom snippet"
+  },
+  "ancomp": {
+    "prefix": "ancomp",
+    "body": [
+      "import { DefineComponent, RootComponent, typeEqual } from \"annil\";",
+      "",
+      "// const chunk = ChunkComponent<Root>()({})",
+      "// const custom = CustomComponent<Root, CompType>()({})",
+      "// type Root = typeof rootComponent;",
+      "const rootComponent = RootComponent()({",
+      "  properties: {},",
+      "  customEvents: {},",
+      "})",
+      "const $1 = DefineComponent({",
+      "  name: \"$1\",",
+      "  rootComponent,",
+      "  subComponents: [],",
+      "})",
+      "",
+      "export type \\$${1/(.*)/${1:/pascalcase}/} = {}",
+      "typeEqual<\\$${1/(.*)/${1:/pascalcase}/}>()($1);",
+      "$0"
+    ],
+    "description": "Annil component default snippet"
+  },
+  "anpage": {
+    "prefix": "anpage",
+    "body": [
+      "import { DefineComponent, RootComponent, typeEqual } from \"annil\";",
+      "",
+      "// const chunk = ChunkComponent<Root>()({})",
+      "// const custom = CustomComponent<Root, CompType>()({})",
+      "// type Root = typeof rootComponent;",
+      "const rootComponent = RootComponent()({",
+      "  isPage: true,",
+      "  properties: {},",
+      "})",
+      "const $1 = DefineComponent({",
+      "  path: \"/$2\",",
+      "  rootComponent,",
+      "  subComponents: [],",
+      "})",
+      "",
+      "export type \\$${1/(.*)/${1:/pascalcase}/} = {",
+      "  path: \"/$2\",",
+      "}",
+      "typeEqual<\\$${1/(.*)/${1:/pascalcase}/}>()($1);",
+      "$0"
+    ],
+    "description": "Annil page default snippet"
   }
 }
