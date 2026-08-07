@@ -115,7 +115,7 @@ Extension Host 手动调试时按以下顺序启动：
 1. 加载 `out/extension.js`，激活 Annil 扩展。
 2. 以 `<workspace>/_test` 作为 Extension Host 的初始工作区。
 
-自动测试通过 `pnpm test:extension` 运行：命令会先执行 `pnpm run typecheck` 验证类型，再编译测试入口、加载 `out/_test/index.js`，递归扫描 `out/_test/suite/**/*.test.js` 并执行 Mocha 测试。仅验证类型时使用 `pnpm run typecheck`；`pnpm check` 用于提交前的完整类型、Lint 和格式检查。
+自动测试通过 `pnpm test:extension` 运行：命令会先执行 `pnpm run typecheck` 验证类型，再编译测试入口、加载 `out/_test/index.js`，递归扫描 `out/_test/suite/**/*.test.js` 并执行 Mocha 测试。仅验证类型时使用 `pnpm run typecheck`；先用 `pnpm fmt` 格式化，再用不会修改文件的 `pnpm check` 执行提交前的完整类型、Lint 和格式检查。
 
 测试运行的是 `out/` 中的 JavaScript，而不是直接运行 `_test/` 中的 TypeScript。
 

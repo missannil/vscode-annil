@@ -1,0 +1,6 @@
+{
+  "resolveAlias": {
+    "~/*": "components/*",
+    "@Components/*": "components/*"
+  }
+}

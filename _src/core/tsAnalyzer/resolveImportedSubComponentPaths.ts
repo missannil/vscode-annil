@@ -12,6 +12,10 @@ type ProjectConfig = {
   miniprogramRoot?: string;
 };
 
+type AppConfig = {
+  resolveAlias?: Record<string, string>;
+};
+
 function findNearestFile(startDirectory: string, fileName: string): string | undefined {
   let directory = startDirectory;
 
@@ -30,6 +34,28 @@ function readJsonc<T>(fsPath: string): T | undefined {
   } catch {
     return undefined;
   }
+}
+
+function getAppConfigPath(projectConfigPath: string, projectConfig: ProjectConfig): string | undefined {
+  if (projectConfig.miniprogramRoot === undefined) return undefined;
+
+  return path.join(path.dirname(projectConfigPath), projectConfig.miniprogramRoot, "app.json");
+}
+
+function resolveAppAlias(source: string, aliases: Record<string, string>): string | undefined {
+  const matchedAlias = Object.keys(aliases)
+    .filter((alias) => alias.endsWith("*") && source.startsWith(alias.slice(0, -1)))
+    .sort((left, right) => right.length - left.length)[0];
+  if (matchedAlias === undefined) return undefined;
+
+  const aliasPrefix = matchedAlias.slice(0, -1);
+  const target = aliases[matchedAlias];
+  if (target === undefined) return undefined;
+
+  const targetPrefix = target.endsWith("*") ? target.slice(0, -1) : target;
+  const resolved = `${targetPrefix}${source.slice(aliasPrefix.length)}`;
+
+  return resolved.startsWith("/") ? resolved : `/${resolved}`;
 }
 
 function stripExtension(fsPath: string): string {
@@ -69,6 +95,7 @@ function resolveModuleSource(source: string, tsConfigPath: string): string | und
  * 将 TS `import type` 的模块路径转换为 JSON `usingComponents` 路径。
  * 无法映射到当前小程序根目录的导入（例如 npm 类型）不会进入 JSON 契约。
  */
+// eslint-disable-next-line complexity
 export function resolveImportedSubComponentPaths(
   tsFsPath: string,
   sourceRecord: ImportedSubComponentSourceRecord,
@@ -79,6 +106,8 @@ export function resolveImportedSubComponentPaths(
   if (projectConfig?.miniprogramRoot === undefined) return {};
   const miniprogramRoot = path.resolve(path.dirname(projectConfigPath), projectConfig.miniprogramRoot);
   const tsConfigPath = findNearestFile(path.dirname(tsFsPath), "tsconfig.json");
+  const appConfigPath = getAppConfigPath(projectConfigPath, projectConfig);
+  const appConfig = appConfigPath === undefined ? undefined : readJsonc<AppConfig>(appConfigPath);
   const result: Record<string, string> = {};
 
   for (const [componentName, source] of Object.entries(sourceRecord)) {
@@ -87,11 +116,18 @@ export function resolveImportedSubComponentPaths(
       : tsConfigPath === undefined
       ? undefined
       : resolveModuleSource(source, tsConfigPath);
-    if (absolutePath === undefined) continue;
 
-    const relativePath = path.relative(miniprogramRoot, stripExtension(absolutePath));
-    if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) continue;
-    result[componentName] = `/${relativePath.split(path.sep).join("/")}`;
+    if (absolutePath !== undefined) {
+      const relativePath = path.relative(miniprogramRoot, stripExtension(absolutePath));
+      if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) continue;
+      result[componentName] = `/${relativePath.split(path.sep).join("/")}`;
+      continue;
+    }
+
+    const aliasedPath = appConfig?.resolveAlias === undefined
+      ? undefined
+      : resolveAppAlias(source, appConfig.resolveAlias);
+    if (aliasedPath !== undefined) result[componentName] = aliasedPath.replace(/\.([cm]?tsx?|jsx?)$/, "");
   }
 
   return result;

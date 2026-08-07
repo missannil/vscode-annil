@@ -44,7 +44,7 @@ VS Code 核心代码迁移到 ESM：v1.94 版本（2024年9月）
 
 当前生产构建使用 `pnpm run build` 执行 esbuild，生成 `out/extension.js`；测试代码和测试直接引用的 `_src` 模块使用 `pnpm run build:test` 编译到 `out/`。
 
-`pnpm run typecheck` 只执行 `tsc --noEmit`，用于快速验证类型错误；`pnpm check` 在此基础上继续执行 ESLint 和 dprint，作为提交前的完整检查。`pnpm test:extension` 会先执行 `typecheck`，确认类型无误后再清理输出目录、执行 `build` 和 `build:test`，最后在独立 Extension Host 中加载生产 bundle 并运行测试。这样可以验证 VSIX 使用的 esbuild bundle，而不是仅验证 TypeScript 多文件开发产物。
+`pnpm run typecheck` 只执行 `tsc --noEmit`，用于快速验证类型错误；`pnpm fmt` 主动格式化代码，`pnpm check` 只执行 ESLint 和 dprint 检查而不会修改文件，作为提交前的完整检查。`pnpm test:extension` 会先执行 `typecheck`，确认类型无误后再清理输出目录、执行 `build` 和 `build:test`，最后在独立 Extension Host 中加载生产 bundle 并运行测试。这样可以验证 VSIX 使用的 esbuild bundle，而不是仅验证 TypeScript 多文件开发产物。
 
 `.vscode/launch.json` 当前提供一个 `Run Annil (调试)` 配置：启动前执行 `tsc-watch`，并以 `${workspaceFolder}/_test` 作为开发宿主打开的工作区。测试运行使用 `pnpm test:extension`，不通过 F5 配置运行测试。
 

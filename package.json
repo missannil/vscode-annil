@@ -188,7 +188,7 @@
     "test:extension": "pnpm run typecheck && pnpm run clean && pnpm run build && pnpm run build:test && node scripts/run-extension-tests.mjs",
     "vscode:prepublish": "pnpm run clean && pnpm run build",
     "fmt": "dprint fmt",
-    "check": "pnpm run typecheck && eslint . --max-warnings 0 && (dprint check || (dprint fmt && exit 1))",
+    "check": "pnpm run typecheck && eslint . --max-warnings 0 && dprint check",
     "vsix": "vsce package",
     "publish": "vsce publish"
   },
