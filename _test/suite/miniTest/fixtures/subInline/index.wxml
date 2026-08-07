@@ -1,0 +1,6 @@
+<block wx:if="{{attached}}">
+	<scroll-view
+		id="{{cid}}"
+		class="xxx"
+	></scroll-view>
+</block>

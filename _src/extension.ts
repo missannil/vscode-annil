@@ -3,6 +3,7 @@ import { registerCodeActionProvider } from "./codeActionProvider/index.js";
 import { configuration } from "./configuration/index.js";
 import { goToDefinition } from "./goToDefinition/index.js";
 import { linter } from "./linter/index.js";
+import { miniTest } from "./miniTest/index.js";
 import { rightClickManager } from "./rightClickManager/index.js";
 import { initSnippet } from "./snippets/index.js";
 
@@ -30,6 +31,7 @@ export async function activate(
   goToDefinition(context);
   registerCodeActionProvider(context);
   registerCheckAllCommand(context);
+  miniTest(context);
 }
 
 export function deactivate(): void {

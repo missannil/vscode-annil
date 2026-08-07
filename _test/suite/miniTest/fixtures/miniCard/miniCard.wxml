@@ -1,0 +1,19 @@
+<view
+	id="card"
+	class="card"
+	data-state="ready"
+	bind:tap="onCardTap"
+>
+	<text id="title">MiniTest Demo</text>
+	<block wx:for="{{items}}">
+		<view
+			id="item"
+			class="item"
+			data-index="{{index}}"
+			bind:tap="onItemTap"
+		>Item</view>
+	</block>
+	<block wx:if="{{showInline}}">
+		<sub-inline cid="inline" />
+	</block>
+</view>

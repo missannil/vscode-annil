@@ -81,7 +81,7 @@ const manuallyFocusedTests: readonly string[] = [
   // "rightClickManager/command/createComponent.test.ts",
   // "rightClickManager/command/createPage.test.ts",
   // -- gotoDefinition --
-  "goToDefinition/annilDefinition/annilDefinition.test.ts",
+  // "goToDefinition/annilDefinition/annilDefinition.test.ts",
 ];
 
 function getFocusedTests(): readonly string[] {

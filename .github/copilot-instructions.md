@@ -5,6 +5,7 @@
 - 本项目是 Annil 微信小程序框架的 VS Code 诊断插件。
 - `src`、`test`、`miniTest` 是旧版参考代码，只读。
 - 新实现和新测试只写入 `_src`、`_test`；不要修改生成目录 `out`。
+- `_test/miniprogram` 只保留跨测试共享的小程序项目环境和基础组件；业务功能测试的真实组件 demo、fixture 和 expected 文件必须放在对应测试模块目录下，例如 `_test/suite/miniTest/fixtures`，不得放入 `_test/miniprogram`。
 - 已迁移功能以 `_src` 为事实源；仅在迁移缺失行为时读取对应旧代码。
 
 ## 工作方式

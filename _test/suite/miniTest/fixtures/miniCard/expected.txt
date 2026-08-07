@@ -1,0 +1,81 @@
+from typing import TypedDict, List
+from miniTest.common import Common, BaseElement, DiffConfig
+from miniTest.components.subInline import SubInlineComponent, SubInlineComponentInfo
+
+MiniCardComponentInfo = TypedDict("MiniCardComponentInfo", {
+        "miniCard_class": str,
+        "miniCard_data-state": str,
+        "title_innerText": str,
+        "item_classList": List[str],
+        "item_data-indexList": List[str],
+        "item_innerTextList": List[str],
+        "customComponents": dict,
+})
+PartialMiniCardComponentInfo = TypedDict("PartialMiniCardComponentInfo", {
+        "miniCard_class": str,
+        "miniCard_data-state": str,
+        "title_innerText": str,
+        "item_classList": List[str],
+        "item_data-indexList": List[str],
+        "item_innerTextList": List[str],
+        "customComponents": dict,
+}, total=False)
+
+class MiniCardComponent(Common):
+    def __init__(self, rootElement: BaseElement) -> None:
+        super().__init__()
+        self.rootElement = rootElement
+    def tapMiniCard(self, count: int = 1) -> None:
+        self.tapElement(self.rootElement, count)
+    def getClass(self) -> str:
+        return self.rootElement.attribute("class")[0]
+    def getDataState(self) -> str:
+        return self.rootElement.attribute("data-state")[0]
+    def getElementOfTitle(self) -> BaseElement:
+        return self.rootElement.get_element("text[id$='title']")
+    def getInnerTextOfTitle(self) -> str:
+        return self.getElementOfTitle().inner_text
+    def getElementsOfItem(self) -> List[BaseElement]:
+        return self.rootElement.get_elements("view[id$='item']")
+    def tapItem(self, index: int, count: int = 1) -> None:
+        elements = self.getElementsOfItem()
+        if index >= len(elements):
+            raise Exception("Element not found")
+        self.tapElement(elements[index], count)
+    def getClassOfItem(self) -> List[str]:
+        return [element.attribute("class")[0] for element in self.getElementsOfItem()]
+    def getDataIndexOfItem(self) -> List[str]:
+        return [element.attribute("data-index")[0] for element in self.getElementsOfItem()]
+    def getInnerTextOfItem(self) -> List[str]:
+        return [element.inner_text for element in self.getElementsOfItem()]
+    def getSubInlineComponent(self, cid: str) -> SubInlineComponentInfo | None:
+        try:
+            return SubInlineComponent(self.rootElement.get_element(f"scroll-view[id$='{cid}']")).getComponentInfo()
+        except Exception:
+            return None
+    def methodsRecord(self) -> dict:
+        return {
+            "miniCard_class": ["getClass", ""],
+            "miniCard_data-state": ["getDataState", ""],
+            "title_innerText": ["getInnerTextOfTitle", ""],
+            "item_classList": ["getClassOfItem", ""],
+            "item_data-indexList": ["getDataIndexOfItem", ""],
+            "item_innerTextList": ["getInnerTextOfItem", ""],
+        }
+    def getComponentInfo(self) -> MiniCardComponentInfo:
+        return {
+            "miniCard_class": self.getClass(),
+            "miniCard_data-state": self.getDataState(),
+            "title_innerText": self.getInnerTextOfTitle(),
+            "item_classList": self.getClassOfItem(),
+            "item_data-indexList": self.getDataIndexOfItem(),
+            "item_innerTextList": self.getInnerTextOfItem(),
+            "customComponents": {
+            "sub-inline": self.getSubInlineComponent("inline"),
+            },
+        }
+    def assertComponentInfo(self, expectedInfo: PartialMiniCardComponentInfo, diffConfig: DiffConfig | None = None) -> None:
+        actual_info = {key: getattr(self, method_name)() for key, (method_name, _) in self.methodsRecord().items() if key in expectedInfo}
+        if "customComponents" in expectedInfo:
+            actual_info["customComponents"] = self.getComponentInfo()["customComponents"]
+        self.dict_diff(actual_info, dict(expectedInfo), compareConfig=diffConfig)
