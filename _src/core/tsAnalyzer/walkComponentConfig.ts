@@ -121,7 +121,9 @@ export function isArrayTypeFunction(value: ObjectProperty["value"]): boolean {
 
 /** computed / store 字段值的布尔返回类型 */
 export function isBoolTypeFunction(value: ObjectProperty["value"]): boolean {
-  return isArrowFunctionExpression(value) && isBooleanLiteral(value.body);
+  if (!isArrowFunctionExpression(value)) return false;
+
+  return value.returnType != null && isTSBooleanKeyword(value.returnType.typeAnnotation);
 }
 
 // ---- 公共收集原子操作 ----

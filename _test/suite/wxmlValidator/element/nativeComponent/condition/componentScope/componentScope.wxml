@@ -7,7 +7,7 @@
 	<block wx:if="{{chunkInline_visible}}"></block>
 </view>
 <block wx:if="{{chunkInline_visible}}"></block>
-<!-- CustomComponent 的局部 data 不并入父 WXML 条件作用域。 -->
-<block wx:if="{{subInline_dataBool}}">
+<!-- CustomComponent 的 isReady 可用于包裹它的 block 条件。 -->
+<block wx:if="{{subInline_isReady}}">
 	<subInline></subInline>
 </block>

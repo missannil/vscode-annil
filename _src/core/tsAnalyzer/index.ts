@@ -27,6 +27,8 @@ export type TraverseAstResult = {
   chunkComponentInfoRecord: ChunkComponentInfoRecord;
   importedSubComponentSourceRecord: ImportedSubComponentSourceRecord;
   importedComponentSourceRecord: ImportedComponentSourceRecord;
+  /** `import type { X } from "..."` 的本地类型名 → 模块路径 */
+  importedTypeSources: Record<string, string>;
 };
 
 /**
@@ -220,5 +222,6 @@ export function traverseAst(
     chunkComponentInfoRecord,
     importedSubComponentSourceRecord,
     importedComponentSourceRecord,
+    importedTypeSources,
   };
 }

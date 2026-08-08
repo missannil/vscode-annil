@@ -112,6 +112,8 @@ export type Root = typeof rootComponent;
  *  4 所有数据名列表(dataList: string[])，用于判断 wxml 中数据绑定的值是否正确
  */
 
+const appBootstrap = { isReady: true };
+
 const rootComponent = RootComponent()({
   properties: {
     // 1 & 4
@@ -152,7 +154,9 @@ const rootComponent = RootComponent()({
     // 1 & 4
     storeList: (): unknown[] => [],
     // 2 & 4
-    storeBool: (): boolean => true,
+    storeBool: () => true,
+    // 2 & 4: 返回类型注解来自非字面量表达式
+    storeFromApp: (): boolean => appBootstrap.isReady,
     // 4
     storeOther: (): string => {
       return "otherData";

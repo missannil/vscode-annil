@@ -10,6 +10,7 @@ export const ConditionDiagnosticCode = {
   invalidExpression: "annil.condition.invalidExpression",
   nonBooleanValue: "annil.condition.nonBooleanValue",
   unknownValue: "annil.condition.unknownValue",
+  illegalElementIf: "annil.condition.illegalElementIf",
 } as const;
 
 export type ConditionDiagnosticCode = (typeof ConditionDiagnosticCode)[keyof typeof ConditionDiagnosticCode];

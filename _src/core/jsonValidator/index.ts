@@ -18,10 +18,12 @@ import { validateUnknownKeys } from "./validateUnknownKeys.js";
  *
  * @param jsonFileInfo - JSON 文件解析结果
  * @param importedSubCompInfo - TS 推导的导入子组件映射（组件名 → 路径）
+ * @param jsonFsPath - JSON 文件绝对路径（用于归一化相对路径）
  */
 export function validateJson(
   jsonFileInfo: JsonFileInfo,
   importedSubCompInfo: Record<string, string | undefined>,
+  jsonFsPath: string,
 ): vscode.Diagnostic[] {
   const diagnosticList: vscode.Diagnostic[] = [];
   const config = jsonFileInfo.config;
@@ -41,7 +43,7 @@ export function validateJson(
 
   // 4. 无效的导入路径
   diagnosticList.push(
-    ...validateInvalidPath(usingComponents, importedSubCompInfo, unknownResult.validImportKeys, textlines),
+    ...validateInvalidPath(usingComponents, importedSubCompInfo, unknownResult.validImportKeys, textlines, jsonFsPath),
   );
 
   // 5. componentPlaceholder 校验

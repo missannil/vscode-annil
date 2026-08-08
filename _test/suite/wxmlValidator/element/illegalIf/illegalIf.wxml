@@ -1,0 +1,7 @@
+<subInline wx:if="{{subInline_isReady}}" />
+<view
+	id="chunkInline"
+	wx:if="{{chunkInline_visible}}"
+></view>
+
+<view wx:if="{{missingVisible}}"></view>

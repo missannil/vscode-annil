@@ -19,4 +19,4 @@ const subInline = CustomComponent<Root, { properties: { subInline_isReady?: bool
   },
 });
 
-DefineComponent({ name: "componentScope", rootComponent, subComponents: [chunkInline, subInline] });
+DefineComponent({ name: "illegalIf", rootComponent, subComponents: [chunkInline, subInline] });

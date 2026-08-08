@@ -1,0 +1,4 @@
+<subInline
+	subInline_inheritBool="{{propRequiredBool}}"
+	key="{{unknownKey}}"
+></subInline>

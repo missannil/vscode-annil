@@ -1,0 +1,11 @@
+{
+  "component": true,
+  "usingComponents": {
+    "external": "/components/subExternal/subExternal",
+    "cart": "../../../miniprogram/components/subExternal/subExternal"
+  },
+  "componentPlaceholder": {
+    "external": "view",
+    "cart": "view"
+  }
+}

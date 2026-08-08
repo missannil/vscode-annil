@@ -1,8 +1,12 @@
 import { type Domhandler, vscode } from "#deps";
+import { configuration } from "../../../configuration/index.js";
 import type { AttrValue, CustomComponentInfo } from "../../types/TsFileInfo.js";
+import { findOpeningTagAttributeValueRange } from "../element/openingTag.js";
+import { validateMustacheText } from "../expression/validateMustache.js";
 
 const MUSTACHE_RE = /^\{\{\s*(.*?)\s*\}\}$/;
 const TERNARY_RE = /^([\w$.]+)\s*\?\s*([\w$.]+)\s*:\s*([\w$.]+)$/;
+const OPTIONAL_COMPONENT_ATTRIBUTES = new Set(["isReady"]);
 
 export const CustomComponentDiagnosticCode = {
   missingAttribute: "annil.customComponent.missingAttribute",
@@ -45,6 +49,7 @@ function validateMissingAttributes(
   const actualNames = Object.keys(node.attribs);
 
   for (const expectedName of Object.keys(componentInfo.configInfo)) {
+    if (isOptionalComponentAttribute(expectedName)) continue;
     if (actualNames.some((name) => normalizeAttributeName(name) === expectedName)) continue;
     addDiagnostic(
       diagnostics,
@@ -57,6 +62,14 @@ function validateMissingAttributes(
       CustomComponentDiagnosticCode.missingAttribute,
     );
   }
+}
+
+/** `isReady` 只用于外层 block wx:if，不要求重复传入子组件。 */
+function isOptionalComponentAttribute(name: string): boolean {
+  if (OPTIONAL_COMPONENT_ATTRIBUTES.has(name)) return true;
+  const prefixSeparator = name.indexOf("_");
+
+  return prefixSeparator >= 0 && OPTIONAL_COMPONENT_ATTRIBUTES.has(name.slice(prefixSeparator + 1));
 }
 
 function validateExistingAttributes(
@@ -74,6 +87,10 @@ function validateExistingAttributes(
     const expectedName = normalizeAttributeName(name);
     const expectedValue = componentInfo.configInfo[expectedName];
     if (expectedValue === undefined) {
+      if (configuration.isAllowedAttribute(name)) {
+        validateAllowedAttributeValue(node, startLine, name, value, validScopeNames, textlines, diagnostics);
+        continue;
+      }
       addDiagnosticAtAttributeName(
         diagnostics,
         startLine,
@@ -96,6 +113,29 @@ function validateExistingAttributes(
       diagnostics,
     );
   }
+}
+
+/**
+ * 校验配置允许透传的未知属性。
+ *
+ * 允许的是属性名，不是属性值；因此不做组件契约值匹配，但仍校验值中的
+ * mustache 变量是否存在于当前 WXML 作用域中。
+ */
+function validateAllowedAttributeValue(
+  node: Domhandler.Element,
+  startLine: number,
+  name: string,
+  value: string,
+  validScopeNames: ReadonlySet<string>,
+  textlines: string[],
+  diagnostics: vscode.Diagnostic[],
+): void {
+  validateMustacheText(
+    value,
+    validScopeNames,
+    diagnostics,
+    findOpeningTagAttributeValueRange(textlines, startLine, name, value, node.startIndex ?? undefined).start,
+  );
 }
 
 function normalizeAttributeName(name: string): string {

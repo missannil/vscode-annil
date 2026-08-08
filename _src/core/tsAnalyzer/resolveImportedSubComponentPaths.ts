@@ -1,46 +1,10 @@
-import { fs, jsonc, path } from "#deps";
+import { path } from "#deps";
 import type { ImportedSubComponentSourceRecord } from "../types/TsFileInfo.js";
-
-type TsConfig = {
-  compilerOptions?: {
-    baseUrl?: string;
-    paths?: Record<string, string[]>;
-  };
-};
-
-type ProjectConfig = {
-  miniprogramRoot?: string;
-};
+import { findNearestFile, getMiniprogramRoot, readJsonc, resolveModuleSource } from "./tsConfigResolver.js";
 
 type AppConfig = {
   resolveAlias?: Record<string, string>;
 };
-
-function findNearestFile(startDirectory: string, fileName: string): string | undefined {
-  let directory = startDirectory;
-
-  while (true) {
-    const candidate = path.join(directory, fileName);
-    if (fs.existsSync(candidate)) return candidate;
-    const parent = path.dirname(directory);
-    if (parent === directory) return undefined;
-    directory = parent;
-  }
-}
-
-function readJsonc<T>(fsPath: string): T | undefined {
-  try {
-    return jsonc.parse(fs.readFileSync(fsPath, "utf-8")) as T;
-  } catch {
-    return undefined;
-  }
-}
-
-function getAppConfigPath(projectConfigPath: string, projectConfig: ProjectConfig): string | undefined {
-  if (projectConfig.miniprogramRoot === undefined) return undefined;
-
-  return path.join(path.dirname(projectConfigPath), projectConfig.miniprogramRoot, "app.json");
-}
 
 function resolveAppAlias(source: string, aliases: Record<string, string>): string | undefined {
   const matchedAlias = Object.keys(aliases)
@@ -59,36 +23,9 @@ function resolveAppAlias(source: string, aliases: Record<string, string>): strin
 }
 
 function stripExtension(fsPath: string): string {
-  return fsPath.slice(0, Math.max(fsPath.lastIndexOf("."), 0));
-}
+  const extension = path.extname(fsPath);
 
-// eslint-disable-next-line complexity
-function resolveModuleSource(source: string, tsConfigPath: string): string | undefined {
-  const config = readJsonc<TsConfig>(tsConfigPath);
-  const compilerOptions = config?.compilerOptions;
-  if (compilerOptions === undefined) return undefined;
-  const configDirectory = path.dirname(tsConfigPath);
-  const resolutionBase = compilerOptions.baseUrl === undefined
-    ? configDirectory
-    : path.resolve(configDirectory, compilerOptions.baseUrl);
-  const paths = compilerOptions.paths;
-
-  if (paths !== undefined) {
-    for (const [pattern, targets] of Object.entries(paths)) {
-      const starIndex = pattern.indexOf("*");
-      const prefix = starIndex === -1 ? pattern : pattern.slice(0, starIndex);
-      const suffix = starIndex === -1 ? "" : pattern.slice(starIndex + 1);
-      if (!source.startsWith(prefix) || !source.endsWith(suffix)) continue;
-      const wildcard = source.slice(prefix.length, source.length - suffix.length);
-      const target = targets[0];
-      if (target === undefined) continue;
-
-      return path.resolve(resolutionBase, target.replace("*", wildcard));
-    }
-  }
-
-  // 无 paths 匹配时，仅兼容仍声明 baseUrl 的旧项目；TS 7 新配置应显式使用 paths。
-  return compilerOptions.baseUrl === undefined ? undefined : path.resolve(resolutionBase, source);
+  return extension === "" ? fsPath : fsPath.slice(0, -extension.length);
 }
 
 /**
@@ -100,14 +37,10 @@ export function resolveImportedSubComponentPaths(
   tsFsPath: string,
   sourceRecord: ImportedSubComponentSourceRecord,
 ): Record<string, string> {
-  const projectConfigPath = findNearestFile(path.dirname(tsFsPath), "project.config.json");
-  if (projectConfigPath === undefined) return {};
-  const projectConfig = readJsonc<ProjectConfig>(projectConfigPath);
-  if (projectConfig?.miniprogramRoot === undefined) return {};
-  const miniprogramRoot = path.resolve(path.dirname(projectConfigPath), projectConfig.miniprogramRoot);
+  const miniprogramRoot = getMiniprogramRoot(tsFsPath);
+  if (miniprogramRoot === undefined) return {};
   const tsConfigPath = findNearestFile(path.dirname(tsFsPath), "tsconfig.json");
-  const appConfigPath = getAppConfigPath(projectConfigPath, projectConfig);
-  const appConfig = appConfigPath === undefined ? undefined : readJsonc<AppConfig>(appConfigPath);
+  const appConfig = readJsonc<AppConfig>(path.join(miniprogramRoot, "app.json"));
   const result: Record<string, string> = {};
 
   for (const [componentName, source] of Object.entries(sourceRecord)) {

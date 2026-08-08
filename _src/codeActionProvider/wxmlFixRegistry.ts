@@ -3,6 +3,7 @@ import { generateBlockCodeActions } from "./blockFix.js";
 import { generateCommentCodeActions } from "./commentFix.js";
 import { generateConditionCodeActions } from "./conditionFix.js";
 import { generateCustomComponentCodeActions } from "./customComponentFix.js";
+import { generateElementConditionCodeActions } from "./elementConditionFix.js";
 import { generateEventValueCodeActions } from "./eventFix.js";
 import { generateWxForCodeActions } from "./wxForFix.js";
 
@@ -21,6 +22,7 @@ const wxmlFixGenerators: readonly WxmlFixGenerator[] = [
   (document, diagnostic): vscode.CodeAction[] => generateCommentCodeActions(document.uri, diagnostic),
   generateBlockCodeActions,
   generateConditionCodeActions,
+  generateElementConditionCodeActions,
   generateEventValueCodeActionsForDocument,
   generateWxForCodeActions,
   generateCustomComponentCodeActions,

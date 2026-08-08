@@ -48,4 +48,4 @@ VS Code 核心代码迁移到 ESM：v1.94 版本（2024年9月）
 
 `.vscode/launch.json` 当前提供一个 `Run Annil (调试)` 配置：启动前执行 `tsc-watch`，并以 `${workspaceFolder}/_test` 作为开发宿主打开的工作区。测试运行使用 `pnpm test:extension`，不通过 F5 配置运行测试。
 
-发布前使用 `pnpm run vsix`；该命令由 `vsce package` 读取当前 package 配置生成 VSIX。
+发布前使用 `pnpm run vsix`；该命令由 `vsce package --no-dependencies` 读取当前 package 配置生成 VSIX，并跳过 npm/yarn 依赖检测。发布时使用 `pnpm run publish`，同样通过 `vsce publish --no-dependencies` 跳过依赖检测。

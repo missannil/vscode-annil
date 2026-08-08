@@ -18,10 +18,10 @@ describe("conditionComponentScope", () => {
     const document = await workspace.openTextDocument(wxmlUri);
     await window.showTextDocument(document);
 
-    const diagnostics = await waitForStableDiagnostics(wxmlUri, 2);
+    const diagnostics = await waitForStableDiagnostics(wxmlUri, 1);
     const unknownValues = diagnostics.filter((item) => item.code === "annil.condition.unknownValue");
-    assert.strictEqual(unknownValues.length, 2);
-    for (const name of ["chunkInline_visible", "subInline_dataBool"] as const) {
+    assert.strictEqual(unknownValues.length, 1);
+    for (const name of ["chunkInline_visible"] as const) {
       const diagnostic = unknownValues.find((item) => item.message === `未知数据: "${name}"`);
       assert.ok(diagnostic);
       const line = diagnostic.range.start.line;

@@ -2,9 +2,14 @@ import { vscode } from "#deps";
 import { configuration } from "../configuration/index.js";
 import { jsonParser } from "../core/fileManager/jsonParser.js";
 import { tsParser } from "../core/fileManager/tsParser.js";
-import { wxmlParser } from "../core/fileManager/wxmlParser.js";
+import { type WxmlFileInfo, wxmlParser } from "../core/fileManager/wxmlParser.js";
 import { validateJson } from "../core/jsonValidator/index.js";
+import {
+  collectExternalComponentInfo,
+  type TraverseAstResult,
+} from "../core/tsAnalyzer/collectExternalSubComponentSources.js";
 import { resolveImportedSubComponentPaths } from "../core/tsAnalyzer/resolveImportedSubComponentPaths.js";
+import type { JsonFileInfo } from "../core/types/JsonFileInfo.js";
 import { checkWxml } from "../core/wxmlValidator/wxmlChecker.js";
 import { debounce } from "../utils/debounce.js";
 import { nonNullable } from "../utils/nonNullable.js";
@@ -208,19 +213,39 @@ class Linter {
     const tsInfo = nonNullable(tsParser.getCached(tsUri.fsPath));
     const jsonInfo = nonNullable(jsonParser.getCached(jsonUri.fsPath));
     const wxmlInfo = nonNullable(wxmlParser.getCached(wxmlUri.fsPath));
+
+    void this.#diagnoseWithExternalSubComponents(tsUri, jsonUri, wxmlUri, tsInfo, jsonInfo, wxmlInfo);
+  }
+
+  /** 合并外部文件定义的子组件来源后运行 JSON + WXML 诊断。 */
+  async #diagnoseWithExternalSubComponents(
+    tsUri: vscode.Uri,
+    jsonUri: vscode.Uri,
+    wxmlUri: vscode.Uri,
+    tsInfo: TraverseAstResult,
+    jsonInfo: JsonFileInfo,
+    wxmlInfo: WxmlFileInfo,
+  ): Promise<void> {
+    const parseFile = (fsPath: string): Promise<TraverseAstResult> => tsParser.tsParse(vscode.Uri.file(fsPath));
+    const externalComponentInfo = await collectExternalComponentInfo(tsUri.fsPath, tsInfo, parseFile);
     const importedSubCompInfo = resolveImportedSubComponentPaths(
       tsUri.fsPath,
-      tsInfo.importedSubComponentSourceRecord,
+      externalComponentInfo.importedSubComponentSourceRecord,
     );
+    const effectiveTsInfo: TraverseAstResult = {
+      ...tsInfo,
+      customComponentInfoRecord: externalComponentInfo.customComponentInfoRecord,
+      chunkComponentInfoRecord: externalComponentInfo.chunkComponentInfoRecord,
+    };
 
     // WXML 诊断统一由校验入口编排，Linter 不感知具体规则。
     const wxmlDiagnostics = checkWxml(
       wxmlInfo.text,
       wxmlInfo.wxmlDocument,
-      tsInfo,
+      effectiveTsInfo,
       configuration.validDatas,
     );
-    const jsonDiagnostics = validateJson(jsonInfo, importedSubCompInfo);
+    const jsonDiagnostics = validateJson(jsonInfo, importedSubCompInfo, jsonUri.fsPath);
 
     this.#diagnosticCollection.set(wxmlUri, wxmlDiagnostics);
     this.#diagnosticCollection.set(jsonUri, jsonDiagnostics);

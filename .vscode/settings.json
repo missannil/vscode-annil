@@ -36,5 +36,6 @@
   },
   "[jsonc]": {
     "editor.defaultFormatter": "dprint.dprint"
-  }
+  },
+  "annil.allowUnknownAttributes": []
 }
