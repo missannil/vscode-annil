@@ -7,7 +7,14 @@
 ### linter
 
 1. 错误诊断
-   当打开一个组件的任意一个文件(`.wxml`|`.ts`|`.json`)时,会自动生成当前组件`.wxml`和`.json`文件的诊断信息,在文件和问题面板中给出提示信息
+   当打开一个组件的任意一个文件(`.wxml`|`.ts`|`.json`)时,会自动生成当前组件`.wxml`、`.ts`和`.json`文件的诊断信息,在文件和问题面板中给出提示信息
+
+   对组件数据还会进行未使用检查：
+   - `RootComponent` 中的 `properties`、`data`、`computed` 和 `store` 字段，检查其是否被 TypeScript 逻辑或 WXML 使用。
+   - `CustomComponent` 中以内部前缀（默认 `_`）开头的字段，检查其是否在组件自身的计算属性、方法、`watch` 或事件等 TypeScript 逻辑中使用。对外属性继续由现有的组件类型契约检查。
+   - `ChunkComponent` 中的 `properties`、`data`、`computed` 和 `store` 字段，检查其是否被 TypeScript 逻辑或对应的 WXML 作用域使用。
+
+   未使用的数据会在 TypeScript 声明前的空白处给出黄色警告，诊断信息为“未使用到的数据”。无法通过静态分析确定的动态字段访问不会直接报告。
 
 2. 文件错误修复
    快速修复菜单中,提供修复当前错误和修复全部错误的选项(不可修复的错误没有修复选项)

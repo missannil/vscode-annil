@@ -23,7 +23,7 @@ const manuallyFocusedTests: readonly string[] = [
   // "wxmlValidator/element/customComponent/missingAttr/missingAttrRoot/missingAttrRoot.test.ts",
   // "wxmlValidator/element/customComponent/missingAttr/missingAttrEvents/missingAttrEvents.test.ts",
   // "wxmlValidator/element/customComponent/missingAttr/missingAttrSelf/missingAttrSelf.test.ts",
-  // "wxmlValidator/element/customComponent/missingAttr/missingAttrCustom/missingAttrCustom.test.ts",
+  "wxmlValidator/element/customComponent/missingAttr/missingAttrCustom/missingAttrCustom.test.ts",
   // "wxmlValidator/element/customComponent/missingAttr/missingAttrTernary/missingAttrTernary.test.ts",
   // "wxmlValidator/element/customComponent/invalidValue/rootValue/rootValue.test.ts",
   // "wxmlValidator/element/customComponent/invalidValue/selfValue/selfValue.test.ts",

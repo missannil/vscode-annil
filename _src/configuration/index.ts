@@ -55,7 +55,9 @@ class Configuration {
     return this.ignoreFields.includes(attrName);
   }
   public isAllowedAttribute(attrName: string): boolean {
-    return this.#allowUnknownAttributes.includes(attrName);
+    // `data-*` 是小程序/WXML 的通用透传属性，不属于具体组件契约。
+    // 与 miniTest 对 data-* 属性的既有识别规则保持一致，无需用户逐项配置。
+    return attrName.startsWith("data-") || this.#allowUnknownAttributes.includes(attrName);
   }
   // 注册工作区配置变化监听器，当配置变化时，更新配置
   private ondidChangeConfiguration(context: vscode.ExtensionContext): void {

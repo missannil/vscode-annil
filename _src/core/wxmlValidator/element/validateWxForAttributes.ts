@@ -1,7 +1,7 @@
 import { type Domhandler, vscode } from "#deps";
 import type { TsFileInfo } from "../../types/TsFileInfo.js";
 import type { WxmlValidationContext } from "../context.js";
-import { positionAt, readOpeningTag } from "./openingTag.js";
+import { findOpeningTagNameRange, positionAt, readOpeningTag } from "./openingTag.js";
 
 const identifierPattern = /^[A-Za-z_$][\w$]*$/;
 const mustachePattern = /^\{\{\s*(.*?)\s*\}\}$/s;
@@ -78,8 +78,28 @@ export function validateWxForAttributes(
     }
   }
 
-  validateLoopVariable(node, itemName, "wx:for-item", outerItems, outerIndexes, context, startLine, nodeStartOffset);
-  validateLoopVariable(node, indexName, "wx:for-index", outerItems, outerIndexes, context, startLine, nodeStartOffset);
+  validateLoopVariable(
+    node,
+    itemName,
+    "wx:for-item",
+    outerItems,
+    outerIndexes,
+    context,
+    startLine,
+    nodeStartOffset,
+    "wx:for-item" in attributes,
+  );
+  validateLoopVariable(
+    node,
+    indexName,
+    "wx:for-index",
+    outerItems,
+    outerIndexes,
+    context,
+    startLine,
+    nodeStartOffset,
+    "wx:for-index" in attributes,
+  );
 }
 
 function validateForExpression(
@@ -168,6 +188,7 @@ function validateLoopVariable(
   context: WxmlValidationContext,
   startLine: number,
   nodeStartOffset?: number,
+  checkConflict = true,
 ): void {
   if (!identifierPattern.test(name)) {
     addDiagnostic(
@@ -183,7 +204,7 @@ function validateLoopVariable(
     return;
   }
 
-  if (outerItems.has(name) || outerIndexes.has(name)) {
+  if (checkConflict && (outerItems.has(name) || outerIndexes.has(name))) {
     addDiagnostic(
       node,
       context,
@@ -253,6 +274,12 @@ function findAttributeLocation(
 
       return { line: position.line, character: position.character };
     }
+
+    // 默认的 wx:for-item / wx:for-index 没有实际属性文本，不能继续向后扫描，
+    // 否则会把后续子节点中的 item/index 误当成当前循环变量的位置。
+    const tagRange = findOpeningTagNameRange(textlines, startLine, "block", nodeStartOffset);
+
+    return { line: tagRange.start.line, character: tagRange.start.character };
   }
 
   let quote: "\"" | "'" | undefined;

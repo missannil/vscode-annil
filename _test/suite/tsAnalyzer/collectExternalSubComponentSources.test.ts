@@ -8,7 +8,10 @@ import { assert, fileURLToPath, fs, path } from "#deps";
 import { describe as suite, it as test } from "mocha";
 
 import { configuration } from "../../../_src/configuration/index.js";
-import { collectExternalSubComponentSources } from "../../../_src/core/tsAnalyzer/collectExternalSubComponentSources.js";
+import {
+  collectExternalComponentInfo,
+  collectExternalSubComponentSources,
+} from "../../../_src/core/tsAnalyzer/collectExternalSubComponentSources.js";
 import { traverseAst, type TraverseAstResult } from "../../../_src/core/tsAnalyzer/index.js";
 import { resolveImportedSubComponentPaths } from "../../../_src/core/tsAnalyzer/resolveImportedSubComponentPaths.js";
 
@@ -38,6 +41,19 @@ suite("collectExternalSubComponentSources", () => {
       subInline: "~/subInline/index.js",
       subExternal: "~/subExternal/subExternal.js",
     });
+  });
+
+  test("记录主组件依赖的外部 TS 文件", async () => {
+    const pageInfo = traverseAst(
+      pageFsPath,
+      fs.readFileSync(pageFsPath, "utf-8"),
+      configuration.innerDataPrefix,
+    );
+    const info = await collectExternalComponentInfo(pageFsPath, pageInfo, parseFile);
+
+    assert.deepStrictEqual(info.dependencies, [
+      path.resolve(__dirname, "../../../..", "_test/miniprogram/pages/index/useSubExternal.ts"),
+    ]);
   });
 
   test("合并后的来源可解析为 usingComponents 路径", async () => {

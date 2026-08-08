@@ -1,4 +1,5 @@
 <subInline
 	subInline_inheritBool="{{propRequiredBool}}"
 	key="{{unknownKey}}"
+	data-index="{{propRequiredBool}}"
 ></subInline>

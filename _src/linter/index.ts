@@ -9,6 +9,7 @@ import {
   type TraverseAstResult,
 } from "../core/tsAnalyzer/collectExternalSubComponentSources.js";
 import { resolveImportedSubComponentPaths } from "../core/tsAnalyzer/resolveImportedSubComponentPaths.js";
+import { diagnoseUnusedData } from "../core/tsAnalyzer/unusedDataAnalyzer.js";
 import type { JsonFileInfo } from "../core/types/JsonFileInfo.js";
 import { checkWxml } from "../core/wxmlValidator/wxmlChecker.js";
 import { debounce } from "../utils/debounce.js";
@@ -28,6 +29,7 @@ import {
 class Linter {
   #diagnosticCollection = vscode.languages.createDiagnosticCollection("annil");
   #checkedDirs = new Set<string>();
+  #dependencyToComponents = new Map<string, Set<string>>();
   #disposables: vscode.Disposable[] = [];
 
   /**
@@ -84,9 +86,19 @@ class Linter {
 
   #onDidChangeTextDocument(): void {
     const debouncedDiagnose = debounce(this.#diagnoseComponent, 200);
+    const debouncedRefresh = debounce(this.#refreshDependentComponents, 200);
     this.#disposables.push(vscode.workspace.onDidChangeTextDocument(async (event) => {
       const uri = event.document.uri;
       if (event.contentChanges.length === 0) return;
+      if (isTsFile(uri)) {
+        tsParser.updateFromText(uri, event.document.getText());
+        const dependents = this.#dependencyToComponents.get(uri.fsPath);
+        if (dependents !== undefined && dependents.size > 0) {
+          debouncedRefresh.call(this, uri.fsPath);
+        }
+
+        if (!isComponentUri(uri)) return;
+      }
       if (!isComponentUri(uri)) {
         this.__test__?.skippedNonComponent.push(uri.fsPath);
 
@@ -95,9 +107,7 @@ class Linter {
 
       // 仅更新变更文件对应 parser 的缓存，不触发全量重新解析
       const text = event.document.getText();
-      if (isTsFile(uri)) {
-        tsParser.updateFromText(uri, text);
-      } else if (isWxmlFile(uri)) {
+      if (isWxmlFile(uri)) {
         wxmlParser.updateFromText(uri, text);
       } else if (isJsonFile(uri) === true) {
         jsonParser.updateFromText(uri, text);
@@ -133,6 +143,7 @@ class Linter {
   #invalidateComponent(uri: vscode.Uri): void {
     const dir = getComponentDir(uri);
     this.#checkedDirs.delete(dir);
+    this.#removeComponentDependencies(getSiblingUri(uri, ".ts").fsPath);
 
     for (
       const sibling of [
@@ -217,6 +228,32 @@ class Linter {
     void this.#diagnoseWithExternalSubComponents(tsUri, jsonUri, wxmlUri, tsInfo, jsonInfo, wxmlInfo);
   }
 
+  /** 外部 TS 文件变化时，只重新检查依赖它的主组件。 */
+  async #refreshDependentComponents(changedFsPath: string): Promise<void> {
+    const dependents = [...(this.#dependencyToComponents.get(changedFsPath) ?? [])];
+
+    for (const mainTsPath of dependents) {
+      this.#checkedDirs.delete(getComponentDir(vscode.Uri.file(mainTsPath)));
+      await this.#checkComponent(vscode.Uri.file(mainTsPath));
+    }
+  }
+
+  #removeComponentDependencies(mainTsPath: string): void {
+    for (const [dependency, components] of this.#dependencyToComponents) {
+      components.delete(mainTsPath);
+      if (components.size === 0) this.#dependencyToComponents.delete(dependency);
+    }
+  }
+
+  #updateComponentDependencies(mainTsPath: string, dependencies: readonly string[]): void {
+    this.#removeComponentDependencies(mainTsPath);
+    for (const dependency of dependencies) {
+      const components = this.#dependencyToComponents.get(dependency) ?? new Set<string>();
+      components.add(mainTsPath);
+      this.#dependencyToComponents.set(dependency, components);
+    }
+  }
+
   /** 合并外部文件定义的子组件来源后运行 JSON + WXML 诊断。 */
   async #diagnoseWithExternalSubComponents(
     tsUri: vscode.Uri,
@@ -228,6 +265,7 @@ class Linter {
   ): Promise<void> {
     const parseFile = (fsPath: string): Promise<TraverseAstResult> => tsParser.tsParse(vscode.Uri.file(fsPath));
     const externalComponentInfo = await collectExternalComponentInfo(tsUri.fsPath, tsInfo, parseFile);
+    this.#updateComponentDependencies(tsUri.fsPath, externalComponentInfo.dependencies);
     const importedSubCompInfo = resolveImportedSubComponentPaths(
       tsUri.fsPath,
       externalComponentInfo.importedSubComponentSourceRecord,
@@ -237,6 +275,8 @@ class Linter {
       customComponentInfoRecord: externalComponentInfo.customComponentInfoRecord,
       chunkComponentInfoRecord: externalComponentInfo.chunkComponentInfoRecord,
     };
+    const tsText = (await vscode.workspace.openTextDocument(tsUri)).getText();
+    const wxmlUsedNames = new Set<string>();
 
     // WXML 诊断统一由校验入口编排，Linter 不感知具体规则。
     const wxmlDiagnostics = checkWxml(
@@ -244,9 +284,12 @@ class Linter {
       wxmlInfo.wxmlDocument,
       effectiveTsInfo,
       configuration.validDatas,
+      wxmlUsedNames,
     );
+    const tsDiagnostics = diagnoseUnusedData(tsText, configuration.innerDataPrefix, wxmlUsedNames);
     const jsonDiagnostics = validateJson(jsonInfo, importedSubCompInfo, jsonUri.fsPath);
 
+    this.#diagnosticCollection.set(tsUri, tsDiagnostics);
     this.#diagnosticCollection.set(wxmlUri, wxmlDiagnostics);
     this.#diagnosticCollection.set(jsonUri, jsonDiagnostics);
   }

@@ -2,4 +2,7 @@
 <subInline bind:onTap="subInline_onTap"></subInline>
 <!-- annil disable repeatTag -->
 <!-- ② 错误：绑定 wrong → 应绑定 "subInline_onTap" -->
-<subInline bind:onTap="wrong"></subInline>
+<subInline
+	bind:onTap="wrong"
+	twClass="this-is-a-deliberately-long-class-value-used-to-keep-the-opening-tag-multiline-for-range-testing"
+/>

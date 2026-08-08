@@ -17,12 +17,13 @@ export function collectRootComponentInfo(
 ): void {
   walkComponentConfig(
     expression,
-    ["properties", "data", "computed", "store", "events"],
+    ["properties", "data", "computed", "store", "events", "customEvents"],
     innerPrefix,
     // onProperty
     (fieldName, subName, value) => {
       switch (fieldName) {
         case "events":
+        case "customEvents":
           addToEvents(subName, result.events);
           break;
         case "properties":
@@ -37,6 +38,7 @@ export function collectRootComponentInfo(
     (fieldName, subName, method) => {
       switch (fieldName) {
         case "events":
+        case "customEvents":
           addToEvents(subName, result.events);
           break;
         case "computed":

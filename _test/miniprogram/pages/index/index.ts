@@ -63,7 +63,7 @@ const subInline = CustomComponent<Root, $SubInline>()({
     subInline_storeBool: (): boolean => true,
   },
   computed: {
-    subInline_isReady(): boolean {
+    subInline_isReady() {
       return true;
     },
     // 1

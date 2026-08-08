@@ -11,6 +11,8 @@ export type ExternalComponentInfo = {
   customComponentInfoRecord: TraverseAstResult["customComponentInfoRecord"];
   chunkComponentInfoRecord: TraverseAstResult["chunkComponentInfoRecord"];
   importedSubComponentSourceRecord: ImportedSubComponentSourceRecord;
+  /** 当前主组件直接依赖的外部 TS 文件。 */
+  dependencies: string[];
 };
 
 function stripComponentPrefix(name: string): string {
@@ -55,14 +57,19 @@ export async function collectExternalComponentInfo(
   const sources: ImportedSubComponentSourceRecord = { ...tsInfo.importedSubComponentSourceRecord };
   const customComponentInfoRecord = { ...tsInfo.customComponentInfoRecord };
   const chunkComponentInfoRecord = { ...tsInfo.chunkComponentInfoRecord };
-  const visited = new Set<string>([tsFsPath]);
+  const dependencies: string[] = [];
+  const parsedExternalFiles = new Map<string, TraverseAstResult>();
 
   for (const [localName, moduleSource] of Object.entries(tsInfo.importedComponentSourceRecord)) {
     const importedFsPath = resolveImportedTsPath(tsFsPath, moduleSource);
-    if (importedFsPath === undefined || visited.has(importedFsPath)) continue;
-    visited.add(importedFsPath);
+    if (importedFsPath === undefined) continue;
 
-    const importedInfo = await parseFile(importedFsPath);
+    let importedInfo = parsedExternalFiles.get(importedFsPath);
+    if (importedInfo === undefined) {
+      importedInfo = await parseFile(importedFsPath);
+      parsedExternalFiles.set(importedFsPath, importedInfo);
+      dependencies.push(importedFsPath);
+    }
     const importedCustomComponentInfoRecord = Object.fromEntries(
       Object.entries(importedInfo.customComponentInfoRecord).map(([name, info]) => [
         name,
@@ -71,16 +78,26 @@ export async function collectExternalComponentInfo(
     );
     Object.assign(customComponentInfoRecord, importedCustomComponentInfoRecord);
     Object.assign(chunkComponentInfoRecord, importedInfo.chunkComponentInfoRecord);
+    // 优先使用外部文件已经收集好的组件来源。这样同一个外部模块导出多个
+    // CustomComponent 时，不必再次依赖当前导入名与泛型类型名的匹配。
+    const directSource = importedInfo.importedSubComponentSourceRecord[localName];
+    if (directSource !== undefined) {
+      sources[localName] = directSource;
+      continue;
+    }
+
+    // 兼容外部解析结果未生成 importedSubComponentSourceRecord 的情况。
     const typeName = importedInfo.customComponentInfoRecord[localName]?.componentTypeName;
-    if (typeName === undefined) continue;
-    const typeSource = importedInfo.importedTypeSources[typeName];
-    if (typeSource === undefined) continue;
-    sources[localName] = typeSource;
+    if (typeName !== undefined) {
+      const typeSource = importedInfo.importedTypeSources[typeName];
+      if (typeSource !== undefined) sources[localName] = typeSource;
+    }
   }
 
   return {
     customComponentInfoRecord,
     chunkComponentInfoRecord,
     importedSubComponentSourceRecord: sources,
+    dependencies,
   };
 }

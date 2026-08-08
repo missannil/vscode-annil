@@ -20,7 +20,11 @@ import { validateRepeatSubComponentTag } from "./element/validateRepeatSubCompon
 import { isNativeTag, validateUnknownTag } from "./element/validateUnknownTag.js";
 import { validateWxForAttributes } from "./element/validateWxForAttributes.js";
 import { validateWxForStructure } from "./element/validateWxForStructure.js";
-import { validateAttributeValues, validateMustacheText } from "./expression/validateMustache.js";
+import {
+  collectMustacheDataNames,
+  validateAttributeValues,
+  validateMustacheText,
+} from "./expression/validateMustache.js";
 import { walkWxmlNodeList } from "./walkNodeList.js";
 
 /**
@@ -34,6 +38,7 @@ export function checkWxml(
   wxmlDocument: Domhandler.Document,
   tsFileInfo: TsFileInfo,
   validDatas: readonly string[],
+  usedDataNames?: Set<string>,
 ): vscode.Diagnostic[] {
   const textlines = text.split("\n");
   const validNames = new Set([...tsFileInfo.rootComponentInfo.dataList, ...validDatas]);
@@ -44,12 +49,21 @@ export function checkWxml(
     onEnterNodeList(currentContext) {
       currentContext.pushConditionScope();
     },
+    // eslint-disable-next-line complexity
     onElementNode(node, startLine, currentContext) {
       validateDuplicateId(node, startLine, currentContext.textlines, existingIds, currentContext.diagnosticList);
 
       currentContext.traversal.isHeadLocation = false;
 
       if (currentContext.comment.isCommented()) return;
+
+      if (usedDataNames !== undefined) {
+        for (const [name, value] of Object.entries(node.attribs)) {
+          if (name === "wx:if" || name === "wx:elif" || name.startsWith("wx:for") || name === "wx:key") {
+            collectMustacheDataNames(value, usedDataNames);
+          }
+        }
+      }
 
       validateElementIfAttribute(node, startLine, currentContext);
 
@@ -80,6 +94,7 @@ export function checkWxml(
           effectiveNames,
           currentContext.diagnosticList,
           (name, value) => findOpeningTagAttributeValueRange(currentContext.textlines, startLine, name, value).start,
+          usedDataNames,
         );
         validateCustomComponent(
           node,
@@ -88,6 +103,7 @@ export function checkWxml(
           effectiveNames,
           currentContext.textlines,
           currentContext.diagnosticList,
+          usedDataNames,
         );
 
         return;
@@ -122,6 +138,7 @@ export function checkWxml(
           validNames,
           currentContext.diagnosticList,
           currentContext.textlines,
+          usedDataNames,
         );
 
         return;
@@ -144,6 +161,7 @@ export function checkWxml(
         getEffectiveValidNames(validNames, currentContext, tsFileInfo),
         currentContext.diagnosticList,
         (name, value) => findOpeningTagAttributeValueRange(currentContext.textlines, startLine, name, value).start,
+        usedDataNames,
       );
     },
     onBeforeElementChildren(node, _, currentContext) {
@@ -163,6 +181,7 @@ export function checkWxml(
         getEffectiveValidNames(validNames, currentContext, tsFileInfo),
         currentContext.diagnosticList,
         positionAt(currentContext.textlines, node.startIndex ?? 0),
+        usedDataNames,
       );
     },
     onCommentNode(node, startLine, nodeLevelMark, currentContext) {
@@ -279,6 +298,11 @@ function getEffectiveBooleanNames(
     }
   }
 
+  for (const componentInfo of Object.values(tsFileInfo.customComponentInfoRecord)) {
+    if (componentInfo === undefined) continue;
+    for (const name of componentInfo.boolTypeDatas) booleanNames.add(name);
+  }
+
   return booleanNames;
 }
 
@@ -289,6 +313,7 @@ function getEffectiveBooleanNames(
  * 自定义组件时，用它的 CustomComponent 配置补充 block 条件作用域；
  * 新版在 block 节点立即校验，因此需要从 block 的直接子组件反推这些名称。
  */
+// eslint-disable-next-line complexity
 function getConditionValidNames(
   node: Domhandler.Element,
   baseNames: ReadonlySet<string>,
@@ -296,6 +321,10 @@ function getConditionValidNames(
   tsFileInfo: TsFileInfo,
 ): Set<string> {
   const validNames = getEffectiveValidNames(baseNames, context, tsFileInfo);
+  for (const componentInfo of Object.values(tsFileInfo.customComponentInfoRecord)) {
+    if (componentInfo === undefined) continue;
+    for (const name of componentInfo.boolTypeDatas) validNames.add(name);
+  }
   for (const componentInfo of getDirectCustomComponentInfos(node, tsFileInfo)) {
     for (const value of Object.values(componentInfo.configInfo)) {
       if (value.type === "Root" || value.type === "Self") validNames.add(value.value);
@@ -303,6 +332,9 @@ function getConditionValidNames(
         for (const name of value.values) validNames.add(name);
       }
     }
+  }
+  for (const componentInfo of getDirectChunkComponentInfos(node, tsFileInfo)) {
+    for (const name of componentInfo.dataList) validNames.add(name);
   }
 
   return validNames;
@@ -316,6 +348,9 @@ function getConditionBooleanNames(
 ): Set<string> {
   const booleanNames = getEffectiveBooleanNames(context, tsFileInfo);
   for (const componentInfo of getDirectCustomComponentInfos(node, tsFileInfo)) {
+    for (const name of componentInfo.boolTypeDatas) booleanNames.add(name);
+  }
+  for (const componentInfo of getDirectChunkComponentInfos(node, tsFileInfo)) {
     for (const name of componentInfo.boolTypeDatas) booleanNames.add(name);
   }
 
@@ -332,6 +367,22 @@ function getDirectCustomComponentInfos(
   return node.children.flatMap((child) => {
     if (child.type !== "tag") return [];
     const info = tsFileInfo.customComponentInfoRecord[child.name];
+
+    return info === undefined ? [] : [info];
+  });
+}
+
+/** 获取 block 直接包裹的 ChunkComponent（通过子元素 id 匹配）。 */
+function getDirectChunkComponentInfos(
+  node: Domhandler.Element,
+  tsFileInfo: TsFileInfo,
+): NonNullable<TsFileInfo["chunkComponentInfoRecord"][string]>[] {
+  if (node.name !== "block") return [];
+
+  return node.children.flatMap((child) => {
+    if (child.type !== "tag") return [];
+    const id = child.attribs.id;
+    const info = id === undefined ? undefined : tsFileInfo.chunkComponentInfoRecord[id];
 
     return info === undefined ? [] : [info];
   });

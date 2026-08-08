@@ -6,6 +6,17 @@ import { isValidVariableName } from "./validateVariableSyntax.js";
 /** 匹配 `{{expr}}` 语法的正则。 */
 const MUSTACHE_RE = /\{\{(.+?)\}\}/g;
 
+/** 收集简单 mustache 表达式中的根数据名，不产生诊断。 */
+export function collectMustacheDataNames(text: string, usedNames: Set<string>): void {
+  for (const match of text.matchAll(MUSTACHE_RE)) {
+    const expr = match[1].trim();
+    if (expr.includes("(") || expr.includes("+") || expr.includes("?")) continue;
+    const memberStart = expr.search(/[.\[]/);
+    const topVar = memberStart >= 0 ? expr.slice(0, memberStart) : expr;
+    if (isValidVariableName(topVar)) usedNames.add(topVar);
+  }
+}
+
 /**
  * 扫描文本中的 `{{...}}`，按三层级联校验：
  *   ① 非法运算符 → Error
@@ -20,6 +31,7 @@ export function validateMustacheText(
   validNames: ReadonlySet<string>,
   diagnostics: vscode.Diagnostic[],
   sourceStart: vscode.Position,
+  usedNames?: Set<string>,
 ): void {
   for (const match of text.matchAll(MUSTACHE_RE)) {
     const expr = match[1].trim();
@@ -66,6 +78,8 @@ export function validateMustacheText(
       continue;
     }
 
+    usedNames?.add(topVar);
+
     // ③ 数据名校验
     if (validNames.has(topVar)) continue;
 
@@ -90,9 +104,10 @@ export function validateAttributeValues(
   validNames: ReadonlySet<string>,
   diagnostics: vscode.Diagnostic[],
   getAttributeValueStart: (name: string, value: string) => vscode.Position,
+  usedNames?: Set<string>,
 ): void {
   for (const [name, value] of attributes) {
-    validateMustacheText(value, validNames, diagnostics, getAttributeValueStart(name, value));
+    validateMustacheText(value, validNames, diagnostics, getAttributeValueStart(name, value), usedNames);
   }
 }
 

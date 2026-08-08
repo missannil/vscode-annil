@@ -22,6 +22,7 @@ export function validateChunkComponent(
   rootDataNames: ReadonlySet<string>,
   diagnostics: vscode.Diagnostic[],
   textlines: string[],
+  usedNames?: Set<string>,
 ): void {
   const chunkInfo = tsFileInfo.chunkComponentInfoRecord[chunkId];
   if (chunkInfo === undefined) return;
@@ -48,6 +49,7 @@ export function validateChunkComponent(
     chunkValidNames,
     diagnostics,
     (name, value) => findOpeningTagAttributeValueRange(textlines, startLine, name, value).start,
+    usedNames,
   );
 }
 

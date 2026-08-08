@@ -13,10 +13,16 @@ const chunkInline = ChunkComponent<Root, "chunkInline">()({
   },
 });
 
+const chunkBlock = ChunkComponent<Root, "chunkBlock">()({
+  data: {
+    chunkBlock_visible: true,
+  },
+});
+
 const subInline = CustomComponent<Root, { properties: { subInline_isReady?: boolean } }>()({
   data: {
     subInline_isReady: true,
   },
 });
 
-DefineComponent({ name: "componentScope", rootComponent, subComponents: [chunkInline, subInline] });
+DefineComponent({ name: "componentScope", rootComponent, subComponents: [chunkInline, chunkBlock, subInline] });

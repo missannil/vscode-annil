@@ -4,7 +4,7 @@
 	wx:for-item="item"
 	wx:for-index="index"
 >
-	<subInline subInline_customValue="{{item}}"></subInline>
+	<subInline customValue="{{item}}"></subInline>
 	<!-- annil disable repeatTag -->
 	<!-- ② 缺少自定义属性 → 缺少属性诊断 -->
 	<subInline></subInline>

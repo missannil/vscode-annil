@@ -6,6 +6,9 @@
 <view id="chunkInline">
 	<block wx:if="{{chunkInline_visible}}"></block>
 </view>
+<block wx:if="{{chunkBlock_visible}}">
+	<view id="chunkBlock"></view>
+</block>
 <block wx:if="{{chunkInline_visible}}"></block>
 <!-- CustomComponent 的 isReady 可用于包裹它的 block 条件。 -->
 <block wx:if="{{subInline_isReady}}">

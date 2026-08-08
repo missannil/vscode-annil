@@ -4,8 +4,9 @@
 	wx:for="{{list}}"
 	wx:for-item="item"
 	wx:for-index="index"
+	wx:key="*this"
 >
 	<!-- ② 正确：item 来自当前 wx:for 作用域 → 无诊断 -->
 	<!-- annil disable repeatTag -->
-	<subInline subInline_customValue="{{item}}"></subInline>
+	<subInline subInline_customValue="{{activeIndex === index}}"></subInline>
 </block>

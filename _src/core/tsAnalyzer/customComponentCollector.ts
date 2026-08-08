@@ -79,7 +79,7 @@ export function collectCustomComponentInfo(
         case "computed":
         case "store":
           info.configInfo[subName] = { type: "Self", value: subName };
-          addToDataList(subName, value, info.arrTypeDatas, info.boolTypeDatas);
+          addCustomComponentData(subName, value, info);
           break;
       }
     },
@@ -90,13 +90,25 @@ export function collectCustomComponentInfo(
           break;
         case "computed":
           info.configInfo[subName] = { type: "Self", value: subName };
-          addToDataList(subName, method, info.arrTypeDatas, info.boolTypeDatas);
+          addCustomComponentData(subName, method, info);
           break;
       }
     },
   );
 
   customComponentInfoRecord[variableName] = info;
+}
+
+/** CustomComponent 的 isReady 是框架约定字段，即使没有显式类型注解也表示布尔值。 */
+function addCustomComponentData(
+  name: string,
+  value: Parameters<typeof addToDataList>[1],
+  info: CustomComponentInfo,
+): void {
+  addToDataList(name, value, info.arrTypeDatas, info.boolTypeDatas);
+  if (name.endsWith("_isReady") && !info.boolTypeDatas.includes(name)) {
+    info.boolTypeDatas.push(name);
+  }
 }
 
 function addEventToConfigInfo(info: CustomComponentInfo, rawName: string): void {

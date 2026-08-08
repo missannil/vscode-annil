@@ -3,6 +3,7 @@ import type { $SubInline } from "~/subInline/index.js";
 
 const rootComponent = RootComponent()({
   data: { list: [] as string[] },
+  computed: { activeIndex: () => 0 },
 });
 type Root = typeof rootComponent;
 

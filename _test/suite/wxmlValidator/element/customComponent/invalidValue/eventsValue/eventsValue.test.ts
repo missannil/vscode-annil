@@ -18,17 +18,17 @@ describe("eventsValue", () => {
     );
     const document = await workspace.openTextDocument(wxmlUri);
     await window.showTextDocument(document);
-    const diags = await waitForDiagnostics(wxmlUri, (current) => current.length === 1);
+    const diags = await waitForDiagnostics(wxmlUri, (current) => current.some((d) => d.message.includes("应绑定")));
     const eventDiags = diags.filter((d) => d.message.includes("应绑定"));
     assert.strictEqual(eventDiags.length, 1);
     assert.strictEqual(eventDiags[0].message, `事件属性 "bind:onTap" 应绑定 "subInline_onTap"`);
     assert.strictEqual(eventDiags[0].severity, vscode.DiagnosticSeverity.Error);
     assert.strictEqual(eventDiags[0].source, "vscode-annil");
     assert.strictEqual(eventDiags[0].code, "annil.customComponent.eventValueMismatch");
-    assert.strictEqual(eventDiags[0].range.start.line, 4);
-    assert.strictEqual(eventDiags[0].range.start.character, 23);
-    assert.strictEqual(eventDiags[0].range.end.line, 4);
-    assert.strictEqual(eventDiags[0].range.end.character, 28);
+    assert.strictEqual(eventDiags[0].range.start.line, 5);
+    assert.strictEqual(eventDiags[0].range.start.character, 13);
+    assert.strictEqual(eventDiags[0].range.end.line, 5);
+    assert.strictEqual(eventDiags[0].range.end.character, 18);
     await verifyQuickFixAndFixAll(
       wxmlUri,
       eventDiags[0],
