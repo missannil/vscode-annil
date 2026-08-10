@@ -1,7 +1,9 @@
 {
   "component": true,
   "usingComponents": {
+    "subGoods": "/components/subGoods/index"
   },
   "componentPlaceholder": {
+    "subGoods": "view"
   }
 }

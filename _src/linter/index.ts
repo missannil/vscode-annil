@@ -276,6 +276,11 @@ class Linter {
       chunkComponentInfoRecord: externalComponentInfo.chunkComponentInfoRecord,
     };
     const tsText = (await vscode.workspace.openTextDocument(tsUri)).getText();
+    const externalTexts = await Promise.all(
+      externalComponentInfo.dependencies.map(async (fsPath) => {
+        return (await vscode.workspace.openTextDocument(vscode.Uri.file(fsPath))).getText();
+      }),
+    );
     const wxmlUsedNames = new Set<string>();
 
     // WXML 诊断统一由校验入口编排，Linter 不感知具体规则。
@@ -286,7 +291,12 @@ class Linter {
       configuration.validDatas,
       wxmlUsedNames,
     );
-    const tsDiagnostics = diagnoseUnusedData(tsText, configuration.innerDataPrefix, wxmlUsedNames);
+    const tsDiagnostics = diagnoseUnusedData(
+      tsText,
+      configuration.innerDataPrefix,
+      wxmlUsedNames,
+      externalTexts,
+    );
     const jsonDiagnostics = validateJson(jsonInfo, importedSubCompInfo, jsonUri.fsPath);
 
     this.#diagnosticCollection.set(tsUri, tsDiagnostics);

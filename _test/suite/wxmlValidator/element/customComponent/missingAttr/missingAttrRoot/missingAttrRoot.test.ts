@@ -21,7 +21,7 @@ describe("missingAttrRoot", () => {
     const diags = await waitForStableDiagnostics(wxmlUri, 1);
     const missing = diags.filter((d) => d.message.startsWith("缺少属性:"));
     assert.strictEqual(missing.length, 1);
-    assert.strictEqual(missing[0].message, "缺少属性: \"subInline_inheritBool\"");
+    assert.strictEqual(missing[0].message, "缺少属性: \"inheritBool\"");
     assert.strictEqual(missing[0].severity, vscode.DiagnosticSeverity.Error);
     assert.strictEqual(missing[0].range.start.line, 4);
     assert.strictEqual(missing[0].range.start.character, 1);
@@ -29,7 +29,7 @@ describe("missingAttrRoot", () => {
     await verifyQuickFixAndFixAll(
       wxmlUri,
       missing[0],
-      "添加属性 “subInline_inheritBool”",
+      "添加属性 “inheritBool”",
       (current) => current.some((diagnostic) => diagnostic.message.startsWith("缺少属性:")),
     );
   });

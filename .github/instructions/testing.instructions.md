@@ -8,6 +8,7 @@ description: "Use when creating or changing tests, fixtures, diagnostics, Quick 
 
 - 新测试和 fixture 只写入 `_test`。
 - `_test/miniprogram` 仅用于跨测试共享的项目环境、页面和组件；某个功能的真实组件 demo 必须放在该功能自己的测试目录下，例如 miniTest 使用 `_test/suite/miniTest/fixtures/<component>`，并在组件目录中提供 `.ts`、`.json`、`.wxml` 等真实文件。
+- `_test/suite` 下每个独立业务场景必须建立独立目录，并在该目录内放置自己的 `*.test.ts` 以及同名 `.ts`、`.json`、`.wxml` fixture；不同场景不得在同一测试文件中通过路径切换共用 fixture。goToDefinition 等功能若包含多个场景，必须按场景拆分目录。
 - 一条业务规则对应一个最小测试单元；不要在同一任务中迁移多条规则。
 - 行为变更先写能失败的最小测试，再修改实现。
 - 不为满足目录形式迁移无关旧测试。

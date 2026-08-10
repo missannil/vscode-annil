@@ -6,6 +6,7 @@
 - `src`、`test`、`miniTest` 是旧版参考代码，只读。
 - 新实现和新测试只写入 `_src`、`_test`；不要修改生成目录 `out`。
 - `_test/miniprogram` 只保留跨测试共享的小程序项目环境和基础组件；业务功能测试的真实组件 demo、fixture 和 expected 文件必须放在对应测试模块目录下，例如 `_test/suite/miniTest/fixtures`，不得放入 `_test/miniprogram`。
+- `_test/suite` 下每个独立业务场景必须使用独立子目录；目录内只放该场景自己的 `*.test.ts`、同名 `.ts`、`.json`、`.wxml` 及其辅助文件。不同场景不得共用或混放 fixture；例如 `goToDefinition` 的子组件跳转和 RootComponent 数据跳转必须分别放在两个目录。
 - 已迁移功能以 `_src` 为事实源；仅在迁移缺失行为时读取对应旧代码。
 
 ## 工作方式

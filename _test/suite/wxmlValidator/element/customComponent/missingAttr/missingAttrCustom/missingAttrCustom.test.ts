@@ -20,14 +20,14 @@ describe("missingAttrCustom", () => {
     await window.showTextDocument(document);
     const diagnostics = await waitForStableDiagnostics(uri, 1);
     assert.ok(!diagnostics.some((item) => item.message === "未知数据: \"item\""));
-    const diagnostic = diagnostics.find((item) => item.message === "缺少属性: \"subInline_customValue\"");
+    const diagnostic = diagnostics.find((item) => item.message === "缺少属性: \"customValue\"");
     assert.ok(diagnostic);
     assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
     await verifyQuickFixAndFixAll(
       uri,
       diagnostic,
-      "添加属性 “subInline_customValue”",
-      (current) => current.some((item) => item.message === "缺少属性: \"subInline_customValue\""),
+      "添加属性 “customValue”",
+      (current) => current.some((item) => item.message === "缺少属性: \"customValue\""),
     );
   });
 });

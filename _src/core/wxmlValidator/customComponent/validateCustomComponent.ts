@@ -55,17 +55,27 @@ function validateMissingAttributes(
     if (
       actualNames.some((name) => getAttributeAliases(expectedName).includes(normalizeAttributeName(name)))
     ) continue;
+    const publicName = getPublicAttributeName(expectedName);
     addDiagnostic(
       diagnostics,
       startLine,
       node.name.length,
-      `缺少属性: "${expectedName}"`,
+      `缺少属性: "${publicName}"`,
       vscode.DiagnosticSeverity.Error,
-      { replaceText: `${expectedName}="${getExpectedAttributeValue(componentInfo.configInfo[expectedName])}"` },
+      { replaceText: `${publicName}="${getExpectedAttributeValue(componentInfo.configInfo[expectedName])}"` },
       tagNameStart,
       CustomComponentDiagnosticCode.missingAttribute,
     );
   }
+}
+
+/**
+ * WXML/XML 属性名不允许以连字符开头（XML Name 起始字符不允许是 `-`）。
+ * `-btnType` 这类写法不是 kebab-case，而是 `_btnType` 的笔误；
+ * 必须拦在 kebab-case 归一化之前，否则会被错误归一化后参与契约匹配。
+ */
+function isIllegalLeadingHyphenName(name: string): boolean {
+  return name.startsWith("-");
 }
 
 /** `isReady` 只用于外层 block wx:if，不要求重复传入子组件。 */
@@ -88,6 +98,19 @@ function validateExistingAttributes(
 ): void {
   for (const [name, value] of Object.entries(node.attribs)) {
     if (name.startsWith("wx:")) continue;
+
+    if (isIllegalLeadingHyphenName(name)) {
+      addDiagnosticAtAttributeName(
+        diagnostics,
+        startLine,
+        name,
+        textlines,
+        node.startIndex ?? undefined,
+        `未知属性: "${name}"`,
+        CustomComponentDiagnosticCode.unknownAttribute,
+      );
+      continue;
+    }
 
     const expectedName = normalizeAttributeName(name);
     const expectedConfigName = Object.keys(componentInfo.configInfo).find((configName) =>
@@ -157,9 +180,15 @@ function validateAllowedAttributeValue(
  */
 function getAttributeAliases(name: string): string[] {
   const separator = name.indexOf("_");
-  if (separator < 0) return [name];
+  // `component__field` 去除组件前缀后是 `_field`，不能再次把开头的
+  // 下划线当作分隔符，否则会错误地把 `field` 也当成合法属性名。
+  if (separator <= 0) return [name];
 
   return [name, name.slice(separator + 1)];
+}
+
+function getPublicAttributeName(name: string): string {
+  return getAttributeAliases(name)[1] ?? name;
 }
 
 function normalizeAttributeName(name: string): string {
@@ -205,6 +234,7 @@ function validateAttributeValue(
         true,
         diagnostics,
         nodeStartOffset,
+        validScopeNames,
         usedNames,
       );
 
@@ -220,6 +250,7 @@ function validateAttributeValue(
         true,
         diagnostics,
         nodeStartOffset,
+        validScopeNames,
       );
 
       return;
@@ -252,11 +283,22 @@ function validateExactMustache(
   useValueRange: boolean,
   diagnostics: vscode.Diagnostic[],
   nodeStartOffset?: number,
+  validScopeNames?: ReadonlySet<string>,
   usedNames?: Set<string>,
 ): void {
   const variableName = getMustacheExpression(value);
   if (variableName !== undefined && getTopName(variableName) === expectedName) usedNames?.add(expectedName);
   if (variableName === expectedName) return;
+
+  if (variableName !== undefined && validScopeNames !== undefined) {
+    validateMustacheText(
+      value,
+      validScopeNames,
+      diagnostics,
+      findOpeningTagAttributeValueRange(textlines, startLine, name, value, nodeStartOffset).start,
+      usedNames,
+    );
+  }
 
   const message = `属性 "${name}" 应绑定 "{{${expectedName}}}"`;
   if (useValueRange) {
@@ -337,6 +379,7 @@ function addDiagnosticAtAttributeName(
   diagnostics.push(diagnostic);
 }
 
+// eslint-disable-next-line complexity
 function validateCustomValue(
   name: string,
   value: string,
@@ -347,6 +390,29 @@ function validateCustomValue(
   nodeStartOffset?: number,
   usedNames?: Set<string>,
 ): void {
+  // Custom 类型允许绑定当前作用域中的任意数据。对于完整的简单
+  // `{{value}}`，复用通用 mustache 校验，以便同时检查非法变量名（例如
+  // `{{自定义}}`）和不存在的数据；复杂表达式继续由下方逻辑提取根变量。
+  const simpleExpression = MUSTACHE_RE.exec(value)?.[1].trim();
+  const hasExpressionOperator = simpleExpression !== undefined
+    && /===|!==|==|!=|&&|\|\||[?+*/%<>()-]/.test(simpleExpression);
+  if (
+    simpleExpression !== undefined
+    && !hasExpressionOperator
+    && simpleExpression !== "item"
+    && simpleExpression !== "index"
+  ) {
+    validateMustacheText(
+      value,
+      validScopeNames,
+      diagnostics,
+      findOpeningTagAttributeValueRange(textlines, startLine, name, value, nodeStartOffset).start,
+      usedNames,
+    );
+
+    return;
+  }
+
   for (const match of value.matchAll(/\{\{(.+?)\}\}/g)) {
     const expression = match[1];
     // 函数调用等复杂语法暂不做变量推断；比较、逻辑运算等表达式中的

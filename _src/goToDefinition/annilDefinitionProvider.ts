@@ -1,4 +1,7 @@
 import { fs, path, vscode } from "#deps";
+import { parse } from "@babel/parser";
+import traverse from "@babel/traverse";
+import { isCallExpression, isIdentifier, isObjectExpression, isObjectMethod, isObjectProperty } from "@babel/types";
 import { tsParser } from "../core/fileManager/tsParser.js";
 import type {
   ChunkComponentInfoRecord,
@@ -23,11 +26,89 @@ export function registerAnnilDefinitionProvider(context: vscode.ExtensionContext
       );
       if (customDefinition !== undefined) return customDefinition;
 
-      return getChunkComponentDefinition(document, position, componentInfo.chunkComponentInfoRecord);
+      const chunkDefinition = getChunkComponentDefinition(document, position, componentInfo.chunkComponentInfoRecord);
+      if (chunkDefinition !== undefined) return chunkDefinition;
+
+      return getDataDefinition(document, position, tsUri, tsInfo.rootComponentInfo.dataList);
     },
   });
 
   context.subscriptions.push(provider);
+}
+
+/** 返回光标所在 WXML 表达式的数据字段声明。 */
+async function getDataDefinition(
+  document: vscode.TextDocument,
+  position: vscode.Position,
+  tsUri: vscode.Uri,
+  dataList: string[],
+): Promise<vscode.Location | undefined> {
+  const wordRange = document.getWordRangeAtPosition(position);
+  if (wordRange === undefined) return undefined;
+
+  const word = document.getText(wordRange);
+  if (!dataList.includes(word) || !isMustachePosition(document, position)) return undefined;
+
+  const tsDocument = await vscode.workspace.openTextDocument(tsUri);
+  const ast = parse(tsDocument.getText(), { sourceType: "module", plugins: ["typescript"] });
+  let definition: vscode.Location | undefined;
+
+  traverse(ast, {
+    // eslint-disable-next-line complexity
+    VariableDeclarator(variablePath) {
+      if (definition !== undefined) return;
+
+      const init = variablePath.node.init;
+      if (!isCallExpression(init) || !isCallExpression(init.callee)) return;
+      const callee = init.callee.callee;
+      if (!isIdentifier(callee) || callee.name !== "RootComponent") return;
+
+      const config = init.arguments[0];
+      if (!isObjectExpression(config)) return;
+
+      for (const field of config.properties) {
+        if (!isObjectProperty(field) || !isIdentifier(field.key)) continue;
+        if (!["properties", "data", "computed", "store"].includes(field.key.name)) continue;
+        if (!isObjectExpression(field.value)) continue;
+
+        for (const member of field.value.properties) {
+          const name = isObjectProperty(member)
+            ? getObjectMemberName(member.key)
+            : isObjectMethod(member)
+            ? getObjectMemberName(member.key)
+            : undefined;
+          const loc = member.loc;
+          if (name !== word || loc === null || loc === undefined) continue;
+          definition = new vscode.Location(
+            tsUri,
+            new vscode.Position(Math.max(loc.start.line - 1, 0), loc.start.column),
+          );
+
+          return;
+        }
+      }
+    },
+  });
+
+  return definition;
+}
+
+function getObjectMemberName(key: unknown): string | undefined {
+  if (typeof key !== "object" || key === null) return undefined;
+  if ("name" in key && typeof key.name === "string") return key.name;
+  if ("value" in key && typeof key.value === "string") return key.value;
+
+  return undefined;
+}
+
+function isMustachePosition(document: vscode.TextDocument, position: vscode.Position): boolean {
+  const text = document.getText();
+  const offset = document.offsetAt(position);
+  const before = text.slice(0, offset);
+  const after = text.slice(offset);
+
+  return before.lastIndexOf("{{") > before.lastIndexOf("}}")
+    && after.indexOf("}}") !== -1;
 }
 
 type ComponentInfo = {
@@ -90,7 +171,16 @@ function resolveImportedTsPath(importingFsPath: string, source: string): string 
     path.join(sourcePath, "index.ts"),
   ];
 
-  return candidates.find((candidate) => fs.existsSync(candidate));
+  // 只接受真正的文件，避免把同名目录解析为导入目标。
+  return candidates.find(isFile);
+}
+
+function isFile(fsPath: string): boolean {
+  try {
+    return fs.statSync(fsPath).isFile();
+  } catch {
+    return false;
+  }
 }
 
 function getCustomComponentDefinition(

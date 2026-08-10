@@ -1,0 +1,5 @@
+<!-- ① 错误：`-` 开头的属性名不是 kebab-case，而是非法 XML Name → 未知属性诊断 -->
+<subInline
+	subInline_inheritBool="{{propRequiredBool}}"
+	-btnType="{{propRequiredBool}}"
+></subInline>

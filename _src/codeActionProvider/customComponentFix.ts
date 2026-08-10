@@ -1,5 +1,6 @@
 import { vscode } from "#deps";
 import { CustomComponentDiagnosticCode } from "../core/wxmlValidator/customComponent/validateCustomComponent.js";
+import { positionAt, readOpeningTag } from "../core/wxmlValidator/element/openingTag.js";
 
 const MISSING_ATTRIBUTE_RE = /^缺少属性: "([^"]+)"$/;
 const UNKNOWN_ATTRIBUTE_RE = /^未知属性: "([^"]+)"$/;
@@ -22,16 +23,27 @@ function getInfo(diagnostic: vscode.Diagnostic): { replaceText?: string } {
   return ((diagnostic as any).info ?? {}) as { replaceText?: string };
 }
 
+/**
+ * 在诊断所在行开始的 opening tag（可能跨行）中定位整个属性（名 + 值）。
+ *
+ * 用后瞻 `(?<=\s)` 替代 `\s` 前缀：属性名前不留空白字符（删除范围更干净），
+ * 且对 `-` 开头等非单词字符开头的属性名同样有效。
+ */
 function getAttributeRange(
   document: vscode.TextDocument,
   line: number,
   name: string,
 ): vscode.Range | undefined {
-  const text = document.lineAt(line).text;
-  const match = new RegExp(`\\s${escapeRegExp(name)}(?:\\s*=\\s*(?:"[^"]*"|'[^']*'))?`).exec(text);
+  const textlines = document.getText().split("\n");
+  const openingTag = readOpeningTag(textlines, line);
+  const pattern = new RegExp(`(?<=\\s)${escapeRegExp(name)}(?:\\s*=\\s*(?:"[^"]*"|'[^']*'))?`);
+  const match = pattern.exec(openingTag.text);
   if (match?.index === undefined) return undefined;
 
-  return new vscode.Range(line, match.index, line, match.index + match[0].length);
+  const start = positionAt(textlines, openingTag.startOffset + match.index);
+  const end = positionAt(textlines, openingTag.startOffset + match.index + match[0].length);
+
+  return new vscode.Range(start, end);
 }
 
 function getAttributeValueRange(
@@ -65,10 +77,9 @@ export function generateCustomComponentCodeActions(
     if (replaceText === undefined) return [];
 
     const action = createAction(document.uri, diagnostic, `添加属性 “${missing[1]}”`);
-    const lineText = document.lineAt(diagnostic.range.start.line).text;
-    const closeIndex = lineText.indexOf(">");
-    if (closeIndex < 0) return [];
-    action.edit?.insert(document.uri, new vscode.Position(diagnostic.range.start.line, closeIndex), ` ${replaceText}`);
+    const closePosition = findOpeningTagClosePosition(document, diagnostic.range.start.line);
+    if (closePosition === undefined) return [];
+    action.edit?.insert(document.uri, closePosition, ` ${replaceText}`);
 
     return [action];
   }
@@ -101,4 +112,43 @@ export function generateCustomComponentCodeActions(
   }
 
   return [];
+}
+
+/** 查找从诊断所在行开始的 opening tag 属性插入位置，支持多行属性和引号内的 `>`。 */
+function findOpeningTagClosePosition(
+  document: vscode.TextDocument,
+  startLine: number,
+): vscode.Position | undefined {
+  const fullText = document.getText();
+  const startOffset = document.offsetAt(new vscode.Position(startLine, 0));
+  let quote: string | undefined;
+
+  for (let offset = startOffset; offset < fullText.length; offset++) {
+    const current = fullText[offset];
+    if (quote !== undefined) {
+      if (current === quote) quote = undefined;
+    } else if (current === "\"" || current === "'") {
+      quote = current;
+    } else if (current === ">") {
+      return getAttributeInsertPosition(document, fullText, offset);
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * 属性必须插在标签结束标记之前：自闭合 `/>` 时插在 `/` 前，
+ * 否则插在 `>` 前，避免生成 `<xxx / attr="...">` 的错误代码。
+ */
+function getAttributeInsertPosition(
+  document: vscode.TextDocument,
+  fullText: string,
+  closeOffset: number,
+): vscode.Position {
+  let offset = closeOffset - 1;
+  while (offset >= 0 && /\s/.test(fullText[offset] ?? "")) offset--;
+  const insertOffset = fullText[offset] === "/" ? offset : closeOffset;
+
+  return document.positionAt(insertOffset);
 }

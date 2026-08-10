@@ -1,0 +1,7 @@
+<!-- 场景：组件名 subInline 与字段 subInline__subInline 同名（双下划线 → 对外 _subInline）
+	① subInline 不是合法属性名 → 未知属性
+② _subInline 绑定错误值 → 应报属性值不匹配-->
+<subInline
+	subInline="{{subGoods}}"
+	_subInline="{{自定义}}"
+></subInline>

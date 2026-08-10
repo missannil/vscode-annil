@@ -97,5 +97,16 @@ export function resolveImportedTsPath(importingFsPath: string, source: string): 
     path.join(absolutePath, "index.ts"),
   ];
 
-  return candidates.find((candidate) => fs.existsSync(candidate));
+  // 只接受真正的文件；`import "./dir"` 且 dir 是目录时，候选目录
+  // 本身虽然 existsSync 为真，但后续 readFileSync 会抛 EISDIR。
+  return candidates.find(isFile);
+}
+
+/** 判断路径是否为存在的文件（目录、权限错误等都返回 false）。 */
+function isFile(fsPath: string): boolean {
+  try {
+    return fs.statSync(fsPath).isFile();
+  } catch {
+    return false;
+  }
 }

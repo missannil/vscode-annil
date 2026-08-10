@@ -59,7 +59,9 @@ function isUniversalArm64Executable(filePath) {
 function getLocalVscodeCandidates() {
   if (process.platform === "darwin") {
     return [
+      "/Applications/Visual Studio Code.app/Contents/MacOS/Code",
       "/Applications/Visual Studio Code.app/Contents/MacOS/Electron",
+      path.join(process.env.HOME ?? "", "Applications/Visual Studio Code.app/Contents/MacOS/Code"),
       path.join(process.env.HOME ?? "", "Applications/Visual Studio Code.app/Contents/MacOS/Electron"),
     ];
   }
@@ -77,10 +79,13 @@ function getLocalVscodeCandidates() {
 async function resolveVscodeExecutablePath() {
   const configuredPath = process.env.VSCODE_TEST_EXECUTABLE_PATH;
   if (configuredPath !== undefined) {
-    if (!await isExecutable(configuredPath)) {
-      throw new Error(`VSCODE_TEST_EXECUTABLE_PATH 不可执行：${configuredPath}`);
+    const executablePath = configuredPath.endsWith(".app")
+      ? path.join(configuredPath, "Contents", "MacOS", "Code")
+      : configuredPath;
+    if (!await isExecutable(executablePath)) {
+      throw new Error(`VSCODE_TEST_EXECUTABLE_PATH 不可执行：${executablePath}`);
     }
-    return configuredPath;
+    return executablePath;
   }
 
   for (const candidate of getLocalVscodeCandidates()) {

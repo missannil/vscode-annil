@@ -1,7 +1,9 @@
 {
   "component": true,
   "usingComponents": {
+    "subInline": "/components/subInline/index"
   },
   "componentPlaceholder": {
+    "subInline": "view"
   }
 }

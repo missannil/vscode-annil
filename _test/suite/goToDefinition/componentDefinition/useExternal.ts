@@ -1,5 +1,5 @@
 import { CustomComponent } from "annil";
-import type { Root } from "./annilDefinition.js";
+import type { Root } from "./componentDefinition.js";
 
 type ExternalDoc = {
   properties: {

@@ -1,8 +1,8 @@
 <subInline subInline_items="{{propRequiredBool}}" />
-<externalComp externalComp_value="{{propRequiredBool}}" />
+<externalComp value="{{propRequiredBool}}" />
 <view
-	id="itemChunk"
-	data-value="{{label}}"
+  id="itemChunk"
+  data-value="{{label}}"
 ></view>
 <view id="externalChunk"></view>
 <view id="otherId"></view>

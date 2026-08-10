@@ -17,7 +17,7 @@ const itemChunk = ChunkComponent<Root>()({
 });
 
 DefineComponent({
-  name: "annilDefinition",
+  name: "componentDefinition",
   rootComponent,
   subComponents: [subInline, itemChunk, externalComp, externalChunk],
 });

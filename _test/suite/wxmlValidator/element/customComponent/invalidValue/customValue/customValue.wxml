@@ -1,5 +1,7 @@
 <!-- ① 错误：item 不在当前 wx:for 作用域 → 未知数据诊断 -->
 <subInline subInline_customValue="{{item}}"></subInline>
+<!-- ①-a 错误：中文变量名必须在绑定值位置报告无效变量 -->
+<subInline subInline_customValue="{{自定义}}"></subInline>
 <block
 	wx:for="{{list}}"
 	wx:for-item="item"

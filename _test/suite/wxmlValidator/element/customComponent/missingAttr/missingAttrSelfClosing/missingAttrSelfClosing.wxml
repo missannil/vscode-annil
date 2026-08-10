@@ -1,0 +1,5 @@
+<!-- ① 正确：写了继承自 Root 的属性 → 无诊断 -->
+<subInline subInline_inheritBool="{{propRequiredBool}}"></subInline>
+<!-- annil disable repeatTag -->
+<!-- ② 错误：自闭合标签缺少继承自 Root 的属性 → 缺少属性诊断 -->
+<subInline />

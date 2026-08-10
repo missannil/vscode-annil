@@ -19,14 +19,14 @@ describe("missingAttrSelf", () => {
     const document = await workspace.openTextDocument(uri);
     await window.showTextDocument(document);
     const diagnostics = await waitForStableDiagnostics(uri, 1);
-    const diagnostic = diagnostics.find((item) => item.message === "缺少属性: \"subInline_cid\"");
+    const diagnostic = diagnostics.find((item) => item.message === "缺少属性: \"_cid\"");
     assert.ok(diagnostic);
     assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
     await verifyQuickFixAndFixAll(
       uri,
       diagnostic,
-      "添加属性 “subInline_cid”",
-      (current) => current.some((item) => item.message === "缺少属性: \"subInline_cid\""),
+      "添加属性 “_cid”",
+      (current) => current.some((item) => item.message === "缺少属性: \"_cid\""),
     );
   });
 });

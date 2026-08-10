@@ -1,6 +1,8 @@
 import { vscode } from "#deps";
+import { GithubStarAuthorization } from "../authorization/githubStar.js";
 import { registerFixAllCommand } from "./fixAll.js";
 import { generateRegisteredJsonFixes } from "./jsonFixRegistry.js";
+import { generateRegisteredTsFixes } from "./tsFixRegistry.js";
 import { generateRegisteredWxmlFixes } from "./wxmlFixRegistry.js";
 
 const EXTENSION_NAME = "vscode-annil";
@@ -18,6 +20,13 @@ function generateJsonCodeActions(
   diagnostic: vscode.Diagnostic,
 ): vscode.CodeAction[] {
   return generateRegisteredJsonFixes(document, diagnostic);
+}
+
+function generateTsCodeActions(
+  document: vscode.TextDocument,
+  diagnostic: vscode.Diagnostic,
+): vscode.CodeAction[] {
+  return generateRegisteredTsFixes(document, diagnostic);
 }
 
 function generateCodeActionsForDiagnostic(
@@ -70,18 +79,39 @@ class JsonCodeActionProvider implements vscode.CodeActionProvider {
   }
 }
 
+/** 为 TypeScript 诊断提供手动 Quick Fix；这些修复不参与 fix-all。 */
+class TypeScriptCodeActionProvider implements vscode.CodeActionProvider {
+  public provideCodeActions(
+    document: vscode.TextDocument,
+    range: vscode.Range,
+    context: vscode.CodeActionContext,
+  ): vscode.CodeAction[] {
+    return context.diagnostics.flatMap((diagnostic) => {
+      if (diagnostic.source !== EXTENSION_NAME) return [];
+      if (!diagnostic.range.intersection(range)) return [];
+
+      return generateTsCodeActions(document, diagnostic);
+    });
+  }
+}
+
 // ---------- 注册 ----------
 
 /**
- * 注册 WXML/JSON CodeActionProvider 和组件级全局修复命令
+ * 注册 WXML/JSON/TypeScript CodeActionProvider 和组件级全局修复命令。
+ * fix-all 使用的 resolver 刻意不包含 TypeScript 修复。
  */
 export function registerCodeActionProvider(context: vscode.ExtensionContext): void {
+  const authorization = new GithubStarAuthorization(context);
+  context.subscriptions.push(authorization.startDailyValidation());
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider("wxml", new WxmlCodeActionProvider()),
   );
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider("json", new JsonCodeActionProvider()),
   );
-
-  registerFixAllCommand(context, generateCodeActionsForDiagnostic);
+  context.subscriptions.push(
+    vscode.languages.registerCodeActionsProvider("typescript", new TypeScriptCodeActionProvider()),
+  );
+  registerFixAllCommand(context, generateCodeActionsForDiagnostic, authorization);
 }

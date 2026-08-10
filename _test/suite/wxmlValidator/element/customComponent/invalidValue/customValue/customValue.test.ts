@@ -30,5 +30,16 @@ describe("customValue", () => {
     );
     assert.strictEqual(unknownData[0].range.end.line, 1);
     assert.strictEqual(unknownData[0].range.end.character, unknownData[0].range.start.character + 4);
+
+    const invalidVariable = diagnostics.filter((item) => item.message === "无效的变量: \"自定义\"");
+    assert.strictEqual(invalidVariable.length, 1);
+    assert.strictEqual(invalidVariable[0].source, "vscode-annil");
+    assert.strictEqual(invalidVariable[0].code, "annil.expression.invalidVariable");
+    assert.strictEqual(invalidVariable[0].range.start.line, 3);
+    assert.strictEqual(
+      invalidVariable[0].range.start.character,
+      document.lineAt(3).text.indexOf("{{自定义}}") + 2,
+    );
+    assert.strictEqual(invalidVariable[0].range.end.character, invalidVariable[0].range.start.character + 3);
   });
 });

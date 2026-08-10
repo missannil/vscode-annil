@@ -1,5 +1,5 @@
 import { ChunkComponent } from "annil";
-import type { Root } from "./annilDefinition.js";
+import type { Root } from "./componentDefinition.js";
 
 export const externalChunk = ChunkComponent<Root>()({
   data: { externalChunk_label: "" },

@@ -5,15 +5,5 @@
       ".custom-snippet {}"
     ],
     "description": "Annil test custom snippet"
-  },
-  "ancomp": {
-    "prefix": "ancomp",
-    "body": [],
-    "description": "Annil component default snippet"
-  },
-  "anpage": {
-    "prefix": "anpage",
-    "body": [],
-    "description": "Annil page default snippet"
   }
 }

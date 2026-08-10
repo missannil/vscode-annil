@@ -51,8 +51,10 @@ export function findOpeningTagAttributeValueRange(
   nodeStartOffset?: number,
 ): vscode.Range {
   const openingTag = readOpeningTag(textlines, startLine, nodeStartOffset);
+  // 属性名前必须是空白字符，排除与标签名同名时的误匹配；
+  // `-` 开头的属性名不能用 `\b` 单词边界，改用后瞻。
   const attributePattern = new RegExp(
-    `\\b${escapeRegExp(attributeName)}\\s*=\\s*(["'])${escapeRegExp(value)}\\1`,
+    `(?<=\\s)${escapeRegExp(attributeName)}\\s*=\\s*(["'])${escapeRegExp(value)}\\1`,
   );
   const match = attributePattern.exec(openingTag.text);
   if (match?.index === undefined) return new vscode.Range(startLine, 0, startLine, 0);
@@ -71,7 +73,9 @@ export function findOpeningTagAttributeNameRange(
   nodeStartOffset?: number,
 ): vscode.Range {
   const openingTag = readOpeningTag(textlines, startLine, nodeStartOffset);
-  const attributePattern = new RegExp(`\\b${escapeRegExp(attributeName)}(?=\\s*=|\\s|>)`);
+  // 属性名前面必须是空白字符：`(?<=\s)` 同时排除标签名（前为 `<`），
+  // 否则当属性名与标签名相同时（如 `<subGoods subGoods="..."`）会误匹配标签名。
+  const attributePattern = new RegExp(`(?<=\\s)${escapeRegExp(attributeName)}(?=\\s*=|\\s|>)`);
   const match = attributePattern.exec(openingTag.text);
   if (match?.index === undefined) return new vscode.Range(startLine, 0, startLine, 0);
 

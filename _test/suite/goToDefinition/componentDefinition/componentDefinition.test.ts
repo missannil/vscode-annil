@@ -7,19 +7,19 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "../../../../../");
 const wxmlPath = path.join(
   projectRoot,
-  "_test/suite/goToDefinition/annilDefinition/annilDefinition.wxml",
+  "_test/suite/goToDefinition/componentDefinition/componentDefinition.wxml",
 );
 const tsPath = path.join(
   projectRoot,
-  "_test/suite/goToDefinition/annilDefinition/annilDefinition.ts",
+  "_test/suite/goToDefinition/componentDefinition/componentDefinition.ts",
 );
 const externalComponentPath = path.join(
   projectRoot,
-  "_test/suite/goToDefinition/annilDefinition/useExternal.ts",
+  "_test/suite/goToDefinition/componentDefinition/useExternal.ts",
 );
 const externalChunkPath = path.join(
   projectRoot,
-  "_test/suite/goToDefinition/annilDefinition/defExternal.ts",
+  "_test/suite/goToDefinition/componentDefinition/defExternal.ts",
 );
 
 async function getDefinitionAt(searchText: string): Promise<vscode.Location[]> {
@@ -35,7 +35,7 @@ async function getDefinitionAt(searchText: string): Promise<vscode.Location[]> {
   );
 }
 
-describe("Annil 声明跳转", () => {
+describe("CustomComponent 和 ChunkComponent 声明跳转", () => {
   test("CustomComponent 标签跳转到其 TS 声明", async () => {
     const definitions = await getDefinitionAt("subInline");
     assert.ok(Array.isArray(definitions));

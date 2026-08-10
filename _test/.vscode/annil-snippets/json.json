@@ -5,28 +5,5 @@
       "{\\\"customSnippet\\\": true}"
     ],
     "description": "Annil test custom snippet"
-  },
-  "ancomp": {
-    "prefix": "ancomp",
-    "body": [
-      "{",
-      "  \"component\": true,",
-      "  \"usingComponents\": {},",
-      "  \"componentPlaceholder\": {}",
-      "}",
-      ""
-    ],
-    "description": "Annil component default snippet"
-  },
-  "anpage": {
-    "prefix": "anpage",
-    "body": [
-      "{",
-      "  \"usingComponents\": {},",
-      "  \"componentPlaceholder\": {}",
-      "}",
-      ""
-    ],
-    "description": "Annil page default snippet"
   }
 }

@@ -19,14 +19,14 @@ describe("missingAttrTernary", () => {
     const document = await workspace.openTextDocument(uri);
     await window.showTextDocument(document);
     const diagnostics = await waitForStableDiagnostics(uri, 1);
-    const diagnostic = diagnostics.find((item) => item.message === "缺少属性: \"subInline_mode\"");
+    const diagnostic = diagnostics.find((item) => item.message === "缺少属性: \"mode\"");
     assert.ok(diagnostic);
     assert.strictEqual(diagnostic.severity, vscode.DiagnosticSeverity.Error);
     await verifyQuickFixAndFixAll(
       uri,
       diagnostic,
-      "添加属性 “subInline_mode”",
-      (current) => current.some((item) => item.message === "缺少属性: \"subInline_mode\""),
+      "添加属性 “mode”",
+      (current) => current.some((item) => item.message === "缺少属性: \"mode\""),
     );
   });
 });

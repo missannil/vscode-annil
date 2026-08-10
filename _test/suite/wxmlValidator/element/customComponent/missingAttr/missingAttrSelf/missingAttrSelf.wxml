@@ -1,5 +1,5 @@
 <!-- ① 正确：自身属性存在 → 无诊断 -->
-<subInline subInline_cid="{{subInline_cid}}"></subInline>
+<subInline _cid="{{subInline__cid}}"></subInline>
 <!-- annil disable repeatTag -->
 <!-- ② 错误：缺少自身属性 → 缺少属性诊断 -->
 <subInline></subInline>

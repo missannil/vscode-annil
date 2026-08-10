@@ -1,9 +1,9 @@
-import { CustomComponent, DefineComponent, RootComponent } from "annil";
-import type { $SubInline } from "~/subInline/index.js";
+import { type CreateComponentDoc, CustomComponent, DefineComponent, RootComponent } from "annil";
 
-const rootComponent = RootComponent()({ data: {} });
+const rootComponent = RootComponent()({ data: { subInline__cid: "ok" } });
 type Root = typeof rootComponent;
-const subInline = CustomComponent<Root, $SubInline>()({ data: { subInline_cid: "ok" } });
+type $SubInline = CreateComponentDoc<"subInline_", { properties: { cid: string } }>;
+// @ts-expect-error fixture intentionally exercises a double-prefix internal field
+const subInline = CustomComponent<Root, $SubInline>()({ inherit: { subInline__cid: "wxml" } });
 
-// @ts-expect-error fixture only needs a subset of $SubInline fields
 DefineComponent({ name: "missingAttrSelf", rootComponent, subComponents: [subInline] });

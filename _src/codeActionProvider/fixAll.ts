@@ -1,4 +1,5 @@
 import { vscode } from "#deps";
+import { GithubStarAuthorization } from "../authorization/githubStar.js";
 import { getSiblingUri, isComponentUri, isJsonFile } from "../utils/uriHelper.js";
 
 export type CodeActionResolver = (
@@ -10,10 +11,13 @@ export type CodeActionResolver = (
 export function registerFixAllCommand(
   context: vscode.ExtensionContext,
   resolveCodeActions: CodeActionResolver,
+  authorization: GithubStarAuthorization,
 ): void {
   context.subscriptions.push(
     // eslint-disable-next-line complexity
     vscode.commands.registerCommand("annil.fix-all", async () => {
+      if (!await authorization.ensureFixAllAccess()) return;
+
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
         vscode.window.showInformationMessage("annil: 没有打开的编辑器");
