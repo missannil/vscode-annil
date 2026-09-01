@@ -1,6 +1,7 @@
 import { vscode } from "#deps";
 import { GithubStarAuthorization } from "../authorization/githubStar.js";
 import { getSiblingUri, isComponentUri, isJsonFile } from "../utils/uriHelper.js";
+import { formatDocument } from "./formatFixedDocument.js";
 
 export type CodeActionResolver = (
   document: vscode.TextDocument,
@@ -71,6 +72,12 @@ export function registerFixAllCommand(
         const document = await vscode.workspace.openTextDocument(uri);
         const cleanupEdit = cleanupJsonTrailingCommas(document);
         if (cleanupEdit.size > 0) await vscode.workspace.applyEdit(cleanupEdit);
+      }
+      const formattedUris = new Set(fixActions.map(({ document }) => document.uri.toString()));
+      for (const uri of componentUris) {
+        if (!formattedUris.has(uri.toString())) continue;
+        const document = await vscode.workspace.openTextDocument(uri);
+        await formatDocument(document);
       }
       vscode.window.showInformationMessage("annil: 已修复全部");
     }),

@@ -1,6 +1,7 @@
 import { vscode } from "#deps";
 import { GithubStarAuthorization } from "../authorization/githubStar.js";
 import { registerFixAllCommand } from "./fixAll.js";
+import { addFormatCommand, FORMAT_FIXED_DOCUMENT_COMMAND, formatDocument } from "./formatFixedDocument.js";
 import { generateRegisteredJsonFixes } from "./jsonFixRegistry.js";
 import { generateRegisteredTsFixes } from "./tsFixRegistry.js";
 import { generateRegisteredWxmlFixes } from "./wxmlFixRegistry.js";
@@ -39,6 +40,17 @@ function generateCodeActionsForDiagnostic(
   return [];
 }
 
+function addFormatCommands(
+  document: vscode.TextDocument,
+  actions: vscode.CodeAction[],
+): vscode.CodeAction[] {
+  for (const action of actions) {
+    if (action.edit !== undefined) addFormatCommand(action, document);
+  }
+
+  return actions;
+}
+
 // ---------- CodeActionProvider ----------
 
 class WxmlCodeActionProvider implements vscode.CodeActionProvider {
@@ -56,7 +68,7 @@ class WxmlCodeActionProvider implements vscode.CodeActionProvider {
       if (diagnostic.source !== EXTENSION_NAME) continue;
       // 只处理与请求范围相交的诊断（VS Code 可能传入文件中全部诊断）
       if (!diagnostic.range.intersection(range)) continue;
-      actions.push(...generateWxmlCodeActions(document, diagnostic));
+      actions.push(...addFormatCommands(document, generateWxmlCodeActions(document, diagnostic)));
     }
 
     return actions;
@@ -74,7 +86,7 @@ class JsonCodeActionProvider implements vscode.CodeActionProvider {
       if (diagnostic.source !== EXTENSION_NAME) return [];
       if (!diagnostic.range.intersection(range)) return [];
 
-      return generateJsonCodeActions(document, diagnostic);
+      return addFormatCommands(document, generateJsonCodeActions(document, diagnostic));
     });
   }
 }
@@ -90,7 +102,7 @@ class TypeScriptCodeActionProvider implements vscode.CodeActionProvider {
       if (diagnostic.source !== EXTENSION_NAME) return [];
       if (!diagnostic.range.intersection(range)) return [];
 
-      return generateTsCodeActions(document, diagnostic);
+      return addFormatCommands(document, generateTsCodeActions(document, diagnostic));
     });
   }
 }
@@ -112,6 +124,14 @@ export function registerCodeActionProvider(context: vscode.ExtensionContext): vo
   );
   context.subscriptions.push(
     vscode.languages.registerCodeActionsProvider("typescript", new TypeScriptCodeActionProvider()),
+  );
+  context.subscriptions.push(
+    vscode.commands.registerCommand(FORMAT_FIXED_DOCUMENT_COMMAND, (uri: vscode.Uri) => {
+      const document = vscode.workspace.textDocuments.find((item) => item.uri.toString() === uri.toString());
+      if (document === undefined) return;
+
+      return formatDocument(document);
+    }),
   );
   registerFixAllCommand(context, generateCodeActionsForDiagnostic, authorization);
 }

@@ -8,7 +8,7 @@ import type { A } from "hry-types";
  * @returns 去除 null 和 undefined 后的类型
  */
 export function nonNullable<T>(
-  value: A.IfContains<T, null | undefined, T, "参数类型必须包含 null 或 undefined">,
+  value: A.IfSomeExtends<T, null | undefined, T, "参数类型必须包含 null 或 undefined">,
   message?: string,
 ): NonNullable<T> {
   /* istanbul ignore next  */

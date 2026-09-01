@@ -6,3 +6,4 @@ allowBuilds:
 minimumReleaseAgeExclude:
   - annil@1.18.1
   - annil@1.18.2
+  - hry-types@0.20.3

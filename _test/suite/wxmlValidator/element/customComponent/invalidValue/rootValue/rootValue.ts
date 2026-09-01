@@ -10,5 +10,4 @@ const subInline = CustomComponent<Root, $SubInline>()({
   inherit: { subInline_inheritBool: "propRequiredBool" },
 });
 
-// @ts-expect-error fixture only needs a subset of $SubInline fields
 DefineComponent({ name: "rootValue", rootComponent, subComponents: [subInline] });

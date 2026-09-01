@@ -10,5 +10,4 @@ const subInline = CustomComponent<Root, $SubInline>()({
   events: { subInline_onTap() {} },
 });
 
-// @ts-expect-error fixture only needs a subset of $SubInline fields
 DefineComponent({ name: "eventsValue", rootComponent, subComponents: [subInline] });

@@ -10,5 +10,4 @@ const subInline = CustomComponent<Root, $SubInline>()({
   data: { subInline_cid: "ok" },
 });
 
-// @ts-expect-error fixture only needs a subset of $SubInline fields
 DefineComponent({ name: "selfValue", rootComponent, subComponents: [subInline] });
