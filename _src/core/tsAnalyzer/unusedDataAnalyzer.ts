@@ -129,6 +129,7 @@ export function diagnoseUnusedData(
     const usedExternally = wxmlUsedNames.has(declaration.name) || inheritReferences.has(declaration.name);
     const diagnosticKind = getDiagnosticKind(declaration, usedInTs, usedExternally);
     if (diagnosticKind === undefined) return [];
+    if (isFileDisabled(text, diagnosticKind) || isDisabled(text, declaration.memberStart, diagnosticKind)) return [];
 
     return [createDiagnostic(declaration, text, diagnosticKind)];
   });
@@ -237,6 +238,39 @@ function getDiagnosticKind(
   if (usedInTs || usedExternally) return undefined;
 
   return "unused";
+}
+
+function isFileDisabled(text: string, diagnosticKind: "unused" | "suggestInternal"): boolean {
+  const disabledName = diagnosticKind === "suggestInternal" ? "suggestInternalData" : "unusedData";
+  const prefix = `// annil disable ${disabledName}`;
+
+  for (const line of text.split("\n")) {
+    const trimmed = line.trim();
+    if (trimmed === "") continue;
+    if (trimmed.startsWith("//")) {
+      if (trimmed === prefix || trimmed.startsWith(`${prefix} `)) return true;
+      continue;
+    }
+    break;
+  }
+
+  return false;
+}
+
+function isDisabled(
+  text: string,
+  memberStart: number,
+  diagnosticKind: "unused" | "suggestInternal",
+): boolean {
+  const memberLineStart = text.lastIndexOf("\n", memberStart - 1) + 1;
+  if (memberLineStart === 0) return false;
+  const previousLineEnd = memberLineStart - 1;
+  const previousLineStart = text.lastIndexOf("\n", previousLineEnd - 1) + 1;
+  const previousLine = text.slice(previousLineStart, previousLineEnd).trim();
+  const disabledName = diagnosticKind === "suggestInternal" ? "suggestInternalData" : "unusedData";
+  const prefix = `// annil disable ${disabledName}`;
+
+  return previousLine === prefix || previousLine.startsWith(`${prefix} `);
 }
 
 function getPropertyName(property: ObjectProperty): string | undefined {

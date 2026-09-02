@@ -3,6 +3,9 @@ import type { $SubInline } from "~/subInline/index.js";
 
 const rootComponent = RootComponent()({ data: {} });
 type Root = typeof rootComponent;
-const subInline = CustomComponent<Root, $SubInline>()({ events: { subInline_onTap() {} } });
+type TestSubInline = Omit<$SubInline, "properties"> & { properties: Partial<$SubInline["properties"]> };
+const subInline = CustomComponent<Root, TestSubInline>()({
+  events: { subInline_onTap() {} },
+});
 
 DefineComponent({ name: "missingAttrEvents", rootComponent, subComponents: [subInline] });

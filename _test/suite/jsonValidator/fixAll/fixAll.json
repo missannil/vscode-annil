@@ -3,10 +3,9 @@
   "component": true,
   "usingComponents": {
     "pathComponent": "/wrong/path",
-    "unknownComponent": "/components/unknownComponent"
+    "missingComponent": "/components/subInline/index"
   },
   "componentPlaceholder": {
-    "pathComponent": "view",
-    "unknownPlaceholder": "view"
+    "pathComponent": "view"
   }
 }

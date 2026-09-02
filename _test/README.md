@@ -22,6 +22,24 @@
 
 每条诊断规则均应包含反向与正向覆盖：反向用例验证非法输入产生指定诊断，正向覆盖优先由功能用例验证合法输入的实际作用及不产生诊断。仅在没有功能用例可覆盖时，才新增独立的最小合法用例。正向用例必须等待目标文档完成一次诊断发布后才断言空列表，不能在打开文档后立即读取空诊断列表。
 
+## TypeScript 诊断测试
+
+TypeScript 诊断场景按业务规则建立独立目录，并在目录内提供同名的真实组件文件：
+
+```text
+<场景>/
+├─ <场景>.ts
+├─ <场景>.json
+├─ <场景>.wxml
+└─ <场景>.test.ts
+```
+
+fixture 应使用实际的 `RootComponent`、`CustomComponent`、`ChunkComponent` 或其他相关组件 API。测试必须通过 Extension Host 打开真实 `.ts` 文件，等待插件发布诊断后断言结果；底层 analyzer 测试只验证 AST 规则，不替代组件级诊断测试。
+
+涉及 Quick Fix 的测试统一按以下流程执行：诊断出现 → 通过 `vscode.executeCodeActionProvider` 获取并应用真实 Code Action → 验证诊断和关键编辑结果 → 恢复原始 fixture。优先复用 `waitForDiagnostics`、`waitForQuickFix` 和 `withRestoredFixture`，确保测试失败或中断时也恢复 fixture。
+
+文件级忽略使用文件头部注释 `// annil disable unusedData` 或 `// annil disable suggestInternalData`，作用于该 TS 文件中对应类型的全部诊断；字段上一行注释仍只作用于紧随其后的字段。
+
 ## WXML 规则归类
 
 - `comment/`：Annil 注释状态、位置和注释修复。

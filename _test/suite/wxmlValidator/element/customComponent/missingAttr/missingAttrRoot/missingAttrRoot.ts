@@ -6,8 +6,9 @@ const rootComponent = RootComponent()({
 });
 
 type Root = typeof rootComponent;
+type TestSubInline = Omit<$SubInline, "properties"> & { properties: Partial<$SubInline["properties"]> };
 
-const subInline = CustomComponent<Root, $SubInline>()({
+const subInline = CustomComponent<Root, TestSubInline>()({
   inherit: { subInline_inheritBool: "propRequiredBool" },
 });
 

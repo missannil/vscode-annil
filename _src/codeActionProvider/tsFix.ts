@@ -53,6 +53,26 @@ export function generateUnusedDataDeleteAction(
   return action;
 }
 
+export function generateUnusedDataIgnoreAction(
+  document: vscode.TextDocument,
+  diagnostic: vscode.Diagnostic,
+): vscode.CodeAction | undefined {
+  if (diagnostic.code !== "annil.unusedData" && diagnostic.code !== "annil.suggestInternalData") return undefined;
+  const { memberStart } = getInfo(diagnostic);
+  if (memberStart === undefined) return undefined;
+
+  const disabledName = diagnostic.code === "annil.suggestInternalData" ? "suggestInternalData" : "unusedData";
+  const startPosition = document.positionAt(memberStart);
+  const lineStart = new vscode.Position(startPosition.line, 0);
+  const linePrefix = document.getText(new vscode.Range(lineStart, startPosition)).match(/^\s*/)?.[0] ?? "";
+  const action = new vscode.CodeAction("忽略此未使用诊断", vscode.CodeActionKind.QuickFix);
+  action.diagnostics = [diagnostic];
+  action.edit = new vscode.WorkspaceEdit();
+  action.edit.insert(document.uri, lineStart, `${linePrefix}// annil disable ${disabledName}\n`);
+
+  return action;
+}
+
 /** 将 RootComponent 对外字段改为内部字段，并同步重命名 TS 中的所有同名标识符。 */
 export function generateSuggestInternalAction(
   document: vscode.TextDocument,

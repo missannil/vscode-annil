@@ -246,4 +246,30 @@ suite("unusedDataAnalyzer", () => {
       ["未使用到的数据", "未使用到的数据", "未使用到的数据"],
     );
   });
+
+  test("文件头部注释可分别忽略未使用和内部化建议诊断", () => {
+    const source = `
+      // annil disable suggestInternalData
+      const root = RootComponent()({
+        data: {
+          rootUsed: 1,
+          rootUnused: 2,
+        },
+      });
+      const custom = CustomComponent()({
+        computed: {
+          value() {
+            return this.data.rootUsed;
+          },
+        },
+      });
+    `;
+
+    const diagnostics = diagnoseUnusedData(source, configuration.innerDataPrefix, new Set());
+
+    assert.deepStrictEqual(
+      diagnostics.map((diagnostic) => [diagnostic.message, diagnostic.code]),
+      [["未使用到的数据", UnusedDataDiagnosticCode.unusedData]],
+    );
+  });
 });

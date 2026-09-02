@@ -5,8 +5,9 @@ const rootComponent = RootComponent()({
   data: {},
 });
 type Root = typeof rootComponent;
+type TestSubInline = Omit<$SubInline, "properties"> & { properties: Partial<$SubInline["properties"]> };
 
-const subInline = CustomComponent<Root, $SubInline>()({
+const subInline = CustomComponent<Root, TestSubInline>()({
   data: { subInline_cid: "ok" },
 });
 
